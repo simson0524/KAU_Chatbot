@@ -1,6 +1,7 @@
+from search_DB import search_similar_documents
+import google.generativeai as genai
 import os
 import openai
-from search_DB import search_similar_documents
 
 # OpenAI API 설정
 openai.api_key = 'my key'
@@ -59,3 +60,29 @@ while True:
         print(gpt_response)
     else:
         print("유사한 문서를 찾을 수 없습니다.")
+
+
+
+
+
+# 이 아래거 일단 쓰지 말아주세용 KAU_Chatbot/AI/RAG/generator.py에 일단 몰아 넣어놨어요
+'''
+GOOGLE_AI_API_KEY = ''
+
+def get_gemini_response( prompt ):
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    chat = model.start_chat(
+            history=[]
+        )
+    
+    # 처음 메세지
+    response = chat.send_message( prompt )
+
+    try:
+        while True:
+            new_prompt = input()
+            response = chat.send_message(new_prompt)
+            print(response.text)
+    except Exception as e:
+        return f"Error: {str(e)}"
+'''
