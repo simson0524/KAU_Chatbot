@@ -9,6 +9,7 @@ import chromedriver_autoinstaller
 import time
 import pandas as pd
 import requests
+import re
 
 # ChromeDriver 자동설치(with pip install chromedriver-autoinstaller)
 chromedriver_autoinstaller.install()
@@ -51,11 +52,14 @@ try:
 
         # space-y-20 안의 모든 a 태그 가져오기
         a_tags = space_20_y.find_all('a')
+        
+        # 크롤링할 url 패턴 정의
+        pattern = re.compile(r"/posts/\d{5}")
 
         for a in a_tags:
-            title = a.text.strip()
             link = a['href']
-            target_links.append( link )
+            if pattern.match(link):
+                target_links.append( link )
 finally:
     print('크롤링 할 문서 수 :', len( target_links ))
     driver.quit()
@@ -69,9 +73,10 @@ driver = webdriver.Chrome(options=options)
 
 results = {'idx':[],
            'text':[],
-           'additional_files':[],
-           'img':[],
-           'deadline_date':[]}
+           'files':[],
+           'URL':[],
+           'published_date':[],
+           'title':[]}
 
 for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것들 대외활동') ):
     driver.get( 'https://www.allforyoung.com' + link )
@@ -79,6 +84,9 @@ for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것�
 
     # 고유 인덱스
     idx = '요즘것들_대외활동_'+str(len(target_links)-i-1)
+
+    # 공지 제목 추출
+    title = None
 
     # 공지 본문(텍스트) 추출하기
     text = driver.find_elements(By.CSS_SELECTOR,
@@ -107,14 +115,15 @@ for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것�
     additional_file = None
 
     # 마감일자 추출하기
-    deadline = None
+    published_date = None
 
     # 결과 저장
     results['idx'].append( idx )
     results['text'].append( text )
-    results['additional_files'].append( additional_file )
-    results['img'].append( image_url )
-    results['deadline_date'].append( deadline )
+    results['files'].append( additional_file )
+    results['URL'].append( image_url )
+    results['published_date'].append( published_date )
+    results['title'].append( title )
 
 driver.quit()
 

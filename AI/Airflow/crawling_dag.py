@@ -18,10 +18,10 @@ dag = DAG(
     'crawler_dag',
     default_args=default_args,
     description='A simple DAG to run crawler.py',
-    schedule_interval='0 15 * * *',  # 매일 자정 (대한민국 기준 자정 UTC 15시)
+    schedule_interval='0 15 * * *',  # 매일 자정 (한국시간 자정 -> UTC 15시)
 )
 
-# 크롤링 파일들 리스트
+# 크롤링 파이썬 파일들 리스트
 crawler_file_path_list = []
 
 # BashOperator를 사용하여 Python 스크립트 실행
