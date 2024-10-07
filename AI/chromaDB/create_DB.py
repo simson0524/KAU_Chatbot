@@ -18,12 +18,12 @@ def create_vector_db(csv_file_name, demo_version):
     )
     index = []
     
-    id_data = df['ID'].tolist()
-    title_data = df['제목'].tolist()
-    date_data = df['작성일'].tolist()
+    id_data = df['idx'].tolist()
+    title_data = df['title'].tolist()
+    date_data = df['published_date'].tolist()
     url_data = df['URL'].tolist()
-    attachments_data = df['첨부파일'].tolist()
-    text_data = df['텍스트'].tolist()
+    attachments_data = df['files'].tolist()
+    text_data = df['text'].tolist()
 
     index = 0
 
@@ -41,7 +41,7 @@ def create_vector_db(csv_file_name, demo_version):
             },
         )
 
-    print(f"벡터 데이터베이스 '{collection_name}'가 '{db_path}'에 생성되었습니다!")
+    # print(f"벡터 데이터베이스 '{collection_name}'가 '{db_path}'에 생성되었습니다!")
 
 # 사용 예시
 csv_file_name = 'dataset.csv'  # CSV 파일 경로를 지정하세요.
