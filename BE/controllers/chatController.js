@@ -2,13 +2,29 @@ const chatService = require('../services/chatService');
 
 // 대화 세션 시작을 처리하는 컨트롤러
 exports.startChat = async (req, res) => {
+
+    const { student_id, question } = req.body;
+
     try {
-        const session = await chatService.startChatSession(req.body.userId);
+
+        const response = await chatService.generateResponse(question);
+
+        const chatRecord = await chatModel.saveChat(student_id, question, response);
+
+
+        res.json({
+            conversation_id: chatRecord.insertId,
+            student_id: student_id,
+            question: question,
+            response: response
+        });
+
+        // const session = await chatService.startChatSession(req.body.userId);
         res.status(200).json({ message: 'Chat session started', session });
     } catch (error) {
         res.status(500).json({ error: 'Failed to start chat session' });
     }
-};
+};  
 
 // 챗봇에게 질문을 처리하는 컨트롤러 (대화 ID 포함)
 exports.askQuestion = async (req, res) => {

@@ -1,10 +1,10 @@
 
 const express = require('express');
 const router = express.Router();
-const chatController = require('../controllers/chatController');
+const chatController = require('../contorllers/chatController');
 
 // 대화 시작
-router.post('/chatbot/conversation', chatController.startChat);
+router.post('/chat', chatController.startChat);
 
 // 챗봇에게 질문 (대화 ID 필요)
 router.post('/chatbot/conversation/:conversation_id/ask', chatController.askQuestion);

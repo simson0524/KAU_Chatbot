@@ -24,3 +24,8 @@ exports.forwardToAI = async (message) => {
     return response.data;
 };
 
+exports.generateResponse = async (question) => {
+    // 여기에 챗봇 로직을 구현
+    return '반가워요!'; // 예시 응답
+};
+
