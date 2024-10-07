@@ -61,6 +61,8 @@ flutter:
    - assets/images/login_image.png
    - assets/images/grid_background.png
    - assets/images/grid_white_background.png
+   - assets/images/chatbot_image.png
+   - assets/images/chatbot_login.png
 
 
   # The following line ensures that the Material Icons font is
