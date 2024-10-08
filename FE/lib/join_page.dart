@@ -1,5 +1,5 @@
-import 'package:fe_view/find_password_page.dart';
-import 'package:fe_view/main.dart';
+import 'package:FE/find_password_page.dart';
+import 'package:FE/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
