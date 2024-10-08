@@ -1,12 +1,20 @@
-// import 'package:fe_view/character_page.dart';
-import 'package:fe_view/character_page.dart';
-import 'package:fe_view/find_password_page.dart';
+import 'package:FE/character_page.dart';
+import 'package:FE/character_provider.dart';
+import 'package:FE/find_password_page.dart';
 import 'package:flutter/material.dart';
-import 'package:fe_view/join_page.dart';
-import 'package:fe_view/api/auth_api.dart'; // auth_api.dart 파일 추가하여 API 호출
+import 'package:FE/join_page.dart';
+import 'package:FE/api/auth_api.dart';
+import 'package:provider/provider.dart'; // auth_api.dart 파일 추가하여 API 호출
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CharacterProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
