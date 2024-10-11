@@ -65,7 +65,7 @@ class AuthApi {
 
   // 로그아웃 API 호출 함수
   static Future<http.Response> logout() async {
-    final url = Uri.parse('http://your-server.com/user/logout'); // 로그아웃 API URL
+    final url = Uri.parse('http://localhost:3000/user/logout'); // 로그아웃 API URL
 
     try {
       // API 요청 본문 작성
@@ -86,7 +86,7 @@ class AuthApi {
   static Future<http.Response> changePassword(
       String userId, String newPassword) async {
     final url =
-        Uri.parse('http://your-server.com/user/$userId'); // 비밀번호 변경 API URL
+        Uri.parse('http://localhost:3000/user/$userId'); // 비밀번호 변경 API URL
 
     try {
       // API 요청 본문 작성
