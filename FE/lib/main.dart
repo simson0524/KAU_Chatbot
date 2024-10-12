@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 import 'package:FE/character_page.dart';
 import 'package:FE/character_provider.dart';
 import 'package:FE/find_password_page.dart';
 import 'package:flutter/material.dart';
+
+>>>>>>> junsu
 import 'package:FE/join_page.dart';
 import 'package:FE/api/auth_api.dart';
 import 'package:provider/provider.dart'; // auth_api.dart 파일 추가하여 API 호출
@@ -197,16 +200,21 @@ class LoginButtons extends StatelessWidget {
   Future<void> _handleLogin(
       BuildContext context, String email, String password) async {
     try {
-      // auth_api.dart 파일의 login 함수 호출
-      await AuthApi.login(email, password);
-      print('로그인 성공');
-      // 로그인 성공 시 CharacterPage로 이동
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const CharacterPage(), // 로그인 성공 시 이동할 페이지
-        ),
-      );
+      // auth_api.dart 파일의 login 함수 호출 후 응답 상태 코드 확인
+      final response = await AuthApi.login(email, password);
+
+      if (response.statusCode == 200) {
+        print('로그인 성공');
+        // 로그인 성공 시 CharacterPage로 이동
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CharacterPage(), // 로그인 성공 시 이동할 페이지
+          ),
+        );
+      } else {
+        throw Exception('로그인 실패');
+      }
     } catch (error) {
       print('로그인 실패: $error');
       // 로그인 실패 시 경고창 표시
@@ -345,8 +353,11 @@ class DottedLineHorizontalPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
+<<<<<<< HEAD
 
 /*
+=======
+>>>>>>> junsu
 void showloginfailDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -437,4 +448,7 @@ void showloginfailDialog(BuildContext context) {
     },
   );
 }
+<<<<<<< HEAD
 */
+=======
+>>>>>>> junsu
