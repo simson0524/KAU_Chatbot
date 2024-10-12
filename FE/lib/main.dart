@@ -1,10 +1,8 @@
-<<<<<<< HEAD
+
 import 'package:FE/character_page.dart';
 import 'package:FE/character_provider.dart';
 import 'package:FE/find_password_page.dart';
 import 'package:flutter/material.dart';
-
->>>>>>> junsu
 import 'package:FE/join_page.dart';
 import 'package:FE/api/auth_api.dart';
 import 'package:provider/provider.dart'; // auth_api.dart 파일 추가하여 API 호출
