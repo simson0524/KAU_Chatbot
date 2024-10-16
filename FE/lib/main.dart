@@ -350,6 +350,8 @@ class DottedLineHorizontalPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
+
+/*
 void showloginfailDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -440,3 +442,4 @@ void showloginfailDialog(BuildContext context) {
     },
   );
 }
+*/
