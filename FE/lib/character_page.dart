@@ -93,7 +93,7 @@ class Mile extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
-            .setCharacter('Mile');
+            .setCharacter('마일');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ChattingPage()),
@@ -121,7 +121,7 @@ class Maha extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
-            .setCharacter('Maha');
+            .setCharacter('마하');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ChattingPage()),
@@ -149,7 +149,7 @@ class Feet extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
-            .setCharacter('Feet');
+            .setCharacter('피트');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ChattingPage()),
@@ -176,7 +176,7 @@ class Basic extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
-            .setCharacter('Basic');
+            .setCharacter('KAU 챗봇');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ChattingPage()),
