@@ -1,3 +1,4 @@
+import 'package:FE/character_page.dart';
 import 'package:FE/find_password_page.dart';
 import 'package:FE/main.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,11 @@ class JoinPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+          Positioned.fill(
+            child: Container(
+              color: Colors.white,
+            ),
+          ),
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -550,6 +556,23 @@ class go_login extends StatelessWidget {
                   '비밀번호찾기 페이지로',
                   style: TextStyle(fontSize: 5, color: Colors.black),
                 )),
+            //캐릭터선택창 이동  페이지로 버튼은  추후 삭제 예정
+            TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CharacterPage()),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                ),
+                child: const Text(
+                  '캐릭터선택 페이지로',
+                  style: TextStyle(fontSize: 5, color: Colors.black),
+                ))
           ],
         ),
       ),

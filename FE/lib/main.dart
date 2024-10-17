@@ -1,4 +1,3 @@
-
 import 'package:FE/character_page.dart';
 import 'package:FE/character_provider.dart';
 import 'package:FE/find_password_page.dart';
@@ -42,6 +41,11 @@ class LoginPage extends StatelessWidget {
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
+          Positioned.fill(
+            child: Container(
+              color: Colors.white,
+            ),
+          ),
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -351,7 +355,7 @@ class DottedLineHorizontalPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-<<<<<<< HEAD
+//<<<<<<< HEAD
 
 /*
 =======
@@ -445,8 +449,7 @@ void showloginfailDialog(BuildContext context) {
       );
     },
   );
-}
-<<<<<<< HEAD
+//<<<<<<< HEAD
 */
-=======
->>>>>>> junsu
+//=======
+//>>>>>>> junsu

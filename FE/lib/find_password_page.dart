@@ -14,6 +14,11 @@ class FindPasswordPage extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Container(
+              color: Colors.white,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/grid_background.png'),
