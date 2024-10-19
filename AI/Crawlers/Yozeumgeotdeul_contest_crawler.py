@@ -39,7 +39,7 @@ try:
         driver.get(target_url)
 
         # 페이지 로딩 대기
-        time.sleep(1.86)
+        time.sleep(1.01)
 
         # 페이지 소스 가져오기
         page_source = driver.page_source
@@ -52,12 +52,11 @@ try:
 
         # space-y-20 안의 모든 a 태그 가져오기
         a_tags = space_20_y.find_all('a')
-
+        
         # 크롤링할 url 패턴 정의
         pattern = re.compile(r"/posts/\d{5}")
 
         for a in a_tags:
-            # title = a.text.strip()
             link = a['href']
             if pattern.match(link):
                 target_links.append( link )
@@ -74,56 +73,57 @@ driver = webdriver.Chrome(options=options)
 
 results = {'idx':[],
            'text':[],
+           'img':[],
            'files':[],
-           'URL':[],
+           'url':[],
+           'title':[],
            'published_date':[],
-           'title':[]}
+           'deadline_date':[]}
 
 for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것들 공모전') ):
     driver.get( 'https://www.allforyoung.com' + link )
     time.sleep(2)
 
     # 고유 인덱스
-    idx = '요즘것들_공모전_'+str(len(target_links)-i-1)
+    idx = '요즘것들_공모전_'+str(len(target_links)-i-1) 
 
     # 공지 제목 추출
-    title = None
+    title = driver.find_element(By.XPATH, '//div[@class="space-y-4"]/h2')
+    title = title.text
 
     # 공지 본문(텍스트) 추출하기
-    text = driver.find_elements(By.CSS_SELECTOR,
-                                ".prose.prose-sm.prose-neutral.break-words")
-    text = [ul.get_attribute('innerHTML') for ul in text]
+    text_elements = driver.find_elements(By.CSS_SELECTOR, 'div.prose.prose-sm.prose-neutral')
+    text = [ul.get_attribute('outerHTML') for ul in text_elements]
 
     # 공지 이미지 추출하기(학교공지와 다르게 포스터)
-    image_url = None
-    image_response = None
+    image_url_elements = driver.find_elements(By.XPATH, '//figure[@class="relative aspect-poster overflow-hidden rounded-lg border border-neutral-200"]//img')
+    image_url = [ img.get_attribute('src') for img in image_url_elements ]
     
-    try:
-        meta_tags = driver.find_elements(By.TAG_NAME,
-                                         'meta')
-
-        for tag in meta_tags:
-            if tag.get_attribute('property') == 'og:image':
-                image_url = tag.get_attribute('content')
-                break
-
-        if image_url:
-            image_response = requests.get(image_url)
-    except:
-        pass
 
     # 공지 첨부파일 추출하기
     additional_file = None
 
-    # 마감일자 추출하기
-    published_date = None
+    # 현재 사이트 url 추출하기
+    url = 'https://www.allforyoung.com' + link
+
+   # 접수마감일자 추출하기
+    deadline_date_elements = driver.find_elements(By.XPATH, '//div[contains(@class, "flex items-center space-x-4")]//p')
+    period = [element.text for element in deadline_date_elements]
+    splited_period = list(period[0].split())
+    deadline_date = ' '.join( splited_period[4:7] )
+
+    # 게시일자 추출하기
+    published_date = ' '.join( splited_period[0:3] )
+
 
     # 결과 저장
     results['idx'].append( idx )
     results['text'].append( text )
+    results['img'].append( image_url )
     results['files'].append( additional_file )
-    results['URL'].append( image_url )
+    results['url'].append( url )
     results['published_date'].append( published_date )
+    results['deadline_date'].append( deadline_date )
     results['title'].append( title )
 
 driver.quit()
