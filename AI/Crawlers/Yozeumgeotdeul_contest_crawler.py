@@ -100,8 +100,16 @@ for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것�
     image_url = [ img.get_attribute('src') for img in image_url_elements ]
     
 
-    # 공지 첨부파일 추출하기
-    additional_file = None
+    # 공지 첨부파일 추출하기(대신에 태그 넣었습니다^^)
+    tags_elements = driver.find_elements(By.CSS_SELECTOR, 'div.flex.items-center.space-x-2 div.inline-flex.items-center')
+    tags_raw = [ tag.text for tag in tags_elements ]
+    tags = []
+    for value in tags_raw:
+        row = list(value.split('/'))
+        tags += row
+    tags = set(tags)
+    tags = list(tags)
+
 
     # 현재 사이트 url 추출하기
     url = 'https://www.allforyoung.com' + link
@@ -120,7 +128,7 @@ for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것�
     results['idx'].append( idx )
     results['text'].append( text )
     results['img'].append( image_url )
-    results['files'].append( additional_file )
+    results['files'].append( tags )
     results['url'].append( url )
     results['published_date'].append( published_date )
     results['deadline_date'].append( deadline_date )
