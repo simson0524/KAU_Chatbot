@@ -1,4 +1,3 @@
-
 import 'package:FE/character_page.dart';
 import 'package:FE/character_provider.dart';
 import 'package:FE/find_password_page.dart';
@@ -351,11 +350,6 @@ class DottedLineHorizontalPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-<<<<<<< HEAD
-
-/*
-=======
->>>>>>> junsu
 void showloginfailDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -446,7 +440,3 @@ void showloginfailDialog(BuildContext context) {
     },
   );
 }
-<<<<<<< HEAD
-*/
-=======
->>>>>>> junsu
