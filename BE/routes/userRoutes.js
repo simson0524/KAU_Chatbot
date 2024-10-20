@@ -18,4 +18,6 @@ router.put('/update', userService.loginRequired, userController.updateUser);
 
 router.put('/password', userService.loginRequired, userController.updatePassword);
 
+router.delete('/delete-account', userService.loginRequired, userController.deleteUser);
+
 module.exports = router;

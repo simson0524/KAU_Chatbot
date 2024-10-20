@@ -40,3 +40,10 @@ exports.updateUserPassword = async (email, newPassword) => {
     );
     return result;
 }
+
+// 사용자 삭제
+exports.deleteUser = async (email) => {
+    const result = await db.query(
+        'DELETE FROM users WHERE email = ?', [email]
+    )
+}
