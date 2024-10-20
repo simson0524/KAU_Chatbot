@@ -12,18 +12,16 @@ class AuthApi {
       String grade,
       String gender,
       String residence) async {
-    final url =
-        Uri.parse('http://localhost:3000/user/register'); // 회원가입 API URL
+    final url = Uri.parse('http://localhost:3000/user/register');
 
     try {
-      // API 요청 본문 작성
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'}, // JSON 요청 헤더 설정
+        headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'student_id': studentId, // 학번
-          'email': email, // 이메일
-          'password': password, // 비밀번호
+          'student_id': studentId,
+          'email': email,
+          'password': password,
           'name': name,
           'major': major,
           'grade': grade,
@@ -32,7 +30,6 @@ class AuthApi {
         }),
       );
 
-      // 응답을 반환하여 statusCode 및 body 확인 가능
       return response;
     } catch (error) {
       print('Error occurred during registration: $error');
@@ -41,69 +38,40 @@ class AuthApi {
   }
 
   // 로그인 API 호출 함수
-  static Future<http.Response> login(String email, String password) async {
-    final url = Uri.parse('http://localhost:3000/user/login'); // 로그인 API URL
+  static Future<Map<String, dynamic>> login(
+      String email, String password) async {
+    final url = Uri.parse('http://localhost:3000/user/login');
 
     try {
-      // API 요청 본문 작성
       final response = await http.post(
         url,
-        headers: {'Content-Type': 'application/json'}, // JSON 요청 헤더 설정
+        headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'email': email, // 이메일
-          'password': password, // 비밀번호
+          'email': email,
+          'password': password,
         }),
       );
 
-      // 응답을 반환하여 statusCode 및 body 확인 가능
-      return response;
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+        return {
+          'success': true,
+          'token': responseBody['accessToken'],
+          'message': responseBody['message'],
+        };
+      } else {
+        final errorResponse = json.decode(response.body);
+        return {
+          'success': false,
+          'message': errorResponse['error'],
+        };
+      }
     } catch (error) {
       print('Error occurred during login: $error');
-      throw Exception('Login failed');
-    }
-  }
-
-  // 로그아웃 API 호출 함수
-  static Future<http.Response> logout() async {
-    final url = Uri.parse('http://localhost:3000/user/logout'); // 로그아웃 API URL
-
-    try {
-      // API 요청 본문 작성
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'}, // JSON 요청 헤더 설정
-      );
-
-      // 응답을 반환하여 statusCode 및 body 확인 가능
-      return response;
-    } catch (error) {
-      print('Error occurred during logout: $error');
-      throw Exception('Logout failed');
-    }
-  }
-
-  // 비밀번호 변경 API 호출 함수
-  static Future<http.Response> changePassword(
-      String userId, String newPassword) async {
-    final url =
-        Uri.parse('http://localhost:3000/user/$userId'); // 비밀번호 변경 API URL
-
-    try {
-      // API 요청 본문 작성
-      final response = await http.put(
-        url,
-        headers: {'Content-Type': 'application/json'}, // JSON 요청 헤더 설정
-        body: json.encode({
-          'user_id': userId, // 사용자 ID
-          'password': newPassword, // 새 비밀번호
-        }),
-      );
-
-      // 응답을 반환하여 statusCode 및 body 확인 가능
-      return response;
-    } catch (error) {
-      print('Error occurred during password change: $error');
-      throw Exception('Password change failed');
+      return {
+        'success': false,
+        'message': 'Login failed due to an error',
+      };
     }
   }
 }

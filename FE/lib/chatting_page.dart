@@ -11,7 +11,7 @@ class ChattingPage extends StatefulWidget {
 }
 
 class _ChattingPageState extends State<ChattingPage> {
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   List<Map<String, dynamic>> messages = [];
 
   // 첫 안내 자동 메시지
@@ -217,7 +217,8 @@ class ChatBubble extends StatelessWidget {
   final String time;
   final bool isMine;
 
-  ChatBubble({
+  const ChatBubble({
+    super.key,
     required this.profileImage,
     required this.name,
     required this.message,
