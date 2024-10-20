@@ -1,6 +1,6 @@
 const userService = require('../services/userService');
 const userModel = require('../models/userModel');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.userLogin = async (req, res) => {
