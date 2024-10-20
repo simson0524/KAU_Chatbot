@@ -22,3 +22,21 @@ exports.addUser = async (student_id, email, password, name, major, grade, gender
     );
     return result;
 }
+
+// 사용자 정보 수정
+exports.updateUserInfo = async (email, name, major, grade, residence) => {
+    const result = await db.query(
+        'UPDATE users SET name = ?, major = ?, grade = ?, residence = ? WHERE email = ?',
+        [name, major, grade, residence, email]
+    );
+    return result;
+}
+
+// 사용자 비밀번호 수정
+exports.updateUserPassword = async (email, newPassword) => {
+    const result = await db.query(
+        'UPDATE users SET password = ? WHERE email = ?',
+        [newPassword, email]
+    );
+    return result;
+}
