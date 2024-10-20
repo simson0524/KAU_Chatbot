@@ -1,110 +1,128 @@
-
 # 드림스폰 사이트에서 일반장학금정보 크롤링
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+from datetime import datetime, timedelta
 import chromedriver_autoinstaller
 import time
 import pandas as pd
 import requests
+import random
 
+# 로그인 정보 입력시 인간처럼 보이게 하기 위해
+def natural_typing(element, text):
+    for char in text:
+        element.send_keys(char)
+        time.sleep(random.uniform(0.1, 0.4))
 
 # ChromeDriver 자동설치(with pip install chromedriver-autoinstaller)
 chromedriver_autoinstaller.install()
 
 # crawling할 사이트 주소(드림스폰 일반장학금)
-CRAWLING_TARGET_URL = ['https://www.dreamspon.com/scholarship/list.html?page=1',
-                       'https://www.dreamspon.com/scholarship/list.html?page=2',
-                       'https://www.dreamspon.com/scholarship/list.html?page=3',
-                       'https://www.dreamspon.com/scholarship/list.html?page=4',
-                       'https://www.dreamspon.com/scholarship/list.html?page=5',
-                       'https://www.dreamspon.com/scholarship/list.html?page=6',
-                       'https://www.dreamspon.com/scholarship/list.html?page=7',
-                       'https://www.dreamspon.com/scholarship/list.html?page=8',
-                       'https://www.dreamspon.com/scholarship/list.html?page=9',
-                       'https://www.dreamspon.com/scholarship/list.html?page=10']
+CRAWLING_TARGET_URL = ['https://www.dreamspon.com/scholarship/list.html?page=1&ordby=1']
 
 # chrome driver 사용하기
 options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(options=options)
 
-# 크롤링한 크롤링 대상 url들(a_tag) 저장해 둘 리스트
-target_links = []
-
 # 크롤링 할 url들을 results에 긁어모음
 try:
-    for target_url in CRAWLING_TARGET_URL:
-        # 웹페이지 열기
-        driver.get(target_url)
-        
-        # 페이지 로딩 대기
-        time.sleep(0.67)
+    # 웹페이지 열기
+    driver.get(CRAWLING_TARGET_URL[0])
+    
+    # 페이지 로딩 대기
+    time.sleep(0.67)
 
-        # 페이지 소스 가져오기
-        page_source = driver.page_source
+    # 모집중인 공고들의 페이지들 a태그를 갖고 옴
+    pager_links = driver.find_elements(By.XPATH, '//div[@class="pager"]//a')
 
-        # BeautifulSoup으로 HTML 파싱
-        soup = BeautifulSoup(page_source, 'html.parser')
-
-        # bo_table 클래스를 가진 div 찾기
-        bo_table = soup.find('div', class_='bo_table')
-
-        # bo_table 안의 모든 a 태그 가져오기
-        a_tags = bo_table.find_all('a')
-
-        for a in a_tags:
-            title = a.text.strip()
-            link = a['href']
-            target_links.append( link )
+    # 각 a태그의 href 속성 값을 CRAWLING_TARGET_URL에 append
+    for link in pager_links:
+        sub_link = link.get_attribute('href')
+        if sub_link != None:
+            CRAWLING_TARGET_URL.append( sub_link )
 finally:
-    print('크롤링 할 문서 수 :', len( target_links ))
     driver.quit()
 
+print(len(CRAWLING_TARGET_URL), CRAWLING_TARGET_URL)
+
 # 중복된 문서 삭제(중복된 url 삭제)
-target_links = set(target_links)
-target_links = list(target_links)
+target_links = set(CRAWLING_TARGET_URL)
+target_links = list(CRAWLING_TARGET_URL)
 
 # target_links에 있는 html열어서 긁어올거임
 driver = webdriver.Chrome(options=options)
 
 results = {'idx':[],
            'text':[],
-           'additional_files':[],
            'img':[],
+           'files':[],
+           'url':[],
+           'title':[],
+           'published_date':[],
            'deadline_date':[]}
 
-for i, link in enumerate( tqdm(target_links, desc='Current Process : 드림스폰 일반장학금') ):
-    driver.get( 'https://www.dreamspon.com' + link )
-    time.sleep(2)
+k = 1
 
-    # 고유 인덱스
-    idx = '드림스폰_일반장학금_' + str( len(target_links)-i-1 )
+for i, link in enumerate( tqdm(CRAWLING_TARGET_URL, desc='Current Process : 드림스폰 일반장학금') ):
+    driver.get( link )
 
-    # 공지 본문(텍스트) 추출하기
-    info_table_elements = driver.find_elements(By.CSS_SELECTOR, ".infoTable .ul-wr + ul")
-    text = [ul.get_attribute('innerHTML') for ul in info_table_elements]
+    rows = driver.find_elements(By.CSS_SELECTOR, 'div.bo_table table tbody tr')
 
-    # 공지 이미지 추출하기
-    image_url = None
+    for row in rows:
+        # 고유 인덱스
+        idx = '드림스폰_일반장학금_' + str( k )
+        k += 1
 
-    # 공지 첨부파일 추출하기
-    file_link_element = driver.find_element(By.CSS_SELECTOR, ".ul-file a.btn_file_down")
-    additional_file = file_link_element.get_attribute("href")
+        # 본문 내용 추출(불가능하므로 None)
+        text = None
 
-    # 마감일자 추출하기(근데 임시로 모집기간)
-    application_period_element = driver.find_element(By.CSS_SELECTOR, ".day p")
-    deadline = application_period_element.text
+        # 이미지 링크 추출(불가능하므로 None)
+        image_url = None
 
-    # 결과 저장
-    # 결과 저장
-    results['idx'].append( idx )
-    results['text'].append( text )
-    results['additional_files'].append( additional_file )
-    results['img'].append( image_url )
-    results['deadline_date'].append( deadline )
+        # 1. title 클래스에서 href와 텍스트 추출
+        title_element = row.find_element(By.CSS_SELECTOR, 'td.td_subject p.title a')
+        title = title_element.text  # 제목 텍스트
+
+        # 원문 링크 추출
+        url = title_element.get_attribute('href')
+
+        # 첨부파일 대신 태그정보 포함
+        hashtag_elements = row.find_elements(By.CSS_SELECTOR, 'div.hashtag span')
+        hashtags = [hashtag.text for hashtag in hashtag_elements]  # 해시태그 리스트
+
+        # 지원 마감일 추출
+        day_element = row.find_element(By.CSS_SELECTOR, 'td.td_day span.count')
+        day_text = day_element.text  # 예: "D-2"
+        day_text = int(day_text.split('-')[-1])
+        today = datetime.today()
+        deadline_date = today + timedelta(days=day_text)
+        deadline_date = deadline_date.strftime('%Y년 %m월 %d일')
+
+        # 게시일 추출(불가능하므로 None)
+        published_date = None
+
+        # 공지 이미지 추출하기
+        image_url = None 
+
+        # 결과 저장
+        results['idx'].append( idx )
+        results['text'].append( text )
+        results['img'].append( image_url )
+        results['files'].append( hashtags )
+        results['url'].append( url )
+        results['title'].append( title )
+        results['published_date'].append( published_date )
+        results['deadline_date'].append( deadline_date )
+
+        # print('\ntitle :', title, '\nurl :', url, '\nhashtags :', hashtags, '\ndeadline :', deadline_date)
+
+
 
 driver.quit()
 

@@ -1,10 +1,21 @@
-// import 'package:fe_view/character_page.dart';
-import 'package:fe_view/find_password_page.dart';
+
+import 'package:FE/character_page.dart';
+import 'package:FE/character_provider.dart';
+import 'package:FE/find_password_page.dart';
 import 'package:flutter/material.dart';
-import 'package:fe_view/join_page.dart';
+import 'package:FE/join_page.dart';
+import 'package:FE/api/auth_api.dart';
+import 'package:provider/provider.dart'; // auth_api.dart 파일 추가하여 API 호출
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CharacterProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -27,26 +38,33 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/images/grid_background.png'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: const SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            children: [
-              LoginImage(), //이미지
-              LoginInputFields(), //입력
-              LoginButtons(), // 버튼
-            ],
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/grid_background.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
           ),
-        ),
+          const SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  LoginImage(), //이미지
+                  LoginInputFields(), //입력
+                  LoginButtons(), // 버튼
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -68,7 +86,7 @@ class LoginImage extends StatelessWidget {
   }
 }
 
-// 입력 - 아이디,비밀번호
+// 입력 - 아이디, 비밀번호
 class LoginInputFields extends StatefulWidget {
   const LoginInputFields({super.key});
 
@@ -88,14 +106,14 @@ class _LoginInputFieldsState extends State<LoginInputFields> {
     _setCursorPosition();
   }
 
-  //커서를 이메일입력부분으로 제한
+  // 커서를 이메일 입력 부분으로 제한
   void _setCursorPosition() {
     _idController.selection = TextSelection.fromPosition(
       TextPosition(offset: _idController.text.length - domain.length),
     );
   }
 
-//@kau.kr는 지우지 못하고 그 앞에만 수정가능하게
+  // @kau.kr는 지우지 못하고 그 앞에만 수정 가능하게 설정
   void _cursorControl(String value) {
     if (!value.endsWith(domain)) {
       setState(() {
@@ -132,7 +150,9 @@ class _LoginInputFieldsState extends State<LoginInputFields> {
                   controller: _idController,
                   textAlign: TextAlign.center,
                   decoration: const InputDecoration(
-                      labelText: '아이디', border: InputBorder.none),
+                    labelText: '아이디',
+                    border: InputBorder.none,
+                  ),
                   onChanged: _cursorControl,
                 ),
               ],
@@ -155,7 +175,9 @@ class _LoginInputFieldsState extends State<LoginInputFields> {
                       obscureText: true, // 비밀번호 입력 시 가리기
                       textAlign: TextAlign.center,
                       decoration: const InputDecoration(
-                          labelText: '비밀번호', border: InputBorder.none),
+                        labelText: '비밀번호',
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
@@ -172,6 +194,71 @@ class _LoginInputFieldsState extends State<LoginInputFields> {
 class LoginButtons extends StatelessWidget {
   const LoginButtons({super.key});
 
+  // 로그인 버튼 클릭 시 API 호출
+  Future<void> _handleLogin(
+      BuildContext context, String email, String password) async {
+    try {
+      // auth_api.dart 파일의 login 함수 호출 후 응답 상태 코드 확인
+      final response = await AuthApi.login(email, password);
+
+      if (response.statusCode == 200) {
+        print('로그인 성공');
+        // 로그인 성공 시 CharacterPage로 이동
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CharacterPage(), // 로그인 성공 시 이동할 페이지
+          ),
+        );
+      } else {
+        throw Exception('로그인 실패');
+      }
+    } catch (error) {
+      print('로그인 실패: $error');
+      // 로그인 실패 시 경고창 표시
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('알림'),
+            content: const Text('아이디 또는 비밀번호가 올바르지 않습니다.'),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: OutlinedButton(
+                  child: const Text(
+                    '로그인',
+                    style: TextStyle(fontSize: 15, color: Colors.black),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: OutlinedButton(
+                  child: const Text(
+                    '비밀번호 찾기',
+                    style: TextStyle(fontSize: 15, color: Colors.black),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const FindPasswordPage(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -184,65 +271,13 @@ class LoginButtons extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: 50.0),
               child: OutlinedButton(
-                // 로그인 버튼  클릭 시
+                // 로그인 버튼 클릭 시
                 onPressed: () {
-                  //if 로그인 실패 시 동작
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('알림'),
-                        content: const Text('아이디 또는 비밀번호가 올바르지 않습니다.'),
-                        actions: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: OutlinedButton(
-                              child: const Text(
-                                '로그인',
-                                style: TextStyle(
-                                    fontSize: 15, color: Colors.black),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: OutlinedButton(
-                              child: const Text(
-                                '비밀번호 찾기',
-                                style: TextStyle(
-                                    fontSize: 15, color: Colors.black),
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const FindPasswordPage(),
-                                  ),
-                                );
-                              },
-                            ),
-                          )
-                        ],
-                      );
-                    },
-                  );
+                  // 사용자가 입력한 이메일과 비밀번호
+                  final email = 'user@kau.kr'; // 실제로는 사용자가 입력한 이메일을 사용
+                  final password = 'password123'; // 실제로는 사용자가 입력한 비밀번호를 사용
+                  _handleLogin(context, email, password); // 로그인 시도
                 },
-
-/*
-                  // else 로그인 성공시 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CharacterPage(),
-                    ),
-                  ); 
-*/
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(
                     width: 1.25,
@@ -268,7 +303,7 @@ class LoginButtons extends StatelessWidget {
                       builder: (context) => const JoinPage(),
                     ),
                   );
-                }, //버튼 디자인
+                },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(
                     width: 1.25,
@@ -287,21 +322,19 @@ class LoginButtons extends StatelessWidget {
   }
 }
 
-//점선 표현
+// 점선 표현
 class DottedLineHorizontalPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = const Color.fromARGB(255, 90, 90, 90)
-      ..strokeWidth = 1.5 // 두께
+      ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
     const dashWidth = 8;
     const dashSpace = 4;
 
     double startX = 0;
-
-    // y 좌표를 size.height로 설정하여 아래쪽에 점선을 그림
     final y = size.height;
 
     while (startX < size.width) {
@@ -317,3 +350,103 @@ class DottedLineHorizontalPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
+
+<<<<<<< HEAD
+
+/*
+=======
+>>>>>>> junsu
+void showloginfailDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
+          side: const BorderSide(color: Colors.black, width: 1.5),
+        ),
+        child: SizedBox(
+          //dialog 사이즈
+          width: 220,
+          height: 100,
+          child: Padding(
+            padding:
+                const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    '아이디 또는 비밀번호가 맞지 않습니다.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10), //텍스트와 버튼 사이 간격
+                  //재로그인 버튼
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 1.0),
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(width: 1.2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 3),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: const Text(
+                            '로그인',
+                            style: TextStyle(fontSize: 10, color: Colors.black),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10), //버튼 사이 간격
+                      //비밀번호 찾기
+                      Padding(
+                        padding: const EdgeInsets.only(right: 1.0),
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const FindPasswordPage(),
+                              ),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(width: 1.2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 3),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: const Text(
+                            '비밀번호 찾기',
+                            style: TextStyle(fontSize: 10, color: Colors.black),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+<<<<<<< HEAD
+*/
+=======
+>>>>>>> junsu

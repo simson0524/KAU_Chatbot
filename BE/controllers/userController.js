@@ -19,7 +19,6 @@ exports.userLogin = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(400).json({error: '비밀번호를 잘못 입력하셨습니다'});
         }
-
         // JWT 토큰 생성 -> secret-key는 .env에 저장 필요
         const accessToken = jwt.sign({email: user.email}, 'access-secretKey', {expiresIn: '1h'});
         const refreshToken = jwt.sign({email: user.email}, 'refresh-secretKey', {expiresIn: '1d'});
