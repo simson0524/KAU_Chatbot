@@ -21,7 +21,23 @@ exports.saveChat = async (student_id, question, response) => {
 };
 
 // 특정 대화 세션의 대화 기록을 조회하는 함수 (대화 ID 포함)
-exports.getHistory = async (sessionId) => {
-    const [rows] = await db.query('SELECT * FROM chat_messages WHERE session_id = ?', [sessionId]);
-    return rows;
+exports.getFilteredHistory = async (conversation_id, date, content) => {
+    try {
+        // SQL 쿼리에서 날짜와 내용 조건을 추가하여 필터링
+        const query = `
+            SELECT * FROM chat 
+            WHERE conversation_id = ? 
+            AND DATE(created_at) = ? 
+            AND (question LIKE ? OR response LIKE ?)`;
+        
+        // '%'를 사용해서 content 부분 매칭을 지원
+        const [rows] = await db.query(query, [conversation_id, date, `%${content}%`, `%${content}%`]);
+        
+        return rows;
+
+    } catch (error) {
+        console.error("Error in getFilteredHistory:", error);
+        throw error;
+    }
+    
 };
