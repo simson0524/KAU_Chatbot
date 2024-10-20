@@ -3,7 +3,8 @@
 
 const express = require('express');
 const router = express.Router();
-const userController = require('../contorllers/userController');
+const userController = require('../controllers/userController');
+const userService = require('../services/userService');
 
 router.post('/login', userController.userLogin);
 
@@ -12,5 +13,9 @@ router.post('/register', userController.userSignUp);
 router.post('/send-email', userController.sendEmail);
 
 router.post('/verify-email', userController.verifyCode);
+
+router.put('/update', userService.loginRequired, userController.updateUser);
+
+router.put('/password', userService.loginRequired, userController.updatePassword);
 
 module.exports = router;
