@@ -9,7 +9,7 @@ router.post('/start', chatController.startChat);
 router.post('/conversation/:conversation_id/ask', chatController.askQuestion);
 
 // 대화 기록 조회 (대화 ID 필요)
-router.get('/chatbot/conversation/:conversation_id/history', chatController.getChatHistory);
+router.get('/conversation/:conversation_id/history', chatController.getFilteredChatHistory);
 
 // AI 서버로 메시지 전달 (대화 내용 전달)
 router.post('/chatbot/ai', chatController.forwardToAI);

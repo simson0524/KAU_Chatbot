@@ -20,6 +20,7 @@ exports.startChat = async (req, res) => {
             response: welcomeMessage
         });
     } catch (error) {
+        console.error("Error in startChat:", error); // 에러 로그 추가
         res.status(500).json({ error: '채팅 세션 시작에 실패했습니다.' });
     }
 };  
@@ -45,12 +46,17 @@ exports.askQuestion = async (req, res) => {
 };
 
 // 대화 기록 조회를 처리하는 컨트롤러 (대화 ID 포함)
-exports.getChatHistory = async (req, res) => {
+exports.getFilteredChatHistory = async (req, res) => {
     try {
         const { conversation_id } = req.params;
-        const history = await chatService.getChatHistory(conversation_id);
+        const {date, content} = req.query;
+        
+        //필터링된 대화 기록을 가져옴
+        const history = await chatService.getFilteredChatHistory(conversation_id, date, content);
+
         res.status(200).json({ history });
     } catch (error) {
+        console.error("Error in getFilteredChatHistory:", error);
         res.status(500).json({ error: 'Failed to get chat history' });
     }
 };

@@ -18,8 +18,14 @@ exports.startChatSession = async (student_id) => {
 //};
 
 // 대화 기록을 조회하는 서비스 함수 (대화 ID 포함)
-exports.getChatHistory = async (sessionId) => {
-    return await chatModel.getHistory(sessionId);
+exports.getFilteredChatHistory = async (conversation_id, date, content) => {
+    try{
+        return await chatModel.getFilteredHistory(conversation_id, date, content);
+    } catch(error){
+        console.error("Error in getFilteredChatHistory:", error);
+        throw error;
+    }
+    
 };
 
 // AI 서버로 메시지를 전달하는 서비스 함수
