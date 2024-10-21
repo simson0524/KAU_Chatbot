@@ -62,10 +62,9 @@ class _ChattingPageState extends State<ChattingPage> {
       return 'assets/images/chat_mile.png';
     } else if (name == '마하') {
       return 'assets/images/chat_maha.png';
-    } else if (name == '피트') {
-      return 'assets/images/chat_feet.png';
     } else {
-      return 'assets/images/chat_basic.png';
+      //피트
+      return 'assets/images/chat_feet.png';
     }
   }
 

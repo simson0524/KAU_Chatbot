@@ -14,6 +14,11 @@ class CharacterPage extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Container(
+              color: Colors.white,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/grid_background.png'),
@@ -37,12 +42,6 @@ class CharacterPage extends StatelessWidget {
                     SizedBox(height: 131, child: Feet())
                   ],
                 ),
-                SizedBox(height: 70),
-                Padding(
-                  padding: EdgeInsets.only(left: 250.0),
-                  child: Basic(),
-                ),
-                SizedBox(height: 100),
               ],
             ),
           ),
@@ -93,7 +92,7 @@ class Mile extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
-            .setCharacter('Mile');
+            .setCharacter('마일');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ChattingPage()),
@@ -121,7 +120,7 @@ class Maha extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
-            .setCharacter('Maha');
+            .setCharacter('마하');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ChattingPage()),
@@ -149,7 +148,7 @@ class Feet extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
-            .setCharacter('Feet');
+            .setCharacter('피트');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ChattingPage()),
@@ -161,33 +160,6 @@ class Feet extends StatelessWidget {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/character_feet.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class Basic extends StatelessWidget {
-  const Basic({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Provider.of<CharacterProvider>(context, listen: false)
-            .setCharacter('Basic');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
-        );
-      },
-      child: Container(
-        width: 100,
-        height: 26,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/basic_image.png'),
             fit: BoxFit.cover,
           ),
         ),

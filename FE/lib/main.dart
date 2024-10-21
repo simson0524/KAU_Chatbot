@@ -48,6 +48,11 @@ class LoginPage extends StatelessWidget {
         children: [
           Positioned.fill(
             child: Container(
+              color: Colors.white,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/grid_background.png'),
@@ -320,7 +325,6 @@ class DottedLineHorizontalPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-// 로그인 실패 시 다이얼로그 표시하는 함수
 void showloginfailDialog(BuildContext context) {
   showDialog(
     context: context,
