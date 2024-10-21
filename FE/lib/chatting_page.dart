@@ -11,7 +11,7 @@ class ChattingPage extends StatefulWidget {
 }
 
 class _ChattingPageState extends State<ChattingPage> {
-  final TextEditingController _controller = TextEditingController();
+  TextEditingController _controller = TextEditingController();
   List<Map<String, dynamic>> messages = [];
 
   // 첫 안내 자동 메시지
@@ -152,8 +152,11 @@ class _ChattingPageState extends State<ChattingPage> {
                     return ChatBubble(
                       profileImage: messages[index]['isMine']
                           ? ''
-                          : _chatCharacterImage(character),
-                      name: messages[index]['isMine'] ? '' : character,
+                          : _chatCharacterImage(
+                              character), // Provider로 받은 이름에 따라 이미지 설정
+                      name: messages[index]['isMine']
+                          ? ''
+                          : character, // Provider로 받은 이름 사용
                       message: messages[index]['message'],
                       time: messages[index]['time'],
                       isMine: messages[index]['isMine'],
@@ -217,8 +220,7 @@ class ChatBubble extends StatelessWidget {
   final String time;
   final bool isMine;
 
-  const ChatBubble({
-    super.key,
+  ChatBubble({
     required this.profileImage,
     required this.name,
     required this.message,
