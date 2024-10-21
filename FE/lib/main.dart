@@ -271,6 +271,12 @@ class LoginButtons extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () {
                   // 회원가입 페이지로 이동하는 코드 (기존 기능 유지)
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const JoinPage(), // 회원가입 페이지로 이동
+                    ),
+                  );
                 },
                 child: const Text(
                   '회원가입',

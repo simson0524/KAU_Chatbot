@@ -2,6 +2,8 @@ import 'package:FE/find_password_page.dart';
 import 'package:FE/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:FE/api/auth_api.dart';
+import 'dart:convert';
 
 final GlobalKey<_JoinInputState> joinPWInputKey = GlobalKey<_JoinInputState>();
 
@@ -569,23 +571,59 @@ class Joinfinish extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 10, right: 120, left: 120),
       child: OutlinedButton(
-        //회원가입 버튼 클릭 시
-        onPressed: () {
+        // 회원가입 버튼 클릭 시
+        onPressed: () async {
           if (inputState == null) {
             return;
           }
+
+          // 입력값 검증
           if (inputState.nullcheck()) {
             textmessageDialog(context, '입력되지 않은 값이 존재합니다');
             return;
           }
-          if (inputState.samePWcheck()) {
-            finishJoinDialog(context);
-          } else {
+
+          if (!inputState.samePWcheck()) {
             textmessageDialog(context, '비밀번호와 비밀번호 확인이 일치하지 않습니다');
+            return;
           }
-          /*
-          이메일 인증이 안되었을 시 조건 -> 조건문 안에는 textmessageDialog(context, '이메일 인증이 완료되지 않았습니다.');
-          */
+
+          // 입력 값 가져오기
+          final studentId = inputState.join_numberController.text;
+          final email = inputState.join_emailController.text;
+          final password = inputState.join_pwController.text;
+          final name = inputState.join_nameController.text;
+          final major = inputState.join_majorController.text;
+          final grade = inputState.join_Grade ?? '';
+          final gender = inputState.join_Gender ?? '';
+          final residence = inputState.join_homeController.text;
+
+          try {
+            // 회원가입 API 호출
+            final response = await AuthApi.register(
+              studentId,
+              email,
+              password,
+              name,
+              major,
+              grade,
+              gender,
+              residence,
+            );
+
+            if (response.statusCode == 200) {
+              // 회원가입 성공 시 알림창 표시
+              finishJoinDialog(context);
+            } else {
+              // 회원가입 실패 시 오류 메시지 출력
+              final responseBody = json.decode(response.body);
+              textmessageDialog(context, responseBody['error'] ?? '회원가입 실패');
+            }
+          } catch (error) {
+            // 예외 처리
+            textmessageDialog(context, '회원가입 중 오류가 발생했습니다');
+            print('Registration error: $error');
+          }
         },
         style: OutlinedButton.styleFrom(
           side: const BorderSide(
