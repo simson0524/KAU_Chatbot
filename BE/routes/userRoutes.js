@@ -14,10 +14,10 @@ router.post('/send-email', userController.sendEmail);
 
 router.post('/verify-email', userController.verifyCode);
 
-router.put('/update', userService.loginRequired, userController.updateUser);
+router.put('/:student_id', userService.loginRequired, userController.updateUser);
 
-router.put('/password', userService.loginRequired, userController.updatePassword);
+router.put('/:student_id/password', userService.loginRequired, userController.updatePassword);
 
-router.delete('/delete-account', userService.loginRequired, userController.deleteUser);
+router.delete('/:student_id', userService.loginRequired, userController.deleteUser);
 
 module.exports = router;

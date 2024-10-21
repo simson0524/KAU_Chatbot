@@ -88,15 +88,15 @@ exports.verifyCode = async (req, res) => {
 exports.updateUser = async (req, res) => {
 
     try {
-        const email = req.user.email;
+        const student_id = req.params.student_id;
         const { name, major, grade, residence } = req.body;
 
-        const user = await userModel.findUserByEmail(email);
+        const user = await userModel.findUserByStudentId(student_id);
         if (!user) {
-            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
+            return res.status(400).json({error: '해당 학번의 사용자가 존재하지 않습니다.'});
         }
 
-        await userModel.updateUserInfo(email, name, major, grade, residence);
+        await userModel.updateUserInfo(student_id, name, major, grade, residence);
         res.status(200).json({'message': '회원 정보 수정이 성공하였습니다.'});
     }
     catch (error) {
@@ -108,13 +108,13 @@ exports.updateUser = async (req, res) => {
 exports.updatePassword = async (req, res) => {
 
     try {
-        const email = req.user.email;
+        const student_id = req.params.student_id;
         const { password, newPassword } = req.body;
 
-        // 해당 이메일의 사용자가 있는지 확인
-        const user = await userModel.findUserByEmail(email);
+        // 해당 학번의 사용자가 있는지 확인
+        const user = await userModel.findUserByStudentId(student_id);
         if (!user) {
-            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
+            return res.status(400).json({error: '해당 학번의 사용자가 존재하지 않습니다.'});
         }
         
         // 입력한 비밀번호가 맞는지 확인
@@ -127,7 +127,7 @@ exports.updatePassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         
         // 비밀번호 수정
-        await userModel.updateUserPassword(email, hashedPassword);
+        await userModel.updateUserPassword(student_id, hashedPassword);
         res.status(200).json({'message': '비밀번호 수정이 성공하였습니다.'});
     }
     catch (error) {
@@ -139,17 +139,16 @@ exports.updatePassword = async (req, res) => {
 exports.deleteUser = async (req, res) => {
 
     try {
-        const email = req.user.email;
-
+        const student_id = req.params.student_id;
         
-        // 해당 이메일의 사용자가 있는지 확인
-        const user = await userModel.findUserByEmail(email);
+        // 해당 학번의 사용자가 있는지 확인
+        const user = await userModel.findUserByStudentId(student_id);
         if (!user) {
-            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
+            return res.status(400).json({error: '해당 학번의 사용자가 존재하지 않습니다.'});
         }
 
         // User 테이블에서 사용자 삭제
-        await userModel.deleteUser(email);
+        await userModel.deleteUser(student_id);
         res.status(200).json({'message': '회원 삭제가 성공하였습니다.'});
 
     } catch (error) {
