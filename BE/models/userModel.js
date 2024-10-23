@@ -9,6 +9,12 @@ exports.findUserByEmail = async (email) => {
     return users[0];
 }
 
+// DB에 입력된 학번의 사용자가 있는지 확인
+exports.findUserByStudentId = async (student_id) => {
+    const [users] = await db.query('SELECT * FROM users where student_id = ?', [student_id]);
+    return users[0];
+}
+
 // refresh Token을 DB에 저장
 exports.saveRefToken = async (email, refreshToken) => {
 
@@ -24,19 +30,32 @@ exports.addUser = async (student_id, email, password, name, major, grade, gender
 }
 
 // 사용자 정보 수정
-exports.updateUserInfo = async (email, name, major, grade, residence) => {
+exports.updateUserInfo = async (student_id, name, major, grade, residence) => {
     const result = await db.query(
-        'UPDATE users SET name = ?, major = ?, grade = ?, residence = ? WHERE email = ?',
-        [name, major, grade, residence, email]
+        'UPDATE users SET name = ?, major = ?, grade = ?, residence = ? WHERE student_id = ?',
+        [name, major, grade, residence, student_id]
     );
     return result;
 }
 
 // 사용자 비밀번호 수정
-exports.updateUserPassword = async (email, newPassword) => {
+exports.updateUserPassword = async (student_id, newPassword) => {
     const result = await db.query(
-        'UPDATE users SET password = ? WHERE email = ?',
-        [newPassword, email]
+        'UPDATE users SET password = ? WHERE student_id = ?',
+        [newPassword, student_id]
     );
     return result;
+}
+
+// 사용자 삭제
+exports.deleteUser = async (student_id) => {
+    const result = await db.query(
+        'DELETE FROM users WHERE student_id = ?', [student_id]
+    )
+}
+
+// DB에 입력된 Refresh Token이 있는지 확인
+exports.findUserByToken = async (refreshToken) => {
+    const [users] = await db.query('SELECT * FROM users where refresh_token = ?', [refreshToken]);
+    return users[0];
 }
