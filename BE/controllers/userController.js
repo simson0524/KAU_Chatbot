@@ -2,6 +2,26 @@ const userService = require('../services/userService');
 const userModel = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const redis = require('redis');
+const { connect } = require('../config/dbConfig');
+
+const redisClient = redis.createClient({
+    url: 'redis://default:T8d3j86H8Vr9cyclTpS2qeGxvhAVxZOb@redis-17713.c323.us-east-1-2.ec2.redns.redis-cloud.com:17713/0',
+    legacyMode: true
+});
+
+// redis 연결
+async function connectRedis() {
+    try {
+        await redisClient.connect();
+        console.info('Redis 서버에 연결되었습니다.');
+    }
+    catch (error) {
+        console.error('Redis 서버 연결 에러: ', error);
+    }
+}
+
+connectRedis();
 
 exports.userLogin = async (req, res) => {
 
@@ -59,16 +79,13 @@ exports.sendEmail = async (req, res) => {
     try {
         const verificationNumber = userService.generateCode();
         const mailOptions = userService.getMailOptions(email, verificationNumber);
+        await redisClient.v4.setEx(email, 180, verificationNumber) // 인증번호를 3분간 redis에 저장
         await userService.transporter.sendMail(mailOptions)
-        .then(() => {
-            return res.status(200).json('이메일 보내기 성공');
-        })
-        .catch((error) => {
-            return res.status(500).json('이메일 보내기 실패');
-        })
+        return res.status(200).json('이메일 보내기 성공');
     }
     catch (error) {
         console.error(error);
+        return res.status(500).json('이메일 보내기 실패');
     }
 }
 
@@ -77,10 +94,28 @@ exports.verifyCode = async (req, res) => {
     const email = req.body.email;
     const code = req.body.code;
 
-    if (code == '전송된 인증번호') { // 전송된 인증번호는 DB나 Redis 등 방법 생각해보기
-        res.status(200).json({message: '인증 성공!!'});
-    } else {
-        res.status(400).json({message: '인증 실패'});
+    console.log(email, code);
+
+    try {
+
+        const storedCode = await redisClient.v4.get(email);
+        console.log(storedCode);
+
+        if (storedCode === null) {
+            return res.status(400).json('인증번호가 만료되었거나 존재하지 않습니다.');
+        }
+
+        // 저장된 인증번호와 입력한 인증번호가 일치한다면
+        if (storedCode === code) {
+            await redisClient.v4.del(email); // redis에서 해당 인증번호 삭제
+            return res.status(200).json('인증번호가 확인되었습니다.');
+        } else {
+            return res.status(400).json('인증번호가 일치하지 않습니다.');
+        }
+        
+    } catch (error) {
+        console.error('인증번호 확인 중 오류: ', error);
+        res.status(500).json('인증번호 확인 중 오류가 발생했습니다.');
     }
 }
 
@@ -101,6 +136,7 @@ exports.updateUser = async (req, res) => {
     }
     catch (error) {
         console.error(error);
+        res.status(500).json('사용자 정보 수정 중 오류가 발생했습니다.');
     }
 }
 
@@ -109,7 +145,7 @@ exports.updatePassword = async (req, res) => {
 
     try {
         const student_id = req.params.student_id;
-        const { password, newPassword } = req.body;
+        const { password, new_password } = req.body;
 
         // 해당 학번의 사용자가 있는지 확인
         const user = await userModel.findUserByStudentId(student_id);
@@ -124,7 +160,7 @@ exports.updatePassword = async (req, res) => {
         }
 
         // 비밀번호 해싱
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(new_password, 10);
         
         // 비밀번호 수정
         await userModel.updateUserPassword(student_id, hashedPassword);
@@ -132,6 +168,7 @@ exports.updatePassword = async (req, res) => {
     }
     catch (error) {
         console.error(error);
+        res.status(500).json('사용자 비밀번호 수정 중 오류가 발생했습니다.');
     }
 }
 
@@ -153,5 +190,39 @@ exports.deleteUser = async (req, res) => {
 
     } catch (error) {
         console.error(error);
+        res.status(500).json('사용자 탈퇴 중 오류가 발생했습니다.');
     }
+}
+
+// access token 재발급
+exports.getToken = async (req, res) => {
+
+    try {
+        const refreshToken = req.body.refresh_token;
+
+        if (!refreshToken) {
+            return res.status(401).json({'message': 'Refresh Token이 제공되지 않았습니다.'});
+        }
+
+        // 해당 refresh Token의 사용자가 있는지 확인
+        const user = await userModel.findUserByToken(refreshToken);
+        if (!user) {
+            return res.status(400).json({error: '유효하지 않은 토큰입니다.'});
+        }
+
+        jwt.verify(refreshToken, 'refresh-secretKey', (err, user) => {
+            if (err) {
+                return res.status(403).json({'message': 'Refresh Token이 만료되었거나 유효하지 않습니다.'});
+            }
+
+            // Access Token 재발급
+            const accessToken = jwt.sign({email: user.email}, 'access-secretKey', {expiresIn: '1h'});
+
+            res.status(200).json({accessToken, "message": "토큰이 재발급 되었습니다."});
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json('토큰 재발급 중 오류가 발생했습니다.');
+    }
+    
 }

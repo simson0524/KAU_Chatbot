@@ -53,3 +53,9 @@ exports.deleteUser = async (student_id) => {
         'DELETE FROM users WHERE student_id = ?', [student_id]
     )
 }
+
+// DB에 입력된 Refresh Token이 있는지 확인
+exports.findUserByToken = async (refreshToken) => {
+    const [users] = await db.query('SELECT * FROM users where refresh_token = ?', [refreshToken]);
+    return users[0];
+}

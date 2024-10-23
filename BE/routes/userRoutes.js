@@ -10,14 +10,16 @@ router.post('/login', userController.userLogin);
 
 router.post('/register', userController.userSignUp);
 
-router.post('/send-email', userController.sendEmail);
-
-router.post('/verify-email', userController.verifyCode);
-
 router.put('/:student_id', userService.loginRequired, userController.updateUser);
 
 router.put('/:student_id/password', userService.loginRequired, userController.updatePassword);
 
 router.delete('/:student_id', userService.loginRequired, userController.deleteUser);
+
+router.post('/send-email', userController.sendEmail);
+
+router.post('/verify-email', userController.verifyCode);
+
+router.post('/token', userController.getToken);
 
 module.exports = router;
