@@ -2,9 +2,9 @@ const chatModel = require('../models/chatModel');
 const axios = require('axios');
 
 // 대화 세션을 시작하는 서비스 함수
-exports.startChatSession = async (student_id) => {
+exports.startChatSession = async (student_id, chat_character) => {
     try {
-        return await chatModel.createChatSession(student_id);
+        return await chatModel.createChatSession(student_id, chat_character);
     } catch (error) {
         console.error("Error in startChatSession:", error);
         throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록
