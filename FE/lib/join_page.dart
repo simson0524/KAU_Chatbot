@@ -616,49 +616,6 @@ class _JoinInputState extends State<JoinInput> {
     ));
   }
 }
-/*
-//버튼 - 이메일 인증, 비밀번호 보기, 비밀번호 보기
-class Joinbutton extends StatelessWidget {
-  const Joinbutton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Column(
-        //mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          const SizedBox(height: 60),
-          //비밀번호 보기 버튼
-          buildOutlineButton('비밀번호 보기', () {}),
-          const SizedBox(height: 30),
-          //비밀번호 보기 확인 버튼
-          buildOutlineButton('비밀번호 보기', () {}),
-        ],
-      ),
-    );
-  }
-
-  SizedBox buildOutlineButton(String text, VoidCallback onPressed) {
-    return SizedBox(
-      width: 80,
-      height: 30,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(width: 1.2),
-          padding: EdgeInsets.zero,
-          visualDensity: VisualDensity.compact,
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 10, color: Colors.black),
-        ),
-      ),
-    );
-  }
-} */
 
 class go_login extends StatelessWidget {
   const go_login({super.key});
