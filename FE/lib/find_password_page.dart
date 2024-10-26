@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:FE/main.dart';
 import 'package:flutter/material.dart';
 
@@ -40,10 +42,10 @@ class FindPasswordPage extends StatelessWidget {
                         Stack(
                           children: [
                             FindPWInput(key: findPWInputKey),
-                            const Positioned(
+                            /*const Positioned(
                               right: 0,
                               child: FindPWbutton(),
-                            ),
+                            ),*/
                           ],
                         ),
                         const SizedBox(height: 2),
@@ -93,14 +95,58 @@ class _FindPWInputState extends State<FindPWInput> {
   final TextEditingController find_checkpwController = TextEditingController();
   final TextEditingController find_emailcodeController =
       TextEditingController();
-
   final domain = '@kau.kr';
+
+  bool _isobscured = true;
+  bool _ischeckobscured = true;
 
   @override
   void initState() {
     super.initState();
     find_emailController.text = domain;
     _setCursorPosition();
+  }
+
+  //비밀번호 보기 버튼 관련
+  void _showPW() {
+    setState(() {
+      _isobscured = false;
+    });
+
+    Timer(Duration(seconds: 3), () {
+      setState(() {
+        _isobscured = true;
+      });
+    });
+  }
+
+  //비밀번호 보기 버튼 관련
+  void _showcheckPW() {
+    setState(() {
+      _ischeckobscured = false;
+    });
+
+    Timer(Duration(seconds: 3), () {
+      setState(() {
+        _ischeckobscured = true;
+      });
+    });
+  }
+
+  //비밀번호 보기 버튼
+  Widget buildOutlineButton(String text, VoidCallback onPressed) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        side: const BorderSide(width: 1.2),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
+        visualDensity: VisualDensity.compact,
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 10, color: Colors.black),
+      ),
+    );
   }
 
   //비밀번호 일치 여부 검증
@@ -266,12 +312,20 @@ class _FindPWInputState extends State<FindPWInput> {
                   ),
                 ),
                 //변경 비밀번호 입력
-                TextFormField(
-                  controller: find_pwController,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                      labelText: '새 비밀번호', border: InputBorder.none),
-                  obscureText: true,
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: find_pwController,
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                            labelText: '새 비밀번호', border: InputBorder.none),
+                        obscureText: _isobscured,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    buildOutlineButton('비밀번호 보기', _showPW),
+                  ],
                 ),
               ],
             ),
@@ -287,12 +341,20 @@ class _FindPWInputState extends State<FindPWInput> {
                   ),
                 ),
                 //변경 비밀번호 확인 입력
-                TextFormField(
-                  controller: find_checkpwController,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                      labelText: '새 비밀번호 확인', border: InputBorder.none),
-                  obscureText: true,
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: find_checkpwController,
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                            labelText: '새 비밀번호 확인', border: InputBorder.none),
+                        obscureText: _ischeckobscured,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    buildOutlineButton('비밀번호 보기', _showcheckPW),
+                  ],
                 ),
               ],
             ),
@@ -302,8 +364,8 @@ class _FindPWInputState extends State<FindPWInput> {
     );
   }
 }
-
-//버튼 : 이메일인증, 비밀번호 보기, 비밀번호 보기, 다시 로그인
+/*
+//버튼 : 비밀번호 보기, 비밀번호 보기
 class FindPWbutton extends StatelessWidget {
   const FindPWbutton({super.key});
 
@@ -317,8 +379,8 @@ class FindPWbutton extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 70),
-          buildOutlineButton('비밀번호 보기', () {
-            //추가예정
+          buildOutlineButton('비밀번호 보기', () { 
+            
           }),
           const SizedBox(height: 25),
           buildOutlineButton('비밀번호 보기', () {
@@ -329,21 +391,8 @@ class FindPWbutton extends StatelessWidget {
     );
   }
 
-  OutlinedButton buildOutlineButton(String text, VoidCallback onPressed) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(width: 1.2),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
-        visualDensity: VisualDensity.compact,
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 10, color: Colors.black),
-      ),
-    );
-  }
-}
+  OutlinedButton 
+}*/
 
 //로그인페이지로 이동
 class go_login extends StatelessWidget {

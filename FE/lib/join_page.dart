@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:FE/character_page.dart';
 import 'package:FE/find_password_page.dart';
 import 'package:FE/main.dart';
@@ -47,13 +49,13 @@ class JoinPage extends StatelessWidget {
                               alignment: Alignment.topCenter,
                               child: JoinInput(key: joinPWInputKey),
                             ),
-                            const Align(
+                            /*const Align(
                               alignment: Alignment.topRight,
                               child: Padding(
                                 padding: EdgeInsets.only(top: 70, right: 20),
                                 child: Joinbutton(),
                               ),
-                            ),
+                            ),*/
                           ],
                         ),
                         const SizedBox(height: 10),
@@ -112,11 +114,56 @@ class _JoinInputState extends State<JoinInput> {
   String? join_Grade;
   final domain = '@kau.kr';
 
+  bool _isobscured = true;
+  bool _ischeckobscured = true;
+
   @override
   void initState() {
     super.initState();
     join_emailController.text = domain;
     _setCursorPosition();
+  }
+
+  //비밀번호 보기 버튼 관련
+  void _showPW() {
+    setState(() {
+      _isobscured = false;
+    });
+
+    Timer(Duration(seconds: 3), () {
+      setState(() {
+        _isobscured = true;
+      });
+    });
+  }
+
+  //비밀번호 보기 버튼 관련
+  void _showcheckPW() {
+    setState(() {
+      _ischeckobscured = false;
+    });
+
+    Timer(Duration(seconds: 3), () {
+      setState(() {
+        _ischeckobscured = true;
+      });
+    });
+  }
+
+  //비밀번호 보기 버튼
+  Widget buildOutlineButton(String text, VoidCallback onPressed) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        side: const BorderSide(width: 1.2),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
+        visualDensity: VisualDensity.compact,
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 10, color: Colors.black),
+      ),
+    );
   }
 
   //비밀번호 일치 여부 검증
@@ -358,12 +405,20 @@ class _JoinInputState extends State<JoinInput> {
                   painter: DottedLineHorizontalPainter(),
                 ),
               ),
-              TextFormField(
-                controller: join_pwController,
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                    labelText: '비밀번호 입력', border: InputBorder.none),
-                obscureText: true,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: join_pwController,
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                          labelText: '비밀번호 입력', border: InputBorder.none),
+                      obscureText: _isobscured,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  buildOutlineButton('비밀번호 보기', _showPW),
+                ],
               ),
             ],
           ),
@@ -379,12 +434,20 @@ class _JoinInputState extends State<JoinInput> {
                   painter: DottedLineHorizontalPainter(),
                 ),
               ),
-              TextFormField(
-                controller: join_checkpwController,
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                    labelText: '비밀번호 확인', border: InputBorder.none),
-                obscureText: true,
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: join_checkpwController,
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                          labelText: '비밀번호 확인', border: InputBorder.none),
+                      obscureText: _ischeckobscured,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  buildOutlineButton('비밀번호 보기', _showcheckPW),
+                ],
               ),
             ],
           ),
@@ -553,7 +616,7 @@ class _JoinInputState extends State<JoinInput> {
     ));
   }
 }
-
+/*
 //버튼 - 이메일 인증, 비밀번호 보기, 비밀번호 보기
 class Joinbutton extends StatelessWidget {
   const Joinbutton({super.key});
@@ -595,7 +658,7 @@ class Joinbutton extends StatelessWidget {
       ),
     );
   }
-}
+} */
 
 class go_login extends StatelessWidget {
   const go_login({super.key});
