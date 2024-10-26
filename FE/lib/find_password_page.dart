@@ -85,6 +85,8 @@ class _FindPWInputState extends State<FindPWInput> {
   final TextEditingController find_emailController = TextEditingController();
   final TextEditingController find_pwController = TextEditingController();
   final TextEditingController find_checkpwController = TextEditingController();
+  final TextEditingController find_emailcodeController =
+      TextEditingController();
 
   final domain = '@kau.kr';
 
@@ -105,7 +107,8 @@ class _FindPWInputState extends State<FindPWInput> {
 
     return emailinput.isEmpty ||
         find_pwController.text.isEmpty ||
-        find_checkpwController.text.isEmpty;
+        find_checkpwController.text.isEmpty ||
+        find_emailcodeController.text.isEmpty;
   }
 
   //커서를 이메일입력부분으로 제한
@@ -140,25 +143,111 @@ class _FindPWInputState extends State<FindPWInput> {
     return Form(
       child: Column(
         children: [
-          Container(
-            margin: const EdgeInsets.only(left: 50.0, right: 50.0),
-            child: Stack(
-              children: [
-                //이메일 입력
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: DottedLineHorizontalPainter(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 이메일 입력칸
+              Flexible(
+                flex: 7,
+                child: Container(
+                  margin: const EdgeInsets.only(left: 50.0, right: 0.0),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: DottedLineHorizontalPainter(),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: find_emailController,
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                            labelText: '이메일 입력', border: InputBorder.none),
+                        onChanged: _cursorControl,
+                      ),
+                    ],
                   ),
                 ),
-                TextFormField(
-                  controller: find_emailController,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                      labelText: '이메일 입력', border: InputBorder.none),
-                  onChanged: _cursorControl,
+              ),
+              // 인증번호 발송 버튼
+              TextButton(
+                onPressed: () {
+                  String emailinput = find_emailController.text.trim();
+                  if (emailinput == '@kau.kr' || emailinput.isEmpty) {
+                    textmessageDialog(context, '이메일을 입력해주세요.');
+                  } else {
+                    textmessageDialog(
+                        context, '이메일 인증번호 메일을 보냈습니다. \n 이메일을 확인해주세요.');
+                  }
+                }, // 버튼 동작
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
+                  side: BorderSide(color: Colors.black),
                 ),
-              ],
-            ),
+                child: const Text(
+                  '인증번호\n    발송',
+                  style: TextStyle(fontSize: 10, color: Colors.black),
+                ),
+              ),
+              const SizedBox(width: 10.0), // 칸 사이 간격
+              // 인증번호 입력칸
+              Flexible(
+                flex: 3,
+                child: Container(
+                  margin: const EdgeInsets.only(left: 0.0, right: 0.0),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: CustomPaint(
+                          painter: DottedLineHorizontalPainter(),
+                        ),
+                      ),
+                      TextFormField(
+                        controller: find_emailcodeController,
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          labelText: '인증번호 입력',
+                          border: InputBorder.none,
+                          labelStyle: TextStyle(fontSize: 12),
+                        ),
+                        onChanged: (value) {
+                          /*
+                if (인증번호 맞을 시){
+                  textmessageDialog(context, '이메일 인증이 확인되었습니다.');
+                } else{
+                  textmessageDialog(context, '인증번호가 맞지 않습니다. \n 이메일과 인증번호를 다시 확인해주세요')
+                }
+                */
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // 확인 버튼
+              Positioned(
+                right: 0,
+                left: 75,
+                top: 10,
+                bottom: 10,
+                child: TextButton(
+                  onPressed: () {}, // 버튼 동작
+                  style: TextButton.styleFrom(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                    visualDensity:
+                        VisualDensity(horizontal: 1.0, vertical: 1.0),
+                    side: BorderSide(color: Colors.black),
+                    minimumSize: Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    '확인',
+                    style: TextStyle(fontSize: 10, color: Colors.black),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 5),
           Container(
@@ -219,21 +308,9 @@ class FindPWbutton extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: Column(
-        //mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          buildOutlineButton('이메일 인증', () {
-            String emailinput = findPWInputKey
-                    .currentState?.find_emailController.text
-                    .split('@')[0] ??
-                '';
-            if (emailinput.isEmpty) {
-              textmessageDialog(context, '이메일을 입력해주세요.');
-            } else {
-              textmessageDialog(context, '이메일 인증 메일을 보냈습니다. \n  이메일을 확인해주세요.');
-            }
-          }),
-          const SizedBox(height: 25),
+          const SizedBox(height: 70),
           buildOutlineButton('비밀번호 보기', () {
             //추가예정
           }),

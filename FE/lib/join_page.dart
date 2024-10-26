@@ -95,6 +95,8 @@ class _JoinInputState extends State<JoinInput> {
   final TextEditingController join_numberController = TextEditingController();
   final TextEditingController join_nameController = TextEditingController();
   final TextEditingController join_emailController = TextEditingController();
+  final TextEditingController join_emailcodeController =
+      TextEditingController();
   final TextEditingController join_pwController = TextEditingController();
   final TextEditingController join_checkpwController = TextEditingController();
   final TextEditingController join_homeController = TextEditingController();
@@ -124,6 +126,7 @@ class _JoinInputState extends State<JoinInput> {
         join_numberController.text.isEmpty ||
         join_nameController.text.isEmpty ||
         join_pwController.text.isEmpty ||
+        join_emailcodeController.text.isEmpty ||
         join_checkpwController.text.isEmpty ||
         join_homeController.text.isEmpty ||
         join_majorController.text.isEmpty ||
@@ -154,6 +157,7 @@ class _JoinInputState extends State<JoinInput> {
   void dispose() {
     join_numberController.clear();
     join_emailController.clear();
+    join_emailcodeController.clear();
     join_pwController.clear();
     join_checkpwController.clear();
     join_nameController.clear();
@@ -232,27 +236,111 @@ class _JoinInputState extends State<JoinInput> {
             ],
           ),
         ),
-        //이메일
-        const SizedBox(height: 2),
-        Container(
-          margin: const EdgeInsets.only(left: 30.0, right: 30.0),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: DottedLineHorizontalPainter(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 이메일 입력칸
+            Flexible(
+              flex: 7,
+              child: Container(
+                margin: const EdgeInsets.only(left: 30.0, right: 0.0),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: DottedLineHorizontalPainter(),
+                      ),
+                    ),
+                    TextFormField(
+                      controller: join_emailController,
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                          labelText: '이메일 입력', border: InputBorder.none),
+                      onChanged: _cursorControl,
+                    ),
+                  ],
                 ),
               ),
-              TextFormField(
-                controller: join_emailController,
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                    labelText: '이메일 입력', border: InputBorder.none),
-                onChanged: _cursorControl,
+            ),
+            // 인증번호 발송 버튼
+            TextButton(
+              onPressed: () {
+                String emailinput = join_emailController.text.trim();
+                if (emailinput == '@kau.kr' || emailinput.isEmpty) {
+                  textmessageDialog(context, '이메일을 입력해주세요.');
+                } else {
+                  textmessageDialog(
+                      context, '이메일 인증번호 메일을 보냈습니다. \n 이메일을 확인해주세요.');
+                }
+              }, // 버튼 동작
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
+                side: BorderSide(color: Colors.black),
               ),
-            ],
-          ),
+              child: const Text(
+                '인증번호\n    발송',
+                style: TextStyle(fontSize: 10, color: Colors.black),
+              ),
+            ),
+            const SizedBox(width: 10.0), // 칸 사이 간격
+            // 인증번호 입력칸
+            Flexible(
+              flex: 3,
+              child: Container(
+                margin: const EdgeInsets.only(left: 0.0, right: 0.0),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: DottedLineHorizontalPainter(),
+                      ),
+                    ),
+                    TextFormField(
+                      controller: join_emailcodeController,
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                        labelText: '인증번호 입력',
+                        border: InputBorder.none,
+                        labelStyle: TextStyle(fontSize: 12),
+                      ),
+                      onChanged: (value) {
+                        /*
+                if (인증번호 맞을 시){
+                  textmessageDialog(context, '이메일 인증이 확인되었습니다.');
+                } else{
+                  textmessageDialog(context, '인증번호가 맞지 않습니다. \n 이메일과 인증번호를 다시 확인해주세요')
+                }
+                */
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // 확인 버튼
+            Positioned(
+              right: 0,
+              left: 75,
+              top: 10,
+              bottom: 10,
+              child: TextButton(
+                onPressed: () {}, // 버튼 동작
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                  visualDensity: VisualDensity(horizontal: 1.0, vertical: 1.0),
+                  side: BorderSide(color: Colors.black),
+                  minimumSize: Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  '확인',
+                  style: TextStyle(fontSize: 10, color: Colors.black),
+                ),
+              ),
+            ),
+          ],
         ),
+
         //비밀번호
         const SizedBox(height: 2),
         Container(
@@ -472,19 +560,7 @@ class Joinbutton extends StatelessWidget {
         //mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          //이메일 인증 버튼
-          buildOutlineButton('이메일 인증', () {
-            String emailinput = joinPWInputKey
-                    .currentState?.join_emailController.text
-                    .split('@')[0] ??
-                '';
-            if (emailinput.isEmpty) {
-              textmessageDialog(context, '이메일을 입력해주세요.');
-            } else {
-              textmessageDialog(context, '이메일 인증 메일을 보냈습니다. \n  이메일을 확인해주세요.');
-            }
-          }),
-          const SizedBox(height: 30),
+          const SizedBox(height: 60),
           //비밀번호 보기 버튼
           buildOutlineButton('비밀번호 보기', () {}),
           const SizedBox(height: 30),
