@@ -364,35 +364,6 @@ class _FindPWInputState extends State<FindPWInput> {
     );
   }
 }
-/*
-//버튼 : 비밀번호 보기, 비밀번호 보기
-class FindPWbutton extends StatelessWidget {
-  const FindPWbutton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final _FindPWInputState? inputState = findPWInputKey.currentState;
-
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 70),
-          buildOutlineButton('비밀번호 보기', () { 
-            
-          }),
-          const SizedBox(height: 25),
-          buildOutlineButton('비밀번호 보기', () {
-            //추가예정
-          }),
-        ],
-      ),
-    );
-  }
-
-  OutlinedButton 
-}*/
 
 //로그인페이지로 이동
 class go_login extends StatelessWidget {
