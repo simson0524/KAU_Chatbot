@@ -27,23 +27,29 @@ class CharacterPage extends StatelessWidget {
               ),
             ),
           ),
-          const SingleChildScrollView(
-            child: Column(
-              children: [
-                CharacterImage(),
-                SizedBox(height: 60),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 200, child: Mile()),
-                    SizedBox(width: 10),
-                    SizedBox(height: 200, child: Maha()),
-                    SizedBox(width: 10),
-                    SizedBox(height: 131, child: Feet())
-                  ],
+          Column(
+            children: [
+              Expanded(
+                child: const SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      CharacterImage(),
+                      SizedBox(height: 60),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(height: 200, child: Mile()),
+                          SizedBox(width: 10),
+                          SizedBox(height: 200, child: Maha()),
+                          SizedBox(width: 10),
+                          SizedBox(height: 131, child: Feet())
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
