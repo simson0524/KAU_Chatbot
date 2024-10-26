@@ -189,7 +189,7 @@ class _FindPWInputState extends State<FindPWInput> {
                   style: TextStyle(fontSize: 10, color: Colors.black),
                 ),
               ),
-              const SizedBox(width: 10.0), // 칸 사이 간격
+              const SizedBox(width: 10.0),
               // 인증번호 입력칸
               Flexible(
                 flex: 3,
@@ -210,28 +210,28 @@ class _FindPWInputState extends State<FindPWInput> {
                           border: InputBorder.none,
                           labelStyle: TextStyle(fontSize: 12),
                         ),
-                        onChanged: (value) {
-                          /*
-                if (인증번호 맞을 시){
-                  textmessageDialog(context, '이메일 인증이 확인되었습니다.');
-                } else{
-                  textmessageDialog(context, '인증번호가 맞지 않습니다. \n 이메일과 인증번호를 다시 확인해주세요')
-                }
-                */
-                        },
+                        onChanged: (value) {},
                       ),
                     ],
                   ),
                 ),
               ),
-              // 확인 버튼
+              // 이메일 인증번호 확인 버튼
               Positioned(
                 right: 0,
                 left: 75,
                 top: 10,
                 bottom: 10,
                 child: TextButton(
-                  onPressed: () {}, // 버튼 동작
+                  onPressed: () {
+                    /*
+                if (인증번호 맞을 시){
+                  textmessageDialog(context, '이메일 인증이 확인되었습니다.');
+                } else{
+                  textmessageDialog(context, '인증번호가 맞지 않습니다. \n 이메일과 인증번호를 다시 확인해주세요')
+                }
+                */
+                  }, // 버튼 동작
                   style: TextButton.styleFrom(
                     padding:
                         EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
