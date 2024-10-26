@@ -343,8 +343,8 @@ class DottedLineHorizontalPainter extends CustomPainter {
 
     while (startX < size.width) {
       canvas.drawLine(
-        Offset(startX, y), // 아래쪽 y 위치에서 시작
-        Offset(startX + dashWidth, y), // y 위치에서 끝
+        Offset(startX, y),
+        Offset(startX + dashWidth, y),
         paint,
       );
       startX += dashWidth + dashSpace;

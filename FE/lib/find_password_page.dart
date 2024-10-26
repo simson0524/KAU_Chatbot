@@ -27,29 +27,35 @@ class FindPasswordPage extends StatelessWidget {
               ),
             ),
           ),
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  const FindPWImage(),
-                  const SizedBox(height: 10), //입력칸 시작 높이
-                  Stack(
-                    children: [
-                      FindPWInput(key: findPWInputKey),
-                      const Positioned(
-                        right: 0,
-                        child: FindPWbutton(),
-                      ),
-                    ],
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        const FindPWImage(),
+                        const SizedBox(height: 10), //입력칸 시작 높이
+                        Stack(
+                          children: [
+                            FindPWInput(key: findPWInputKey),
+                            const Positioned(
+                              right: 0,
+                              child: FindPWbutton(),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        const go_login(),
+                        const SizedBox(height: 20),
+                        const FindPWfinish(),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 2),
-                  const go_login(),
-                  const SizedBox(height: 20),
-                  const FindPWfinish(),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),

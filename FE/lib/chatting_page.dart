@@ -1,4 +1,8 @@
+import 'dart:ui';
+
 import 'package:FE/character_provider.dart';
+import 'package:FE/main.dart';
+import 'package:FE/pw_member_info.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +17,35 @@ class ChattingPage extends StatefulWidget {
 class _ChattingPageState extends State<ChattingPage> {
   TextEditingController _controller = TextEditingController();
   List<Map<String, dynamic>> messages = [];
+
+  //상단바 관련
+  bool right_isDrawerOpen = false;
+
+  void right_openDrawer() {
+    setState(() {
+      right_isDrawerOpen = !right_isDrawerOpen;
+    });
+  }
+
+  void right_closeDrawer() {
+    setState(() {
+      right_isDrawerOpen = false;
+    });
+  }
+
+  bool left_isDrawerOpen = false;
+
+  void left_openDrawer() {
+    setState(() {
+      left_isDrawerOpen = !left_isDrawerOpen;
+    });
+  }
+
+  void left_closeDrawer() {
+    setState(() {
+      left_isDrawerOpen = false;
+    });
+  }
 
   // 첫 안내 자동 메시지
   @override
@@ -81,18 +114,16 @@ class _ChattingPageState extends State<ChattingPage> {
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
+        //왼쪽상단바
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            // 왼쪽상단바 버튼 동작 추가
-          },
+          icon: Icon(Icons.menu, color: Colors.black),
+          onPressed: left_openDrawer,
         ),
         actions: [
+          //오른쪽 상단바
           IconButton(
-            icon: Icon(Icons.menu, color: Colors.black),
-            onPressed: () {
-              // 오른쪽상단바 버튼 동작 추가
-            },
+            icon: Icon(Icons.manage_accounts_outlined, color: Colors.black),
+            onPressed: right_openDrawer,
           ),
         ],
         elevation: 0,
@@ -207,6 +238,75 @@ class _ChattingPageState extends State<ChattingPage> {
               ),
             ],
           ),
+          //오른쪽 상단바
+          if (right_isDrawerOpen)
+            GestureDetector(
+              onTap: right_closeDrawer,
+              child: Stack(
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    color: Colors.transparent,
+                  ),
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (right_isDrawerOpen)
+            Align(
+              alignment: Alignment.topRight,
+              child: Material(
+                elevation: 5,
+                child: Container(
+                  width: 250,
+                  height: MediaQuery.of(context).size.height,
+                  color: Colors.white,
+                  child: right_DrawerWidget(onClose: right_closeDrawer),
+                ),
+              ),
+            ),
+
+          //왼쪽상단바
+          if (left_isDrawerOpen)
+            GestureDetector(
+              onTap: left_closeDrawer,
+              child: Stack(
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    color: Colors.transparent,
+                  ),
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (left_isDrawerOpen)
+            Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 5,
+                child: Container(
+                  width: 250,
+                  height: MediaQuery.of(context).size.height,
+                  color: Colors.white,
+                  child: left_DrawerWidget(onClose: left_closeDrawer),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -299,4 +399,221 @@ class ChatBubble extends StatelessWidget {
       ),
     );
   }
+}
+
+class right_DrawerWidget extends StatelessWidget {
+  final VoidCallback onClose;
+
+  const right_DrawerWidget({Key? key, required this.onClose}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: Material(
+        elevation: 5,
+        child: Container(
+          width: 250,
+          height: MediaQuery.of(context).size.height,
+          color: Colors.white,
+          child: Row(
+            children: [
+              Container(
+                width: 1.0,
+                color: Colors.black,
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    // 이미지
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          vertical: 30.0, horizontal: 20.0),
+                      height: 120,
+                      child: Image.asset(
+                        'assets/images/character_friend.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Divider(color: Colors.grey, thickness: 1.0),
+
+                    // 회원정보 수정 버튼
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PwMemberInfo()),
+                        );
+                        onClose(); // 클릭 시 상단바 닫기
+                      },
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 6.0), // 위아래 여백 설정
+                        child: Center(
+                          child: Text(
+                            '개인정보 수정',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 1.0, // Divider의 높이 간격 줄이기
+                    ),
+                    // 로그아웃 버튼
+                    GestureDetector(
+                      onTap: () {
+                        showlogoutDialog(context);
+                        onClose();
+                      },
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10.0), // 위아래 여백 설정
+                        child: Center(
+                          child: Text(
+                            '로그아웃',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 1.0,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class left_DrawerWidget extends StatelessWidget {
+  final VoidCallback onClose;
+
+  const left_DrawerWidget({Key? key, required this.onClose}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: Material(
+        elevation: 5,
+        child: Container(
+          width: 250,
+          height: MediaQuery.of(context).size.height,
+          color: Colors.white,
+          child: Center(
+            child: Text(
+              '왼쪽상단바 10주차 진행',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void showlogoutDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
+          side: const BorderSide(color: Colors.black, width: 1.5),
+        ),
+        child: SizedBox(
+          //dialog 사이즈
+          width: 220,
+          height: 100,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 3.0, top: 5.0),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    '로그아웃을 하시겠습니까?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  //로그아웃 - 네
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 1.0),
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginPage(),
+                              ),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(width: 1.2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 3),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: const Text(
+                            '네',
+                            style: TextStyle(fontSize: 10, color: Colors.black),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      //로그아웃 - 아니요
+                      Padding(
+                        padding: const EdgeInsets.only(right: 1.0),
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(width: 1.2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 3),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: const Text(
+                            '아니요',
+                            style: TextStyle(fontSize: 10, color: Colors.black),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

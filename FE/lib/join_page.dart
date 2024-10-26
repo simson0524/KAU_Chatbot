@@ -31,35 +31,41 @@ class JoinPage extends StatelessWidget {
               ),
             ),
           ),
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  const JoinImage(),
-                  const SizedBox(height: 0),
-                  Stack(
-                    children: [
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: JoinInput(key: joinPWInputKey),
-                      ),
-                      const Align(
-                        alignment: Alignment.topRight,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 70, right: 20),
-                          child: Joinbutton(),
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        const JoinImage(),
+                        const SizedBox(height: 0),
+                        Stack(
+                          children: [
+                            Align(
+                              alignment: Alignment.topCenter,
+                              child: JoinInput(key: joinPWInputKey),
+                            ),
+                            const Align(
+                              alignment: Alignment.topRight,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 70, right: 20),
+                                child: Joinbutton(),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 10),
+                        const go_login(),
+                        const SizedBox(height: 10),
+                        const Joinfinish()
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  const go_login(),
-                  const SizedBox(height: 10),
-                  const Joinfinish()
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
