@@ -27,18 +27,18 @@ class CharacterPage extends StatelessWidget {
               ),
             ),
           ),
-          const SingleChildScrollView(
+          SingleChildScrollView(
             child: Column(
               children: [
-                CharacterImage(),
-                SizedBox(height: 60),
+                const CharacterImage(),
+                const SizedBox(height: 60),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(height: 200, child: Mile()),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     SizedBox(height: 200, child: Maha()),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     SizedBox(height: 131, child: Feet())
                   ],
                 ),
@@ -95,7 +95,8 @@ class Mile extends StatelessWidget {
             .setCharacter('마일');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
+          MaterialPageRoute(
+              builder: (context) => ChattingPage(characterName: '마일')),
         );
       },
       child: Container(
@@ -123,7 +124,8 @@ class Maha extends StatelessWidget {
             .setCharacter('마하');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
+          MaterialPageRoute(
+              builder: (context) => ChattingPage(characterName: '마하')),
         );
       },
       child: Container(
@@ -151,7 +153,8 @@ class Feet extends StatelessWidget {
             .setCharacter('피트');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
+          MaterialPageRoute(
+              builder: (context) => ChattingPage(characterName: '피트')),
         );
       },
       child: Container(

@@ -1,106 +1,145 @@
-import 'package:FE/character_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+import 'package:FE/db/chat_dao.dart'; // ChatDao import for SQLite
+import 'package:FE/api/chat_api.dart'; // ChatApi import for server interaction
+import 'dart:convert';
 
 class ChattingPage extends StatefulWidget {
-  const ChattingPage({super.key});
+  final String characterName;
+
+  const ChattingPage({super.key, required this.characterName});
 
   @override
   State<ChattingPage> createState() => _ChattingPageState();
 }
 
 class _ChattingPageState extends State<ChattingPage> {
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
+  final ChatDao _chatDao = ChatDao();
+  String conversationId =
+      "1"; // Example conversation ID, replace with actual logic
   List<Map<String, dynamic>> messages = [];
 
-  // 첫 안내 자동 메시지
   @override
   void initState() {
-    WidgetsFlutterBinding.ensureInitialized();
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _receiveMessage(
-          "안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요! ");
+    // Load messages from SQLite when the page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadMessagesFromLocal();
     });
   }
 
-  // 현재 날짜 가져오기
-  String _getCurrentDate() {
-    DateTime now = DateTime.now();
-    return DateFormat('yyyy.MM.dd').format(now);
-  }
+  // Load messages from local SQLite
+  Future<void> _loadMessagesFromLocal() async {
+    final localMessages = await _chatDao.fetchMessages();
 
-  void _sendMessage() {
-    String messageText = _controller.text.trim();
-    if (messageText.isNotEmpty) {
+    if (localMessages.isEmpty) {
+      // SQLite에 저장된 메시지가 없을 경우 환영 메시지 표시
+      _receiveMessage("안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요!");
+    } else {
       setState(() {
-        messages.add({
-          'message': messageText,
-          'time': TimeOfDay.now().format(context),
-          'isMine': true,
-        });
+        messages = localMessages;
       });
-      _controller.clear();
     }
   }
 
+  // Store message in SQLite and send to server
+  Future<void> _sendMessage() async {
+    String messageText = _controller.text.trim();
+    if (messageText.isNotEmpty) {
+      String currentTime = DateFormat('HH:mm').format(DateTime.now());
+
+      // Add message to UI
+      setState(() {
+        messages.add({
+          'message': messageText,
+          'time': currentTime,
+          'isMine': true,
+        });
+      });
+
+      // Clear text field
+      _controller.clear();
+
+      // Save message locally in SQLite
+      await _chatDao.insertMessage(messageText, "user", currentTime);
+
+      // Send message to the server
+      try {
+        final response = await ChatApi.sendMessage(conversationId, messageText);
+        if (response.statusCode == 200) {
+          final responseBody = jsonDecode(response.body);
+          String botResponse = responseBody['message'] ?? 'No response';
+
+          // Display the server response and save to SQLite
+          _receiveMessage(botResponse);
+          await _chatDao.insertMessage(botResponse, "bot", currentTime);
+        }
+      } catch (error) {
+        print("Error sending message to server: $error");
+      }
+    }
+  }
+
+  // Receive message from the bot
   void _receiveMessage(String messageText) {
+    String currentTime = DateFormat('HH:mm').format(DateTime.now());
     setState(() {
       messages.add({
         'message': messageText,
-        'time': TimeOfDay.now().format(context),
+        'time': currentTime,
         'isMine': false,
       });
     });
   }
 
-  // 캐릭터 따라 이미지 선택
-  String _chatCharacterImage(String name) {
-    if (name == '마일') {
+  // Helper to get current date
+  String _getCurrentDate() {
+    DateTime now = DateTime.now();
+    return DateFormat('yyyy.MM.dd').format(now);
+  }
+
+  // Helper method to choose the correct character image
+  String _chatCharacterImage() {
+    if (widget.characterName == '마일') {
       return 'assets/images/chat_mile.png';
-    } else if (name == '마하') {
+    } else if (widget.characterName == '마하') {
       return 'assets/images/chat_maha.png';
-    } else {
-      //피트
+    } else if (widget.characterName == '피트') {
       return 'assets/images/chat_feet.png';
+    } else {
+      return 'assets/images/chat_basic.png'; // Default image
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final character = Provider.of<CharacterProvider>(context).character;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text(
+        title: const Text(
           'KAU CHATBOT',
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            // 왼쪽상단바 버튼 동작 추가
+            // Add back button functionality
           },
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.menu, color: Colors.black),
+            icon: const Icon(Icons.menu, color: Colors.black),
             onPressed: () {
-              // 오른쪽상단바 버튼 동작 추가
+              // Add menu functionality
             },
           ),
         ],
         elevation: 0,
-        bottom: PreferredSize(
+        bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.black,
-            height: 1.0,
-          ),
+          child: Divider(color: Colors.black),
         ),
       ),
       body: Stack(
@@ -108,42 +147,34 @@ class _ChattingPageState extends State<ChattingPage> {
           Container(
             color: Colors.white,
           ),
-          // 배경 이미지
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/grid_background.png'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-
           Column(
             children: [
-              // 날짜 표시
+              // Date display
               Center(
                 child: Container(
-                  margin: EdgeInsets.only(top: 8.0),
+                  margin: const EdgeInsets.only(top: 8.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.black),
                     borderRadius: BorderRadius.circular(20.0),
                   ),
-                  constraints: BoxConstraints(
-                    minWidth: 0,
-                    maxWidth: double.infinity,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                    child: Text(
-                      _getCurrentDate(),
-                      style: TextStyle(color: Colors.black, fontSize: 10.0),
-                    ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    _getCurrentDate(),
+                    style: const TextStyle(color: Colors.black, fontSize: 10.0),
                   ),
                 ),
               ),
 
-              // 채팅 내용
+              // Chat messages
               Expanded(
                 child: ListView.builder(
                   itemCount: messages.length,
@@ -151,11 +182,9 @@ class _ChattingPageState extends State<ChattingPage> {
                     return ChatBubble(
                       profileImage: messages[index]['isMine']
                           ? ''
-                          : _chatCharacterImage(
-                              character), // Provider로 받은 이름에 따라 이미지 설정
-                      name: messages[index]['isMine']
-                          ? ''
-                          : character, // Provider로 받은 이름 사용
+                          : _chatCharacterImage(),
+                      name:
+                          messages[index]['isMine'] ? '' : widget.characterName,
                       message: messages[index]['message'],
                       time: messages[index]['time'],
                       isMine: messages[index]['isMine'],
@@ -163,7 +192,7 @@ class _ChattingPageState extends State<ChattingPage> {
                   },
                 ),
               ),
-              // 입력 필드와 전송 버튼
+              // Message input field and send button
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -176,20 +205,18 @@ class _ChattingPageState extends State<ChattingPage> {
                           borderRadius: BorderRadius.circular(20.0),
                           color: Colors.white,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: TextField(
-                            controller: _controller,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: '메세지를 입력하세요...',
-                            ),
-                            onSubmitted: (text) => _sendMessage(),
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: TextField(
+                          controller: _controller,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: '메세지를 입력하세요...',
                           ),
+                          onSubmitted: (text) => _sendMessage(),
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.0),
+                    const SizedBox(width: 8.0),
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black),
@@ -197,7 +224,7 @@ class _ChattingPageState extends State<ChattingPage> {
                         color: Colors.white,
                       ),
                       child: IconButton(
-                        icon: Icon(Icons.send, color: Colors.black),
+                        icon: const Icon(Icons.send, color: Colors.black),
                         onPressed: _sendMessage,
                       ),
                     ),
@@ -219,7 +246,7 @@ class ChatBubble extends StatelessWidget {
   final String time;
   final bool isMine;
 
-  ChatBubble({
+  const ChatBubble({
     required this.profileImage,
     required this.name,
     required this.message,
@@ -244,17 +271,18 @@ class ChatBubble extends StatelessWidget {
                   width: 50,
                   height: 50,
                 ),
-                SizedBox(height: 4.0),
+                const SizedBox(height: 4.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       name,
-                      style: TextStyle(fontSize: 12.0, color: Colors.black),
+                      style:
+                          const TextStyle(fontSize: 12.0, color: Colors.black),
                     ),
-                    SizedBox(height: 4.0),
+                    const SizedBox(height: 4.0),
                     Container(
-                      padding: EdgeInsets.all(12.0),
+                      padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
@@ -266,7 +294,8 @@ class ChatBubble extends StatelessWidget {
                         alignment: Alignment.bottomLeft,
                         child: Text(
                           time,
-                          style: TextStyle(color: Colors.grey, fontSize: 10.0),
+                          style: const TextStyle(
+                              color: Colors.grey, fontSize: 10.0),
                         )),
                   ],
                 ),
@@ -277,7 +306,7 @@ class ChatBubble extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Container(
-                  padding: EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.black),
@@ -291,7 +320,7 @@ class ChatBubble extends StatelessWidget {
             alignment: Alignment.bottomRight,
             child: Text(
               time,
-              style: TextStyle(color: Colors.grey, fontSize: 10.0),
+              style: const TextStyle(color: Colors.grey, fontSize: 10.0),
             ),
           ),
         ],

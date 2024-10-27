@@ -4,15 +4,15 @@ import 'dart:convert';
 class AuthApi {
   // 회원가입 API 호출 함수
   static Future<http.Response> register(
-      String studentId,
+      int studentId,
       String email,
       String password,
       String name,
       String major,
-      String grade,
+      int grade,
       String gender,
       String residence) async {
-    final url = Uri.parse('http://localhost:3000/user/register');
+    final url = Uri.parse('http://10.0.2.2/user/register');
 
     try {
       final response = await http.post(
@@ -37,10 +37,49 @@ class AuthApi {
     }
   }
 
+  // 이메일 인증번호 전송 API 호출 함수
+  static Future<http.Response> sendEmailVerification(String email) async {
+    final url = Uri.parse('http://10.0.2.2:3000/user/send-email');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email}),
+      );
+
+      return response;
+    } catch (error) {
+      print('Error occurred while sending verification email: $error');
+      throw Exception('Failed to send verification email');
+    }
+  }
+
+  // 이메일 인증번호 확인 API 호출 함수
+  static Future<http.Response> verifyEmailCode(String email, int code) async {
+    final url = Uri.parse('http://10.0.2.2:3000/user/verify-email');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'code': code,
+        }),
+      );
+
+      return response;
+    } catch (error) {
+      print('Error occurred while verifying email: $error');
+      throw Exception('Email verification failed');
+    }
+  }
+
   // 로그인 API 호출 함수
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
-    final url = Uri.parse('http://localhost:3000/user/login');
+    final url = Uri.parse('http://10.0.2.2:3000/user/login');
 
     try {
       final response = await http.post(

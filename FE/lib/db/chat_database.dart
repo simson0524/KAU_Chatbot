@@ -41,10 +41,10 @@ class ChatDatabase {
     // 'chatMessages' 테이블 생성 쿼리
     await db.execute('''
 CREATE TABLE chatMessages (
-  id $idType,         // 각 메시지의 고유 ID
-  message $textType,  // 메시지 내용
-  sender $textType,   // 메시지 발신자 (사용자 또는 AI)
-  timestamp $textType // 메시지 전송 시간
+  id $idType,         
+  message $textType,  
+  sender $textType,   
+  timestamp $textType 
 )
     ''');
   }
