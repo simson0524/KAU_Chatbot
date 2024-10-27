@@ -6,7 +6,7 @@ class ChatApi {
   static Future<http.Response> sendMessage(
       String conversationId, String message) async {
     final url = Uri.parse(
-        'http://localhost:3000/chatbot/conversation/$conversationId/message');
+        'http://10.0.2.2:3000/chatbot/conversation/$conversationId/message');
 
     try {
       // 서버로 메시지를 POST 요청으로 보냄. 메시지 데이터는 JSON으로 변환하여 전송.
@@ -26,7 +26,7 @@ class ChatApi {
   // 서버로부터 메시지 히스토리를 불러오는 API 호출 함수
   static Future<List<dynamic>> getMessageHistory(String conversationId) async {
     final url = Uri.parse(
-        'http://localhost:3000/chatbot/conversation/$conversationId/history');
+        'http://10.0.2.2:3000/chatbot/conversation/$conversationId/history');
 
     try {
       final response = await http.get(url);

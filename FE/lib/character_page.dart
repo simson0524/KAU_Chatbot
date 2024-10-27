@@ -101,7 +101,8 @@ class Mile extends StatelessWidget {
             .setCharacter('마일');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
+          MaterialPageRoute(
+              builder: (context) => ChattingPage(characterName: '마일')),
         );
       },
       child: Container(
@@ -129,7 +130,8 @@ class Maha extends StatelessWidget {
             .setCharacter('마하');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
+          MaterialPageRoute(
+              builder: (context) => ChattingPage(characterName: '마하')),
         );
       },
       child: Container(
@@ -157,7 +159,8 @@ class Feet extends StatelessWidget {
             .setCharacter('피트');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
+          MaterialPageRoute(
+              builder: (context) => ChattingPage(characterName: '피트')),
         );
       },
       child: Container(

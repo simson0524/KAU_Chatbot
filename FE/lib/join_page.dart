@@ -713,17 +713,24 @@ class Joinfinish extends StatelessWidget {
             return;
           }
 
-          // 입력 값 가져오기
-          final studentId = inputState.join_numberController.text;
-          final email = inputState.join_emailController.text;
-          final password = inputState.join_pwController.text;
-          final name = inputState.join_nameController.text;
-          final major = inputState.join_majorController.text;
-          final grade = inputState.join_Grade ?? '';
-          final gender = inputState.join_Gender ?? '';
-          final residence = inputState.join_homeController.text;
-
           try {
+            // 학번과 학년을 정수형으로 변환
+            final studentId =
+                int.tryParse(inputState.join_numberController.text);
+            final email = inputState.join_emailController.text;
+            final password = inputState.join_pwController.text;
+            final name = inputState.join_nameController.text;
+            final major = inputState.join_majorController.text;
+            final grade = int.tryParse(inputState.join_Grade ?? '');
+            final gender = inputState.join_Gender ?? '';
+            final residence = inputState.join_homeController.text;
+
+            // 유효성 검사 (studentId와 grade가 올바른 정수인지 확인)
+            if (studentId == null || grade == null) {
+              textmessageDialog(context, '학번과 학년은 숫자로 입력해주세요.');
+              return;
+            }
+
             // 회원가입 API 호출
             final response = await AuthApi.register(
               studentId,
