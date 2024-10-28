@@ -11,13 +11,17 @@ exports.findUserByEmail = async (email) => {
 
 // DB에 입력된 학번의 사용자가 있는지 확인
 exports.findUserByStudentId = async (student_id) => {
-    const [users] = await db.query('SELECT * FROM users where student_id = ?', [student_id]);
+    const [users] = await db.query('SELECT student_id, email, name, major, grade, gender, residence FROM users where student_id = ?', [student_id]);
     return users[0];
 }
 
 // refresh Token을 DB에 저장
-exports.saveRefToken = async (email, refreshToken) => {
-
+exports.saveRefToken = async (student_id, refreshToken) => {
+    const [result] = await db.query(
+        'UPDATE users SET refresh_token = ? WHERE student_id = ?',
+        [refreshToken, student_id]
+    );
+    return result;
 }
 
 // DB에 입력한 사용자 정보를 저장
