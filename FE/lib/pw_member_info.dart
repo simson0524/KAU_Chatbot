@@ -31,7 +31,7 @@ class _PwMemberInfoState extends State<PwMemberInfo> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context); // 이전 페이지로 돌아가기
+            Navigator.pop(context); 
           },
         ),
         elevation: 0,
@@ -47,17 +47,17 @@ class _PwMemberInfoState extends State<PwMemberInfo> {
         color: Colors.white,
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(16.0), // 전체 여백 설정
+            padding: const EdgeInsets.all(16.0), 
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // 가운데 정렬
+              mainAxisAlignment: MainAxisAlignment.center, 
               children: [
                 // 이미지
                 Container(
-                  margin: EdgeInsets.only(bottom: 15.0), // 이미지와 입력 칸 사이 간격
-                  width: 270, // 이미지 너비
-                  height: 150, // 이미지 높이
+                  margin: EdgeInsets.only(bottom: 15.0), 
+                  width: 270, 
+                  height: 150, 
                   child: Image.asset(
-                      'assets/images/character_friend.png'), // 이미지 파일 경로
+                      'assets/images/character_friend.png'), 
                 ),
                 // 입력 칸
                 Container(
@@ -75,7 +75,7 @@ class _PwMemberInfoState extends State<PwMemberInfo> {
                         textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           hintText: '현재 비밀번호를 입력해주세요',
-                          border: InputBorder.none, // 기본 입력 필드 테두리 제거
+                          border: InputBorder.none, 
                         ),
                         obscureText: true,
                       ),

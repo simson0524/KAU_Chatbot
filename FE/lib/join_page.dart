@@ -264,10 +264,8 @@ class _JoinInputState extends State<JoinInput> {
                       child: SizedBox(
                         width: 100,
                         height: 55,
-                        child: Positioned.fill(
-                          child: CustomPaint(
-                            painter: DottedLineHorizontalPainter(),
-                          ),
+                        child: CustomPaint(
+                          painter: DottedLineHorizontalPainter(),
                         ),
                       ),
                     ),
@@ -371,11 +369,8 @@ class _JoinInputState extends State<JoinInput> {
               ),
             ),
             // 확인 버튼
-            Positioned(
-              right: 0,
-              left: 75,
-              top: 10,
-              bottom: 10,
+            Container(
+              padding: const EdgeInsets.only(left: 10.0),
               child: TextButton(
                 onPressed: () {}, // 버튼 동작
                 style: TextButton.styleFrom(
@@ -568,10 +563,8 @@ class _JoinInputState extends State<JoinInput> {
                       child: SizedBox(
                         width: 40,
                         height: 55,
-                        child: Positioned.fill(
-                          child: CustomPaint(
-                            painter: DottedLineHorizontalPainter(),
-                          ),
+                        child: CustomPaint(
+                          painter: DottedLineHorizontalPainter(),
                         ),
                       ),
                     ),

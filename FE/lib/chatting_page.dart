@@ -462,7 +462,7 @@ class right_DrawerWidget extends StatelessWidget {
                     Divider(
                       color: Colors.grey,
                       thickness: 1.0,
-                      height: 1.0, // Divider의 높이 간격 줄이기
+                      height: 1.0,
                     ),
                     // 로그아웃 버튼
                     GestureDetector(
@@ -471,8 +471,7 @@ class right_DrawerWidget extends StatelessWidget {
                         onClose();
                       },
                       child: Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10.0), // 위아래 여백 설정
+                        padding: EdgeInsets.symmetric(vertical: 10.0),
                         child: Center(
                           child: Text(
                             '로그아웃',
