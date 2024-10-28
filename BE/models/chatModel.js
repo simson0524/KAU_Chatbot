@@ -38,18 +38,26 @@ exports.saveChat = async (chat_id, question, response) => {
 };
 
 // 특정 대화 세션의 대화 기록을 조회하는 함수 (대화 ID 포함)
-exports.getFilteredHistory = async (conversation_id, date, content) => {
+exports.getFilteredHistory = async (chat_id, date, content) => {
     try {
-        // SQL 쿼리에서 날짜와 내용 조건을 추가하여 필터링
-        const query = `
-            SELECT * FROM chat 
-            WHERE conversation_id = ? 
-            AND DATE(created_at) = ? 
-            AND (question LIKE ? OR response LIKE ?)`;
+        // 기본 쿼리
+        let query = `SELECT * FROM message WHERE chat_id = ?`;
+        const params = [chat_id]
         
-        // '%'를 사용해서 content 부분 매칭을 지원
-        const [rows] = await db.query(query, [conversation_id, date, `%${content}%`, `%${content}%`]);
+        // 날짜를 입력한 경우 조건 추가
+        if (date) {
+            query += ` AND DATE(created_at) = ?`;
+            params.push(date);
+        }
         
+        // 내용을 입력한 경우 조건 추가 (질문 / 응답에 포함되는지 확인)
+        if (content) {
+            query += ` AND (question LIKE ? OR response LIKE ?)`;
+            params.push(`%${content}%`, `%${content}%`);
+        }
+        
+        // 쿼리 실행
+        const [rows] = await db.query(query, params);
         return rows;
 
     } catch (error) {
@@ -57,4 +65,85 @@ exports.getFilteredHistory = async (conversation_id, date, content) => {
         throw error;
     }
     
+};
+
+// 캐릭터 정보 조회
+exports.getCharacterById = async (chat_id) => {
+    try {
+        const query = 'SELECT chat_character FROM chat_room WHERE chat_id = ?';
+        const [rows] = await db.execute(query, [chat_id]);
+
+        if (rows.length > 0) {
+            return rows[0].chat_character;; // 채팅방 정보 반환 (첫 번째 결과)
+        } else {
+            return null; // 해당 채팅방이 없으면 null 반환
+        }
+    } catch (error) {
+        console.error("Error in getChatById:", error);
+        throw new Error("Database query failed");
+    }
+};
+
+exports.getStudentIdByChatId = async (chat_id) => {
+    try {
+        // chat_rooms 테이블에서 student_id 조회 (예시)
+        const [rows] = await db.query('SELECT student_id FROM chat_room WHERE chat_id = ?', [chat_id]);
+
+        if (rows.length > 0) {
+            return rows[0].student_id; // student_id 반환
+        } else {
+            throw new Error(`No student found with chat_id: ${chat_id}`);
+        }
+    } catch (error) {
+        console.error("Error in getStudentIdByChatId:", error);
+        throw error;
+    }
+};
+
+
+
+exports.saveOrUpdateTags = async (student_id, newTag) => { 
+    try {
+        // 기존 tags 조회
+        const [existingTagsResult] = await db.query(
+            'SELECT tags FROM tag_sequence WHERE student_id = ?', 
+            [student_id]
+        );
+
+        let updatedTags;
+        if (existingTagsResult.length > 0) {
+            let existingTags = existingTagsResult[0].tags;
+
+            // 기존 태그가 문자열인 경우 JSON 파싱 시도
+            if (typeof existingTags === 'string') {
+                try {
+                    existingTags = JSON.parse(existingTags);
+                } catch (error) {
+                    console.error("Failed to parse tags as JSON. Converting to JSON array:", error);
+                    existingTags = []; // 파싱 실패 시 빈 배열로 초기화
+                }
+            }
+
+            // 새로운 태그가 기존 태그에 없다면 추가
+            if (!existingTags.includes(newTag)) {
+                existingTags.push(newTag);
+            }
+            updatedTags = JSON.stringify(existingTags);
+        } else {
+            // 기존 태그가 없으면 새로운 태그 배열로 초기화
+            updatedTags = JSON.stringify([newTag]);
+        }
+
+        // tag_sequence 테이블 업데이트 또는 삽입
+        const sql = `
+            INSERT INTO tag_sequence (student_id, tags) VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE tags = ?
+        `;
+        const values = [student_id, updatedTags, updatedTags];
+        await db.query(sql, values);
+
+    } catch (error) {
+        console.error("Error in saveOrUpdateTags:", error);
+        throw error;
+    }
 };
