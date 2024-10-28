@@ -3,7 +3,7 @@ import openai
 import re
 
 # OpenAI API 키 설정
-openai.api_key = 'sk-nf4g-k1_L82RdXex5ZybosiVfGPcuYzua6Ha_N5Mf9T3BlbkFJqH6H0iBbjvw3fmJYc--EqMR-uWoPsy7F37vXOCkDAA'
+openai.api_key = ''
 
 # 1. HTML 원문 요약 함수
 def summarize_html(html_content):
