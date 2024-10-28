@@ -1,3 +1,17 @@
 {
-    "cmake.ignoreCMakeListsMissing": true
+    "cmake.ignoreCMakeListsMissing": true,
+    "cSpell.words": [
+        "ARGB",
+        "checkpw",
+        "emailcode",
+        "emailinput",
+        "Findpw",
+        "ischeckobscured",
+        "isobscured",
+        "Joinbutton",
+        "Joinfinish",
+        "nullcheck",
+        "showcheck",
+        "textmessage"
+    ]
 }
