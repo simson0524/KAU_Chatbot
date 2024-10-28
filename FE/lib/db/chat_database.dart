@@ -41,10 +41,10 @@ class ChatDatabase {
     // 'chatMessages' 테이블 생성 쿼리
     await db.execute('''
 CREATE TABLE chatMessages (
-  id $idType,         
-  message $textType,  
-  sender $textType,   
-  timestamp $textType 
+  id $idType,
+  message $textType,
+  sender $textType
+  timestamp $textType
 )
     ''');
   }

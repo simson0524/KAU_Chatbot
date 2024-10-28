@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:FE/character_provider.dart';
 import 'package:FE/main.dart';
 import 'package:FE/pw_member_info.dart';
@@ -21,55 +20,42 @@ class ChattingPage extends StatefulWidget {
 class _ChattingPageState extends State<ChattingPage> {
   final TextEditingController _controller = TextEditingController();
   final ChatDao _chatDao = ChatDao();
-  String conversationId =
-      "1"; // Example conversation ID, replace with actual logic
+  String?
+      conversationId; // Initialize as nullable to determine if new conversation needed
   List<Map<String, dynamic>> messages = [];
 
   //상단바 관련
   bool right_isDrawerOpen = false;
-
-  void right_openDrawer() {
-    setState(() {
-      right_isDrawerOpen = !right_isDrawerOpen;
-    });
-  }
-
-  void right_closeDrawer() {
-    setState(() {
-      right_isDrawerOpen = false;
-    });
-  }
-
   bool left_isDrawerOpen = false;
 
-  void left_openDrawer() {
-    setState(() {
-      left_isDrawerOpen = !left_isDrawerOpen;
-    });
-  }
-
-  void left_closeDrawer() {
-    setState(() {
-      left_isDrawerOpen = false;
-    });
-  }
-
-  // 첫 안내 자동 메시지
   @override
   void initState() {
     super.initState();
-    // Load messages from SQLite when the page loads
+    // Load messages from SQLite when the page loads and start conversation if needed
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadMessagesFromLocal();
+      if (conversationId == null) await _startNewConversation();
     });
+  }
+
+  // Start a new conversation and store the conversation ID
+  Future<void> _startNewConversation() async {
+    try {
+      final response = await ChatApi.startConversation(
+          'user123'); // Replace with actual user ID
+      setState(() {
+        conversationId = response['conversation_id'];
+      });
+      _receiveMessage(response['message']);
+    } catch (error) {
+      print('Error starting conversation: $error');
+    }
   }
 
   // Load messages from local SQLite
   Future<void> _loadMessagesFromLocal() async {
     final localMessages = await _chatDao.fetchMessages();
-
     if (localMessages.isEmpty) {
-      // SQLite에 저장된 메시지가 없을 경우 환영 메시지 표시
       _receiveMessage("안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요!");
     } else {
       setState(() {
@@ -81,10 +67,9 @@ class _ChattingPageState extends State<ChattingPage> {
   // Store message in SQLite and send to server
   Future<void> _sendMessage() async {
     String messageText = _controller.text.trim();
-    if (messageText.isNotEmpty) {
+    if (messageText.isNotEmpty && conversationId != null) {
       String currentTime = DateFormat('HH:mm').format(DateTime.now());
 
-      // Add message to UI
       setState(() {
         messages.add({
           'message': messageText,
@@ -92,31 +77,21 @@ class _ChattingPageState extends State<ChattingPage> {
           'isMine': true,
         });
       });
-
-      // Clear text field
       _controller.clear();
-
-      // Save message locally in SQLite
       await _chatDao.insertMessage(messageText, "user", currentTime);
 
-      // Send message to the server
       try {
-        final response = await ChatApi.sendMessage(conversationId, messageText);
-        if (response.statusCode == 200) {
-          final responseBody = jsonDecode(response.body);
-          String botResponse = responseBody['message'] ?? 'No response';
-
-          // Display the server response and save to SQLite
-          _receiveMessage(botResponse);
-          await _chatDao.insertMessage(botResponse, "bot", currentTime);
-        }
+        final botResponse =
+            await ChatApi.sendQuestion(conversationId!, messageText);
+        _receiveMessage(botResponse);
+        await _chatDao.insertMessage(botResponse, "bot", currentTime);
       } catch (error) {
-        print("Error sending message to server: $error");
+        print("Error sending question to server: $error");
       }
     }
   }
 
-  // Receive message from the bot
+  // Display bot's response
   void _receiveMessage(String messageText) {
     String currentTime = DateFormat('HH:mm').format(DateTime.now());
     setState(() {
@@ -147,6 +122,23 @@ class _ChattingPageState extends State<ChattingPage> {
     }
   }
 
+  // Toggle drawer states for UI
+  void right_openDrawer() {
+    setState(() {
+      right_isDrawerOpen = !right_isDrawerOpen;
+    });
+  }
+
+  void right_closeDrawer() => setState(() => right_isDrawerOpen = false);
+
+  void left_openDrawer() {
+    setState(() {
+      left_isDrawerOpen = !left_isDrawerOpen;
+    });
+  }
+
+  void left_closeDrawer() => setState(() => left_isDrawerOpen = false);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,13 +149,11 @@ class _ChattingPageState extends State<ChattingPage> {
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
-        //왼쪽상단바
         leading: IconButton(
           icon: Icon(Icons.menu, color: Colors.black),
           onPressed: left_openDrawer,
         ),
         actions: [
-          //오른쪽 상단바
           IconButton(
             icon: Icon(Icons.manage_accounts_outlined, color: Colors.black),
             onPressed: right_openDrawer,
@@ -206,7 +196,6 @@ class _ChattingPageState extends State<ChattingPage> {
                   ),
                 ),
               ),
-
               // Chat messages
               Expanded(
                 child: ListView.builder(
@@ -266,8 +255,8 @@ class _ChattingPageState extends State<ChattingPage> {
               ),
             ],
           ),
-          //오른쪽 상단바
-          if (right_isDrawerOpen)
+          // Right drawer
+          if (right_isDrawerOpen) ...[
             GestureDetector(
               onTap: right_closeDrawer,
               child: Stack(
@@ -287,7 +276,6 @@ class _ChattingPageState extends State<ChattingPage> {
                 ],
               ),
             ),
-          if (right_isDrawerOpen)
             Align(
               alignment: Alignment.topRight,
               child: Material(
@@ -296,13 +284,13 @@ class _ChattingPageState extends State<ChattingPage> {
                   width: 250,
                   height: MediaQuery.of(context).size.height,
                   color: Colors.white,
-                  child: right_DrawerWidget(onClose: right_closeDrawer),
+                  child: RightDrawerWidget(onClose: right_closeDrawer),
                 ),
               ),
             ),
-
-          //왼쪽상단바
-          if (left_isDrawerOpen)
+          ],
+          // Left drawer
+          if (left_isDrawerOpen) ...[
             GestureDetector(
               onTap: left_closeDrawer,
               child: Stack(
@@ -322,7 +310,6 @@ class _ChattingPageState extends State<ChattingPage> {
                 ],
               ),
             ),
-          if (left_isDrawerOpen)
             Align(
               alignment: Alignment.topLeft,
               child: Material(
@@ -331,10 +318,11 @@ class _ChattingPageState extends State<ChattingPage> {
                   width: 250,
                   height: MediaQuery.of(context).size.height,
                   color: Colors.white,
-                  child: left_DrawerWidget(onClose: left_closeDrawer),
+                  child: LeftDrawerWidget(onClose: left_closeDrawer),
                 ),
               ),
             ),
+          ],
         ],
       ),
     );
@@ -373,7 +361,7 @@ class ChatBubble extends StatelessWidget {
                   width: 50,
                   height: 50,
                 ),
-                const SizedBox(height: 4.0),
+                const SizedBox(width: 8.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -393,12 +381,13 @@ class ChatBubble extends StatelessWidget {
                       child: Text(message),
                     ),
                     Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Text(
-                          time,
-                          style: const TextStyle(
-                              color: Colors.grey, fontSize: 10.0),
-                        )),
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        time,
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 10.0),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -431,126 +420,100 @@ class ChatBubble extends StatelessWidget {
   }
 }
 
-class right_DrawerWidget extends StatelessWidget {
+// Right drawer widget
+class RightDrawerWidget extends StatelessWidget {
   final VoidCallback onClose;
 
-  const right_DrawerWidget({Key? key, required this.onClose}) : super(key: key);
+  const RightDrawerWidget({Key? key, required this.onClose}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 0,
-      right: 0,
-      child: Material(
-        elevation: 5,
-        child: Container(
-          width: 250,
-          height: MediaQuery.of(context).size.height,
-          color: Colors.white,
-          child: Row(
-            children: [
-              Container(
-                width: 1.0,
-                color: Colors.black,
+    return Material(
+      elevation: 5,
+      child: Container(
+        width: 250,
+        height: MediaQuery.of(context).size.height,
+        color: Colors.white,
+        child: Column(
+          children: [
+            // Image and title
+            Container(
+              margin:
+                  const EdgeInsets.symmetric(vertical: 30.0, horizontal: 20.0),
+              height: 120,
+              child: Image.asset(
+                'assets/images/character_friend.png',
+                fit: BoxFit.cover,
               ),
-              Expanded(
-                child: Column(
-                  children: [
-                    // 이미지
-                    Container(
-                      margin: EdgeInsets.symmetric(
-                          vertical: 30.0, horizontal: 20.0),
-                      height: 120,
-                      child: Image.asset(
-                        'assets/images/character_friend.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Divider(color: Colors.grey, thickness: 1.0),
+            ),
+            const Divider(color: Colors.grey, thickness: 1.0),
 
-                    // 회원정보 수정 버튼
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => PwMemberInfo()),
-                        );
-                        onClose(); // 클릭 시 상단바 닫기
-                      },
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 6.0), // 위아래 여백 설정
-                        child: Center(
-                          child: Text(
-                            '개인정보 수정',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Divider(
-                      color: Colors.grey,
-                      thickness: 1.0,
-                      height: 1.0, // Divider의 높이 간격 줄이기
-                    ),
-                    // 로그아웃 버튼
-                    GestureDetector(
-                      onTap: () {
-                        showlogoutDialog(context);
-                        onClose();
-                      },
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10.0), // 위아래 여백 설정
-                        child: Center(
-                          child: Text(
-                            '로그아웃',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Divider(
-                      color: Colors.grey,
-                      thickness: 1.0,
-                      height: 1.0,
-                    ),
-                  ],
+            // Edit profile button
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PwMemberInfo()),
+                );
+                onClose(); // Close drawer after navigation
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                child: const Center(
+                  child: Text(
+                    '개인정보 수정',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+            const Divider(color: Colors.grey, thickness: 1.0),
+
+            // Logout button
+            GestureDetector(
+              onTap: () {
+                showLogoutDialog(context);
+                onClose();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: const Center(
+                  child: Text(
+                    '로그아웃',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ),
+            ),
+            const Divider(color: Colors.grey, thickness: 1.0),
+          ],
         ),
       ),
     );
   }
 }
 
-class left_DrawerWidget extends StatelessWidget {
+// Left drawer widget
+class LeftDrawerWidget extends StatelessWidget {
   final VoidCallback onClose;
 
-  const left_DrawerWidget({Key? key, required this.onClose}) : super(key: key);
+  const LeftDrawerWidget({Key? key, required this.onClose}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 0,
-      right: 0,
-      child: Material(
-        elevation: 5,
-        child: Container(
-          width: 250,
-          height: MediaQuery.of(context).size.height,
-          color: Colors.white,
-          child: Center(
-            child: Text(
-              '왼쪽상단바 10주차 진행',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14),
-            ),
+    return Material(
+      elevation: 5,
+      child: Container(
+        width: 250,
+        height: MediaQuery.of(context).size.height,
+        color: Colors.white,
+        child: const Center(
+          child: Text(
+            '왼쪽상단바 10주차 진행',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14),
           ),
         ),
       ),
@@ -558,17 +521,17 @@ class left_DrawerWidget extends StatelessWidget {
   }
 }
 
-void showlogoutDialog(BuildContext context) {
+// Logout dialog
+void showLogoutDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
+          borderRadius: BorderRadius.circular(20.0),
           side: const BorderSide(color: Colors.black, width: 1.5),
         ),
         child: SizedBox(
-          //dialog 사이즈
           width: 220,
           height: 100,
           child: Padding(
@@ -589,15 +552,15 @@ void showlogoutDialog(BuildContext context) {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  //로그아웃 - 네
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Confirm logout
                       Padding(
                         padding: const EdgeInsets.only(left: 1.0),
                         child: OutlinedButton(
                           onPressed: () {
-                            Navigator.push(
+                            Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const LoginPage(),
@@ -617,7 +580,7 @@ void showlogoutDialog(BuildContext context) {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      //로그아웃 - 아니요
+                      // Cancel logout
                       Padding(
                         padding: const EdgeInsets.only(right: 1.0),
                         child: OutlinedButton(

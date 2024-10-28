@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:FE/join_page.dart';
 import 'package:FE/api/auth_api.dart';
 import 'package:provider/provider.dart'; // auth_api.dart 파일 추가하여 API 호출
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(
@@ -227,6 +228,11 @@ class LoginButtons extends StatelessWidget {
       if (result['success']) {
         // 로그인 성공 여부 확인
         print('로그인 성공: ${result['message']}');
+
+        // 로그인 성공 시 accessToken을 저장
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', result['token']); // 토큰 저장
+
         // 로그인 성공 시 페이지 이동
         Navigator.push(
           context,

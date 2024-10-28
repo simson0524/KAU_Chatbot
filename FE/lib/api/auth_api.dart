@@ -4,15 +4,16 @@ import 'dart:convert';
 class AuthApi {
   // 회원가입 API 호출 함수
   static Future<http.Response> register(
-      int studentId,
-      String email,
-      String password,
-      String name,
-      String major,
-      int grade,
-      String gender,
-      String residence) async {
-    final url = Uri.parse('http://10.0.2.2/user/register');
+    int studentId,
+    String email,
+    String password,
+    String name,
+    String major,
+    int grade,
+    String gender,
+    String residence,
+  ) async {
+    final url = Uri.parse('http://10.0.2.2:3000/user/register');
 
     try {
       final response = await http.post(
@@ -26,14 +27,14 @@ class AuthApi {
           'major': major,
           'grade': grade,
           'gender': gender,
-          'residence': residence
+          'residence': residence,
         }),
       );
 
-      return response;
+      return response; // statusCode와 응답 본문을 포함하여 반환
     } catch (error) {
       print('Error occurred during registration: $error');
-      throw Exception('Registration failed');
+      throw Exception('회원가입 중 오류가 발생했습니다.');
     }
   }
 
@@ -48,10 +49,10 @@ class AuthApi {
         body: json.encode({'email': email}),
       );
 
-      return response;
+      return response; // statusCode와 응답 본문을 포함하여 반환
     } catch (error) {
       print('Error occurred while sending verification email: $error');
-      throw Exception('Failed to send verification email');
+      throw Exception('이메일 인증 중 오류가 발생했습니다.');
     }
   }
 
@@ -69,10 +70,10 @@ class AuthApi {
         }),
       );
 
-      return response;
+      return response; // statusCode와 응답 본문을 포함하여 반환
     } catch (error) {
       print('Error occurred while verifying email: $error');
-      throw Exception('Email verification failed');
+      throw Exception('이메일 인증 중 오류가 발생했습니다.');
     }
   }
 
