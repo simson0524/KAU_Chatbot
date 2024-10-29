@@ -25,8 +25,6 @@ DB_URL = None
 # 사용할 llm 모델명
 MODEL_NAME = ''
 
-# QA chain에서 사용할 chain type
-CHAIN_TYPE = ''
 
 # 가용 모델명
 chat_gpt_model_name_list = ('gpt-4o', 'chatgpt-4o-latest', 'gpt-4o-mini',
@@ -35,33 +33,26 @@ gemini_model_name_list = ('gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro'
 
 app = FastAPI()
 
-# 대화 히스토리 저장
-# 만약 RAG 인스턴스에서 처리하면 추가로 사용자 ID가 (server -> RAG) Request객체에 포함되어야 함
-conversation_history = []
+vector_store = db_loader(embedding_function=EMBEDDING_FUNCTION,
+                             collection_name=COLLECTION_NAME,
+                             path=DB_PATH,
+                             db_server_url=DB_URL)
 
 # server에서 RAG 인스턴스로 쿼리를 받는 Request객체 정의
 class QueryRequest(BaseModel):
     query: str
-    query_history: str
     character: str
 
 @app.post("/chat")
 async def chat(query_request: QueryRequest):
     query = query_request.query
-    query_history = query_request.query_history
-    # TODO : 각 캐릭터 별 페르소나 설정하는거 qa_chain에 추가하기
     character = query_request.character
-
-    vector_store = db_loader(embedding_function=EMBEDDING_FUNCTION,
-                             collection_name=COLLECTION_NAME,
-                             path=DB_PATH,
-                             db_server_url=DB_URL)
     
-    answer = qa_chain(model_name=MODEL_NAME,
-                      query_history=query_history,
+    answer = qa_chain(character=character,
                       query=query,
-                      vector_store=vector_store,
-                      chain_type=CHAIN_TYPE)
+                      vector_store=vector_store)
     
-    # TODO : BE와 query history 처리방법 논의 후 Response객체 구조 확정
-    return {'answer': answer}
+    # TODO : user query의 tag쏴줄거 지정하기
+    tag = None
+    
+    return {'answer': answer, 'tag': tag}

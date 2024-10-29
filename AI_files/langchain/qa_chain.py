@@ -1,38 +1,56 @@
-from langchain.chains import RetrievalQA
-from langchain.llms import OpenAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
 from langchain_openai import ChatOpenAI
-
 """
 [RAG using LangChain - 4] QA chain 설정하기
 
 실제 RAG 시스템의 틀을 구현한 qa_chain함수를 정의한 py파일입니다.
 """
-def qa_chain(query, vector_store, chain_type='stuff'):
+def qa_chain(query, vector_store, character):
     """user query와 query history를 가지고 document를 retrieve하고 답변을 generate해주는 함수
 
     Args:
-        model_name (str): 사용할 llm 모델명
-        query_history (str): 사용자와 AI의 이전 대화기록
         query (str): 사용자의 현재 쿼리
         vector_store (Chroma): 벡터 DB
-        chain_type (str, optional): chain type으로 사용할 것. Defaults to 'stuff'.
+        character (str): 페르소나
 
     Returns:
         str: LangChain이 생성한 답변
     """
+    # OpenAI 모델 설정
     llm = ChatOpenAI(model='gpt-4o-mini')
-    # QA chain 설정(모델명, 체인유형, 검색기)
-    QA_chain = RetrievalQA.from_chain_type(
-        
-        llm=llm,
-        chain_type=chain_type,
-        retriever=vector_store.as_retriever()
-    )
 
-    # 모델에 넣어줄 쿼리는 이전 쿼리 기록과 현재 사용자의 쿼리의 합
-    # TODO : 나중에 앱 서버에서 api 요청 날려주는 request객체의 틀과 맞춰서 수정해야 함
+    # 검색기 설정
+    retriever = vector_store.as_retriever()
+
+    # 캐릭터에 따른 페르소나 부여(언어)
+    LANGUAGE = 'japanese'
+
+    if character == 'maha':
+        LANGUAGE = 'korean'
+    elif character == 'mile':
+        LANGUAGE = 'english'
+    elif character == 'feet':
+        LANGUAGE = 'chinese'
+
+
+    # prompt customizing template
+    system_prompt = (
+        "Use the given context to answer the question."
+        f"You must answer the question in {LANGUAGE}"
+        "Context: {context}"
+        "query: {query}"
+    )
+    prompt = ChatPromptTemplate(system_prompt)
+    
+    QA_chain = create_stuff_documents_chain(
+        llm=llm,
+        prompt=prompt
+    )
+    chain = create_retrieval_chain(retriever, QA_chain)
 
     # LangChain이 생성한 답변
-    result = QA_chain.run( query )
+    result = chain.run( query )
 
     return result
