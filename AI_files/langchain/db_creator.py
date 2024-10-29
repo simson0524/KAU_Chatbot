@@ -6,7 +6,7 @@ import time
 
 생성한 Document들을 갖고 특정 임베딩함수를 이용해 DB를 생성하는 db_creator함수를 정의한 py파일입니다.
 """
-def db_creator(embedding_function, documents, collection_name, path=None):
+def db_creator(embedding_function, documents, collection_name, path=None, db_server_url=None):
     """ 벡터 DB를 생성하고 Document들을 임베딩함수를 사용하여 벡터 DB에 정보를 저장하는 함수
 
     Args:
@@ -18,20 +18,21 @@ def db_creator(embedding_function, documents, collection_name, path=None):
     """
     half_documents_length = len( documents ) // 2
     
-    db1 = Chroma.from_documents(documents=documents[:half_documents_length],
-                                           embedding=embedding_function,
-                                           collection_name=collection_name+'_1',
-                                           persist_directory=f'DB/{collection_name}_1'
-                                           )
+    # DB 정의
+    db = Chroma.from_documents(
+        documents=documents[:half_documents_length],
+        embedding=embedding_function,
+        collection_name=collection_name,
+        persist_directory=f'DB/{collection_name}'
+        )
     
     # 분당 토큰 제한 해결책
     time.sleep(70)
     
-    db2 = Chroma.from_documents(documents=documents[half_documents_length:],
-                                           embedding=embedding_function,
-                                           collection_name=collection_name+'_2',
-                                           persist_directory=f'DB/{collection_name}_2'
-                                           )
-
+    # 나머지 데이터 임베딩
+    db.aadd_documents(
+        documents=documents[half_documents_length:]
+    )
+    
     # DB 생성 성공 메세지
-    print('\n\n***** [DataBase( {db_name} ) is successfully create at  {db_path}] ***** \n\n')
+    print(f'\n\n***** [DataBase( {collection_name} ) is successfully create at  {path}] ***** \n\n')
