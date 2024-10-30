@@ -13,6 +13,6 @@ router.post('/conversation/:chat_id/ask', userService.loginRequired, chatControl
 router.get('/conversation/:conversation_id/history', userService.loginRequired, chatController.getFilteredChatHistory);
 
 // AI 서버로 메시지 전달 (대화 내용 전달)
-router.post('/chatbot/ai', userService.loginRequired, chatController.forwardToAI);
+//router.post('/chatbot/ai', userService.loginRequired, chatController.forwardToAI);
 
 module.exports = router;
