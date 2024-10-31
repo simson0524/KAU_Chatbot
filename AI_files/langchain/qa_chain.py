@@ -1,12 +1,15 @@
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
 """
 [RAG using LangChain - 4] QA chain 설정하기
 
 실제 RAG 시스템의 틀을 구현한 qa_chain함수를 정의한 py파일입니다.
 """
+load_dotenv()
+
 def qa_chain(query, vector_store, character):
     """user query와 query history를 가지고 document를 retrieve하고 답변을 generate해주는 함수
 
@@ -25,28 +28,32 @@ def qa_chain(query, vector_store, character):
     retriever = vector_store.as_retriever()
 
     # 캐릭터에 따른 페르소나 부여(언어)
-    LANGUAGE = 'japanese'
+    language = None
 
     if character == 'maha':
-        LANGUAGE = 'korean'
+        language = 'Korean'
     elif character == 'mile':
-        LANGUAGE = 'english'
+        language = 'English'
     elif character == 'feet':
-        LANGUAGE = 'chinese'
+        language = 'Chinese'
 
+    context = vector_store.similarity_search(query=query, k=1)[0].page_content
 
-    # prompt customizing template
-    system_prompt = (
-        "Use the given context to answer the question."
-        f"You must answer the question in {LANGUAGE}"
-        "Context: {context}"
-        "query: {query}"
+    # Prompt Template Customizing
+    prompt_template = ChatPromptTemplate([
+        ('system', "You must answer the question in {language}. Use the given context to answer the question. Context: {context}"),
+    ])
+
+    prompt_value = prompt_template.invoke(
+        {
+            'language': language,
+            'context': context,
+        }
     )
-    prompt = ChatPromptTemplate(system_prompt)
-    
+
     QA_chain = create_stuff_documents_chain(
         llm=llm,
-        prompt=prompt
+        prompt=prompt_value
     )
     chain = create_retrieval_chain(retriever, QA_chain)
 

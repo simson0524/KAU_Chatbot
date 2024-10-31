@@ -1,16 +1,15 @@
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings
 from custom_embeddings import *
 from document_loader import document_loader
 from db_creator import db_creator
 from var_config import (EMBEDDING_FUNCTION, 
                         CSV_FILE_PATH, 
                         COLLECTION_NAME,
-                        LOCAL_DB_PATH,
-                        EXTERNAL_DB_URL)
+                        LOCAL_DB_PATH)
+from dotenv import load_dotenv
 import os
 
-# OpenAI API 키 설정
-os.environ["OPENAI_API_KEY"] = "s"
+load_dotenv()
 
 # csv파일들 경로 넣어두기
 csv_file_path_list = [CSV_FILE_PATH]
@@ -29,5 +28,4 @@ db_creator(
     documents=documents_list,
     collection_name=COLLECTION_NAME,
     path=LOCAL_DB_PATH,
-    db_server_url=EXTERNAL_DB_URL
     )

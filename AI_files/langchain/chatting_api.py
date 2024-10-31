@@ -5,14 +5,15 @@ from custom_embeddings import *
 from var_config import (EMBEDDING_FUNCTION,
                         COLLECTION_NAME,
                         LOCAL_DB_PATH,
-                        EXTERNAL_DB_URL,
                         MODEL_NAME)
+from dotenv import load_dotenv
 from db_loader import db_loader
 from qa_chain import qa_chain
 
 """
 앱 서버에서 챗봇 채팅 api 요청이 들어올 때 처리하는 py파일입니다.
 """
+load_dotenv()
 
 # 가용 모델명
 chat_gpt_model_name_list = ('gpt-4o', 'chatgpt-4o-latest', 'gpt-4o-mini',
@@ -24,8 +25,7 @@ app = FastAPI()
 vector_store = db_loader(
     embedding_function=EMBEDDING_FUNCTION,
     collection_name=COLLECTION_NAME,
-    path=LOCAL_DB_PATH,
-    db_server_url=EXTERNAL_DB_URL
+    path=LOCAL_DB_PATH
     )
 
 # server에서 RAG 인스턴스로 쿼리를 받는 Request객체 정의

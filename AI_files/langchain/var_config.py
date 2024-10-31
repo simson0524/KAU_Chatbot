@@ -1,5 +1,8 @@
 from langchain.embeddings import OpenAIEmbeddings
 from custom_embeddings import *
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ### 임베딩 함수 ###
 EMBEDDING_FUNCTION = OpenAIEmbeddings(
@@ -7,7 +10,7 @@ EMBEDDING_FUNCTION = OpenAIEmbeddings(
     )
 
 ### CSV 파일 경로 설정 ###
-CSV_FILE_PATH = "crawling/csv_files/crawl_complete_data_test.csv"
+CSV_FILE_PATH = "KAU_Chatbot\AI_files\crawling\csv_files\crawl_complete_data.csv"
 
 
 ### DB config 설정 ###
@@ -15,7 +18,7 @@ CSV_FILE_PATH = "crawling/csv_files/crawl_complete_data_test.csv"
 COLLECTION_NAME = 'vectorDB_1.3'
 
 # 로컬 DB 경로
-LOCAL_DB_PATH = f"DB/{COLLECTION_NAME}"
+LOCAL_DB_PATH = f"DB\{COLLECTION_NAME}"
 
 # 외부 DB url
 EXTERNAL_DB_URL = None
