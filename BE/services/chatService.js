@@ -14,9 +14,9 @@ exports.startChatSession = async (student_id, chat_character) => {
 
 
 // 대화 기록을 조회하는 서비스 함수 (대화 ID 포함)
-exports.getFilteredChatHistory = async (chat_id, date, content) => {
+exports.getFilteredChatHistory = async (student_id, date, content) => {
     try{
-        return await chatModel.getFilteredHistory(chat_id, date, content);
+        return await chatModel.getFilteredChatHistory(student_id, date, content);
     } catch(error){
         console.error("Error in getFilteredChatHistory:", error);
         throw error;

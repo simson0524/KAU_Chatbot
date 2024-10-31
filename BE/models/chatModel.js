@@ -28,29 +28,30 @@ exports.createChatSession = async (student_id, chat_character) => {
     }
 };
 
-// 사용자의 질문을 저장하는 함수 (대화 ID 포함)
-exports.saveChat = async (chat_id, question, response) => {
-    // 질문을 DB에 저장하고 결과를 반환
-    const result = await db.query('INSERT INTO message (chat_id, question, response) VALUES (?, ?, ?)', [chat_id, question, response]);
-    
-    // 성공적으로 저장되면 결과를 반환
-    return result[0]; // MySQL2의 경우 결과 배열의 첫 번째 요소가 결과입니다.
+// 사용자의 질문을 저장하는 함수 
+exports.saveChat = async ({student_id, question, response, chat_character, created_at }) => {
+    const sql = `
+        INSERT INTO chat (student_id, question, response, chat_character, created_at)
+        VALUES (?, ?, ?, ?, ?)
+    `;
+    const result = await db.query(sql, [student_id, question, response, chat_character, created_at]);
+    return result[0];
 };
 
 // 특정 대화 세션의 대화 기록을 조회하는 함수 (대화 ID 포함)
-exports.getFilteredHistory = async (chat_id, date, content) => {
+exports.getFilteredChatHistory = async (student_id, date, content) => {
     try {
-        // 기본 쿼리
-        let query = `SELECT * FROM message WHERE chat_id = ?`;
-        const params = [chat_id]
+        // 기본 쿼리와 파라미터 설정
+        let query = `SELECT * FROM chat WHERE student_id = ?`;
+        const params = [student_id];
         
-        // 날짜를 입력한 경우 조건 추가
+        // 날짜가 제공된 경우 조건 추가
         if (date) {
             query += ` AND DATE(created_at) = ?`;
             params.push(date);
         }
         
-        // 내용을 입력한 경우 조건 추가 (질문 / 응답에 포함되는지 확인)
+        // 내용이 제공된 경우 조건 추가 (질문 / 응답에 포함되는지 확인)
         if (content) {
             query += ` AND (question LIKE ? OR response LIKE ?)`;
             params.push(`%${content}%`, `%${content}%`);
@@ -64,44 +65,10 @@ exports.getFilteredHistory = async (chat_id, date, content) => {
         console.error("Error in getFilteredHistory:", error);
         throw error;
     }
-    
-};
-
-// 캐릭터 정보 조회
-exports.getCharacterById = async (chat_id) => {
-    try {
-        const query = 'SELECT chat_character FROM chat_room WHERE chat_id = ?';
-        const [rows] = await db.execute(query, [chat_id]);
-
-        if (rows.length > 0) {
-            return rows[0].chat_character;; // 채팅방 정보 반환 (첫 번째 결과)
-        } else {
-            return null; // 해당 채팅방이 없으면 null 반환
-        }
-    } catch (error) {
-        console.error("Error in getChatById:", error);
-        throw new Error("Database query failed");
-    }
-};
-
-exports.getStudentIdByChatId = async (chat_id) => {
-    try {
-        // chat_rooms 테이블에서 student_id 조회 (예시)
-        const [rows] = await db.query('SELECT student_id FROM chat_room WHERE chat_id = ?', [chat_id]);
-
-        if (rows.length > 0) {
-            return rows[0].student_id; // student_id 반환
-        } else {
-            throw new Error(`No student found with chat_id: ${chat_id}`);
-        }
-    } catch (error) {
-        console.error("Error in getStudentIdByChatId:", error);
-        throw error;
-    }
 };
 
 
-
+// AI 서버에서 받아온 태그 값 업데이트
 exports.saveOrUpdateTags = async (student_id, newTag) => { 
     try {
         // 기존 tags 조회
