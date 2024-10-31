@@ -1,4 +1,4 @@
-from langchain_community.vectorstores import Chroma
+from langchain_chroma.vectorstores import Chroma
 import time
 
 """
@@ -6,7 +6,7 @@ import time
 
 생성한 Document들을 갖고 특정 임베딩함수를 이용해 DB를 생성하는 db_creator함수를 정의한 py파일입니다.
 """
-def db_creator(embedding_function, documents, collection_name, path=None, db_server_url=None):
+def db_creator(embedding_function, documents, collection_name, path=None):
     """ 벡터 DB를 생성하고 Document들을 임베딩함수를 사용하여 벡터 DB에 정보를 저장하는 함수
 
     Args:
@@ -14,25 +14,37 @@ def db_creator(embedding_function, documents, collection_name, path=None, db_ser
         documents (list): document_loder함수를 사용하여 생성한 Document객체들의 리스트
         collection_name (str): collection name, 생성할 DB의 이름
         path (str, optional): 생성할 DB 인스턴스를 저장할 경로. Defaults to None.
-        db_server_url (str, optional): 별도의 DB인스턴스를 활용하는 경우, DB의 URL. Defaults to None.
     """
     half_documents_length = len( documents ) // 2
+    print('db 저장될 데이터의 수:', len(documents))
     
     # DB 정의
-    db = Chroma.from_documents(
-        documents=documents[:half_documents_length],
-        embedding=embedding_function,
+    db = Chroma(
         collection_name=collection_name,
-        persist_directory=f'DB/{collection_name}'
-        )
+        embedding_function=embedding_function,
+        persist_directory=path
+    )
+
+    print('db정의 완료')
+    
+    # 1차 데이터 업데이트
+    documents_list_1 = documents[:half_documents_length]
+    print('1')
+    db.add_documents(documents=documents_list_1)
+    print('1차 데이터 길이:', len(documents_list_1))
     
     # 분당 토큰 제한 해결책
     time.sleep(70)
-    
-    # 나머지 데이터 임베딩
-    db.aadd_documents(
-        documents=documents[half_documents_length:]
-    )
+    print('2')
+
+    # 2차 데이터 업데이트
+    documents_list_2 = documents[half_documents_length:]
+    print('3')
+    db.add_documents(documents=documents_list_2)
+    print('2차 데이터 길이:', len(documents_list_2))
+
+    all_data = db.get(include=['documents'])
+    print('db길이', len( all_data['documents'] ))
     
     # DB 생성 성공 메세지
     print(f'\n\n***** [DataBase( {collection_name} ) is successfully create at  {path}] ***** \n\n')
