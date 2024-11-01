@@ -15,8 +15,8 @@ def db_creator(embedding_function, documents, collection_name, path=None):
         collection_name (str): collection name, 생성할 DB의 이름
         path (str, optional): 생성할 DB 인스턴스를 저장할 경로. Defaults to None.
     """
-    half_documents_length = len( documents ) // 2
-    print('db 저장될 데이터의 수:', len(documents))
+    documents_length = len( documents )
+    print('db 저장될 데이터의 수:', documents_length)
     
     # DB 정의
     db = Chroma(
@@ -26,25 +26,19 @@ def db_creator(embedding_function, documents, collection_name, path=None):
     )
 
     print('db정의 완료')
-    
-    # 1차 데이터 업데이트
-    documents_list_1 = documents[:half_documents_length]
-    print('1')
-    db.add_documents(documents=documents_list_1)
-    print('1차 데이터 길이:', len(documents_list_1))
-    
-    # 분당 토큰 제한 해결책
-    time.sleep(70)
-    print('2')
 
-    # 2차 데이터 업데이트
-    documents_list_2 = documents[half_documents_length:]
-    print('3')
-    db.add_documents(documents=documents_list_2)
-    print('2차 데이터 길이:', len(documents_list_2))
+    documents_check_points = [ point for point in range(0, documents_length, 50) ] + [documents_length]
+    print('documents_chk_pt', documents_check_points)
 
+    for i in range( len(documents_check_points)-1 ):
+        print(f"현재 임베딩중인 문서 위치 : {documents_check_points[i]} 부터 {documents_check_points[i+1]}")
+        sub_documents = documents[documents_check_points[i]:documents_check_points[i+1]]
+        db.add_documents(documents=sub_documents)
+        time.sleep(2)
+
+    # 저장된 db 길이 확인
     all_data = db.get(include=['documents'])
-    print('db길이', len( all_data['documents'] ))
+    print('저장된 db길이', len( all_data['documents'] ))
     
     # DB 생성 성공 메세지
     print(f'\n\n***** [DataBase( {collection_name} ) is successfully create at  {path}] ***** \n\n')

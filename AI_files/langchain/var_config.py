@@ -4,10 +4,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+### document 로딩 ###
+TEXT = 'text'
+
+FILE_DOWNLOAD_URL = 'files'
+
+ORIGIN_URL = 'url'
+
+TITLE = 'title'
+
+PUBLISHED_DATE = 'published_date'
+
+DEADLINE_DATE = 'deadline_date'
+
+
 ### 임베딩 함수 ###
 EMBEDDING_FUNCTION = OpenAIEmbeddings(
     model='text-embedding-ada-002'
     )
+
 
 ### CSV 파일 경로 설정 ###
 CSV_FILE_PATH = "KAU_Chatbot\AI_files\crawling\csv_files\crawl_complete_data.csv"
