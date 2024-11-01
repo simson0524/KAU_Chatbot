@@ -2,35 +2,50 @@ import 'package:sqflite/sqflite.dart';
 import 'chat_database.dart';
 
 class ChatDao {
-  // SQLite에 메시지 삽입 함수
-  Future<void> insertMessage(
-      String message, String sender, String timestamp) async {
+  // Function to insert a message into SQLite
+  Future<void> insertMessage(String message, String sender, String timestamp,
+      int chatId, String character) async {
     final db = await ChatDatabase.instance.database;
 
     await db.insert(
       'chatMessages',
       {
         'message': message,
-        'sender': sender, // 사용자(user) 또는 봇(bot)
+        'sender': sender,
         'timestamp': timestamp,
+        'chatId': chatId,
+        'character': character, // character 값이 누락되지 않도록 포함시킴
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     print("Message inserted into SQLite: $message by $sender at $timestamp");
   }
 
-  // SQLite에서 메시지 조회 함수 (최신 메시지부터 순서대로 가져옴)
-  Future<List<Map<String, dynamic>>> fetchMessages() async {
+  // Function to fetch messages based on chatId
+  Future<List<Map<String, dynamic>>> fetchMessages(int chatId) async {
     final db = await ChatDatabase.instance.database;
     return await db.query(
       'chatMessages',
+      where: 'chatId = ?',
+      whereArgs: [chatId],
       orderBy: 'timestamp DESC',
     );
   }
 
-  // SQLite에서 메시지를 모두 삭제하는 함수 (테이블 초기화)
-  Future<void> clearMessages() async {
+  Future<int> getNewChatId() async {
     final db = await ChatDatabase.instance.database;
-    await db.delete('chatMessages');
+    final result =
+        await db.rawQuery('SELECT MAX(chatId) as chatId FROM chatMessages');
+    return (result.first['chatId'] as int?)?.toInt() ?? 0; // 기본값을 1로 설정
+  }
+
+  // Clear all messages for a given chatId
+  Future<void> clearMessages(int chatId) async {
+    final db = await ChatDatabase.instance.database;
+    await db.delete(
+      'chatMessages',
+      where: 'chatId = ?',
+      whereArgs: [chatId],
+    );
   }
 }

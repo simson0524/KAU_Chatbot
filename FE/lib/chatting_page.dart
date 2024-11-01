@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:FE/character_provider.dart';
 import 'package:FE/main.dart';
 import 'package:FE/pw_member_info.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:FE/db/chat_dao.dart'; // ChatDao import for SQLite
 import 'package:FE/api/chat_api.dart'; // ChatApi import for server interaction
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChattingPage extends StatefulWidget {
   final String characterName;
@@ -20,8 +20,8 @@ class ChattingPage extends StatefulWidget {
 class _ChattingPageState extends State<ChattingPage> {
   final TextEditingController _controller = TextEditingController();
   final ChatDao _chatDao = ChatDao();
-  String?
-      conversationId; // Initialize as nullable to determine if new conversation needed
+  late String token;
+  int chatId = 1;
   List<Map<String, dynamic>> messages = [];
 
   //상단바 관련
@@ -31,30 +31,29 @@ class _ChattingPageState extends State<ChattingPage> {
   @override
   void initState() {
     super.initState();
-    // Load messages from SQLite when the page loads and start conversation if needed
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _initializeChat();
       await _loadMessagesFromLocal();
-      if (conversationId == null) await _startNewConversation();
     });
   }
 
-  // Start a new conversation and store the conversation ID
-  Future<void> _startNewConversation() async {
-    try {
-      final response = await ChatApi.startConversation(
-          'user123'); // Replace with actual user ID
-      setState(() {
-        conversationId = response['conversation_id'];
-      });
-      _receiveMessage(response['message']);
-    } catch (error) {
-      print('Error starting conversation: $error');
+  // Initialize token and chatId
+  Future<void> _initializeChat() async {
+    final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString("accessToken") ??
+        ''; // Default to an empty string if null
+    chatId = await _chatDao.getNewChatId();
+
+    if (token.isEmpty) {
+      // Handle the case when token is missing, perhaps navigate to login or show a message
+      print("Token is missing. Please login.");
+      // Optionally, add navigation to the login screen here
     }
   }
 
   // Load messages from local SQLite
   Future<void> _loadMessagesFromLocal() async {
-    final localMessages = await _chatDao.fetchMessages();
+    final localMessages = await _chatDao.fetchMessages(chatId);
     if (localMessages.isEmpty) {
       _receiveMessage("안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요!");
     } else {
@@ -67,7 +66,7 @@ class _ChattingPageState extends State<ChattingPage> {
   // Store message in SQLite and send to server
   Future<void> _sendMessage() async {
     String messageText = _controller.text.trim();
-    if (messageText.isNotEmpty && conversationId != null) {
+    if (messageText.isNotEmpty && token.isNotEmpty) {
       String currentTime = DateFormat('HH:mm').format(DateTime.now());
 
       setState(() {
@@ -75,23 +74,42 @@ class _ChattingPageState extends State<ChattingPage> {
           'message': messageText,
           'time': currentTime,
           'isMine': true,
+          'character': widget.characterName,
         });
       });
       _controller.clear();
-      await _chatDao.insertMessage(messageText, "user", currentTime);
+
+      await _chatDao.insertMessage(
+        messageText,
+        "user",
+        currentTime,
+        chatId,
+        widget.characterName,
+      );
 
       try {
-        final botResponse =
-            await ChatApi.sendQuestion(conversationId!, messageText);
-        _receiveMessage(botResponse);
-        await _chatDao.insertMessage(botResponse, "bot", currentTime);
+        // API 호출 및 응답 처리
+        final response = await ChatApi.sendQuestion(
+            token, messageText, widget.characterName);
+
+        // 서버 응답에서 answer 추출
+        String botAnswer = response['answer']; // 응답의 'answer' 필드 사용
+        _receiveMessage(botAnswer);
+
+        await _chatDao.insertMessage(
+          botAnswer,
+          "bot",
+          currentTime,
+          chatId,
+          widget.characterName,
+        );
       } catch (error) {
         print("Error sending question to server: $error");
       }
     }
   }
 
-  // Display bot's response
+// Display bot's response
   void _receiveMessage(String messageText) {
     String currentTime = DateFormat('HH:mm').format(DateTime.now());
     setState(() {
@@ -99,9 +117,12 @@ class _ChattingPageState extends State<ChattingPage> {
         'message': messageText,
         'time': currentTime,
         'isMine': false,
+        'character': widget.characterName,
       });
     });
   }
+
+  // UI and other methods remain unchanged...
 
   // Helper to get current date
   String _getCurrentDate() {

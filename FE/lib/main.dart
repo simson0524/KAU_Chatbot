@@ -218,20 +218,21 @@ class LoginButtons extends StatelessWidget {
     super.key,
   });
 
-  // 로그인 버튼 클릭 시 API 호출 함수
   Future<void> _handleLogin(
       BuildContext context, String email, String password) async {
     try {
       // AuthApi의 login 함수 호출
       final result = await AuthApi.login(email, password);
 
-      if (result['success']) {
-        // 로그인 성공 여부 확인
+      // 로그인 성공 여부 확인 (result에서 직접 확인)
+      if (result.containsKey('accessToken') &&
+          result.containsKey('refreshToken')) {
         print('로그인 성공: ${result['message']}');
 
-        // 로그인 성공 시 accessToken을 저장
+        // 로그인 성공 시 accessToken과 refreshToken 저장
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', result['token']); // 토큰 저장
+        await prefs.setString('accessToken', result['accessToken'] ?? '');
+        await prefs.setString('refreshToken', result['refreshToken'] ?? '');
 
         // 로그인 성공 시 페이지 이동
         Navigator.push(
@@ -241,7 +242,7 @@ class LoginButtons extends StatelessWidget {
           ),
         );
       } else {
-        print('로그인 실패: ${result['message']}');
+        print('로그인 실패: ${result['message'] ?? '알 수 없는 오류'}');
         // 로그인 실패 시 알림창 표시
         showloginfailDialog(context); // 로그인 실패 시 다이얼로그 호출
       }

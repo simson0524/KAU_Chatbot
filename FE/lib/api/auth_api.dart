@@ -95,21 +95,19 @@ class AuthApi {
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
         return {
-          'success': true,
-          'token': responseBody['accessToken'],
+          'accessToken': responseBody['accessToken'],
+          'refreshToken': responseBody['refreshToken'],
           'message': responseBody['message'],
         };
       } else {
         final errorResponse = json.decode(response.body);
         return {
-          'success': false,
-          'message': errorResponse['error'],
+          'message': errorResponse['message'],
         };
       }
     } catch (error) {
       print('Error occurred during login: $error');
       return {
-        'success': false,
         'message': 'Login failed due to an error',
       };
     }
