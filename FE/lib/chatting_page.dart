@@ -9,7 +9,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChattingPage extends StatefulWidget {
-  const ChattingPage({super.key});
+  final String characterName;
+
+  const ChattingPage({super.key, required this.characterName});
 
   @override
   State<ChattingPage> createState() => _ChattingPageState();
@@ -28,7 +30,6 @@ class _ChattingPageState extends State<ChattingPage> {
 
   @override
   void initState() {
-    WidgetsFlutterBinding.ensureInitialized();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initializeChat();
@@ -129,40 +130,16 @@ class _ChattingPageState extends State<ChattingPage> {
     return DateFormat('yyyy.MM.dd').format(now);
   }
 
-  void _sendMessage() {
-    String messageText = _controller.text.trim();
-    if (messageText.isNotEmpty) {
-      setState(() {
-        messages.add({
-          'message': messageText,
-          'time': TimeOfDay.now().format(context),
-          'isMine': true,
-        });
-      });
-      _controller.clear();
-    }
-  }
-
-  void _receiveMessage(String messageText) {
-    setState(() {
-      messages.add({
-        'message': messageText,
-        'time': TimeOfDay.now().format(context),
-        'isMine': false,
-      });
-    });
-  }
-
-  // 캐릭터 따라 이미지 선택
-  String _chatCharacterImage(String name) {
-    if (name == '마일') {
+  // Helper method to choose the correct character image
+  String _chatCharacterImage() {
+    if (widget.characterName == '마일') {
       return 'assets/images/chat_mile.png';
-    } else if (name == '마하') {
+    } else if (widget.characterName == '마하') {
       return 'assets/images/chat_maha.png';
-    } else if (name == '피트') {
+    } else if (widget.characterName == '피트') {
       return 'assets/images/chat_feet.png';
     } else {
-      return 'assets/images/chat_basic.png';
+      return 'assets/images/chat_basic.png'; // Default image
     }
   }
 
@@ -185,12 +162,10 @@ class _ChattingPageState extends State<ChattingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final character = Provider.of<CharacterProvider>(context).character;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text(
+        title: const Text(
           'KAU CHATBOT',
           style: TextStyle(color: Colors.black),
         ),
@@ -206,12 +181,9 @@ class _ChattingPageState extends State<ChattingPage> {
           ),
         ],
         elevation: 0,
-        bottom: PreferredSize(
+        bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.black,
-            height: 1.0,
-          ),
+          child: Divider(color: Colors.black),
         ),
       ),
       body: Stack(
@@ -219,37 +191,29 @@ class _ChattingPageState extends State<ChattingPage> {
           Container(
             color: Colors.white,
           ),
-          // 배경 이미지
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/grid_background.png'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-
           Column(
             children: [
-              // 날짜 표시
+              // Date display
               Center(
                 child: Container(
-                  margin: EdgeInsets.only(top: 8.0),
+                  margin: const EdgeInsets.only(top: 8.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.black),
                     borderRadius: BorderRadius.circular(20.0),
                   ),
-                  constraints: BoxConstraints(
-                    minWidth: 0,
-                    maxWidth: double.infinity,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                    child: Text(
-                      _getCurrentDate(),
-                      style: TextStyle(color: Colors.black, fontSize: 10.0),
-                    ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    _getCurrentDate(),
+                    style: const TextStyle(color: Colors.black, fontSize: 10.0),
                   ),
                 ),
               ),
@@ -261,11 +225,9 @@ class _ChattingPageState extends State<ChattingPage> {
                     return ChatBubble(
                       profileImage: messages[index]['isMine']
                           ? ''
-                          : _chatCharacterImage(
-                              character), // Provider로 받은 이름에 따라 이미지 설정
-                      name: messages[index]['isMine']
-                          ? ''
-                          : character, // Provider로 받은 이름 사용
+                          : _chatCharacterImage(),
+                      name:
+                          messages[index]['isMine'] ? '' : widget.characterName,
                       message: messages[index]['message'],
                       time: messages[index]['time'],
                       isMine: messages[index]['isMine'],
@@ -273,7 +235,7 @@ class _ChattingPageState extends State<ChattingPage> {
                   },
                 ),
               ),
-              // 입력 필드와 전송 버튼
+              // Message input field and send button
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -286,20 +248,18 @@ class _ChattingPageState extends State<ChattingPage> {
                           borderRadius: BorderRadius.circular(20.0),
                           color: Colors.white,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: TextField(
-                            controller: _controller,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: '메세지를 입력하세요...',
-                            ),
-                            onSubmitted: (text) => _sendMessage(),
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: TextField(
+                          controller: _controller,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: '메세지를 입력하세요...',
                           ),
+                          onSubmitted: (text) => _sendMessage(),
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.0),
+                    const SizedBox(width: 8.0),
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black),
@@ -307,7 +267,7 @@ class _ChattingPageState extends State<ChattingPage> {
                         color: Colors.white,
                       ),
                       child: IconButton(
-                        icon: Icon(Icons.send, color: Colors.black),
+                        icon: const Icon(Icons.send, color: Colors.black),
                         onPressed: _sendMessage,
                       ),
                     ),
@@ -397,7 +357,7 @@ class ChatBubble extends StatelessWidget {
   final String time;
   final bool isMine;
 
-  ChatBubble({
+  const ChatBubble({
     required this.profileImage,
     required this.name,
     required this.message,
@@ -428,11 +388,12 @@ class ChatBubble extends StatelessWidget {
                   children: [
                     Text(
                       name,
-                      style: TextStyle(fontSize: 12.0, color: Colors.black),
+                      style:
+                          const TextStyle(fontSize: 12.0, color: Colors.black),
                     ),
-                    SizedBox(height: 4.0),
+                    const SizedBox(height: 4.0),
                     Container(
-                      padding: EdgeInsets.all(12.0),
+                      padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
@@ -457,7 +418,7 @@ class ChatBubble extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Container(
-                  padding: EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.black),
@@ -471,7 +432,7 @@ class ChatBubble extends StatelessWidget {
             alignment: Alignment.bottomRight,
             child: Text(
               time,
-              style: TextStyle(color: Colors.grey, fontSize: 10.0),
+              style: const TextStyle(color: Colors.grey, fontSize: 10.0),
             ),
           ),
         ],
