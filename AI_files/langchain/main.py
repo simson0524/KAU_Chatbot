@@ -4,6 +4,7 @@ from langchain_openai import OpenAIEmbeddings
 from db_loader import db_loader
 from qa_chain import qa_chain
 
+
 COLLECTION_NAME1 = "vectorDB_1.3_1"  # 벡터 DB 컬렉션 이름
 COLLECTION_NAME2 = "vectorDB_1.3_2"  # 벡터 DB 컬렉션 이름
 DB_PATH = f"DB/{COLLECTION_NAME1}"  # 로컬에 벡터 DB를 저장할 경로

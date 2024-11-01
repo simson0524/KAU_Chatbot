@@ -28,36 +28,35 @@ def qa_chain(query, vector_store, character):
     retriever = vector_store.as_retriever()
 
     # 캐릭터에 따른 페르소나 부여(언어)
-    language = None
+    prompt = None
 
     if character == 'maha':
-        language = 'Korean'
+        prompt = "You must answer the question in Korean. Use the given context to answer the question. Context: {context}"
     elif character == 'mile':
-        language = 'English'
+        prompt = "You must answer the question in English. Use the given context to answer the question. Context: {context}"
     elif character == 'feet':
-        language = 'Chinese'
+        prompt = "You must answer the question in Chinese. Use the given context to answer the question. Context: {context}"
 
     context = vector_store.similarity_search(query=query, k=1)[0].page_content
 
     # Prompt Template Customizing
     prompt_template = ChatPromptTemplate([
-        ('system', "You must answer the question in {language}. Use the given context to answer the question. Context: {context}"),
+        ('system', prompt),
+        ('human', '{input}')
     ])
-
-    prompt_value = prompt_template.invoke(
-        {
-            'language': language,
-            'context': context,
-        }
-    )
 
     QA_chain = create_stuff_documents_chain(
         llm=llm,
-        prompt=prompt_value
+        prompt=prompt_template
     )
     chain = create_retrieval_chain(retriever, QA_chain)
 
     # LangChain이 생성한 답변
-    result = chain.run( query )
+    result = chain.invoke(
+        {
+            'context': context,
+            'input': query
+        }
+    )
 
     return result

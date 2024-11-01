@@ -25,7 +25,7 @@ EMBEDDING_FUNCTION = OpenAIEmbeddings(
 
 
 ### CSV 파일 경로 설정 ###
-CSV_FILE_PATH = "KAU_Chatbot\AI_files\crawling\csv_files\crawl_complete_data.csv"
+CSV_FILE_PATH = "/Users/jaehyeoksim/무제 폴더/KAU_Chatbot/AI_files/crawling/csv_files/crawl_complete_data.csv"
 
 
 ### DB config 설정 ###

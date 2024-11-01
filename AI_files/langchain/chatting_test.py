@@ -31,10 +31,12 @@ else:
 # 사용자의 질문에 대해 답변과 URL 제공
 def get_answer_with_url(query, character):
     answer = qa_chain(query, vector_store, character)
+    answer = answer['answer']
     
     # 유사도 검색 수행 및 URL 정보 포함
     results = vector_store.similarity_search(query, k=1)
     if results:
+        print(type(answer), answer)
         url = results[0].metadata.get('url', 'URL을 찾을 수 없습니다')
         answer += f"\n\n관련 URL: {url}"
 
