@@ -99,6 +99,8 @@ class JoinInput extends StatefulWidget {
   State<JoinInput> createState() => _JoinInputState();
 }
 
+bool isEmailVerified = false;
+
 class _JoinInputState extends State<JoinInput> {
   final TextEditingController join_numberController = TextEditingController();
   final TextEditingController join_nameController = TextEditingController();
@@ -315,27 +317,41 @@ class _JoinInputState extends State<JoinInput> {
                 ),
               ),
             ),
-            // 인증번호 발송 버튼
+
+            // 인증번호 발송 버튼에 기능 추가
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 String emailinput = join_emailController.text.trim();
                 if (emailinput == '@kau.kr' || emailinput.isEmpty) {
                   textmessageDialog(context, '이메일을 입력해주세요.');
                 } else {
-                  textmessageDialog(
-                      context, '이메일 인증번호 메일을 보냈습니다. \n 이메일을 확인해주세요.');
+                  try {
+                    final response =
+                        await AuthApi.sendEmailVerification(emailinput);
+                    if (response.statusCode == 200) {
+                      textmessageDialog(
+                          context, '이메일 인증번호를 전송했습니다. 이메일을 확인해주세요.');
+                    } else {
+                      textmessageDialog(
+                          context, '이메일 인증번호 전송에 실패했습니다. 다시 시도해주세요.');
+                    }
+                  } catch (error) {
+                    textmessageDialog(context, '이메일 인증 중 오류가 발생했습니다.');
+                  }
                 }
-              }, // 버튼 동작
+              },
               style: TextButton.styleFrom(
                 visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                 side: BorderSide(color: Colors.black),
               ),
               child: const Text(
-                '인증번호\n    발송',
+                '인증번호\n발송',
                 style: TextStyle(fontSize: 10, color: Colors.black),
               ),
             ),
+
             const SizedBox(width: 10.0), // 칸 사이 간격
+
             // 인증번호 입력칸
             Flexible(
               flex: 3,
@@ -371,13 +387,37 @@ class _JoinInputState extends State<JoinInput> {
               ),
             ),
             // 확인 버튼
+            // 인증 코드 확인 버튼에 기능 추가
             Positioned(
               right: 0,
               left: 75,
               top: 10,
               bottom: 10,
               child: TextButton(
-                onPressed: () {}, // 버튼 동작
+                onPressed: () async {
+                  try {
+                    final code =
+                        int.tryParse(join_emailcodeController.text.trim());
+                    final email = join_emailController.text.trim();
+
+                    if (code == null) {
+                      textmessageDialog(context, '인증번호를 올바르게 입력해주세요.');
+                      return;
+                    }
+
+                    final response = await AuthApi.verifyEmailCode(email, code);
+                    if (response.statusCode == 200) {
+                      setState(() {
+                        isEmailVerified = true;
+                      });
+                      textmessageDialog(context, '이메일 인증이 완료되었습니다.');
+                    } else {
+                      textmessageDialog(context, '인증번호가 일치하지 않습니다.');
+                    }
+                  } catch (error) {
+                    textmessageDialog(context, '이메일 인증 중 오류가 발생했습니다.');
+                  }
+                },
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                   visualDensity: VisualDensity(horizontal: 1.0, vertical: 1.0),
@@ -696,67 +736,64 @@ class Joinfinish extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 10, right: 120, left: 120),
       child: OutlinedButton(
-        // 회원가입 버튼 클릭 시
-        onPressed: () async {
-          if (inputState == null) {
-            return;
-          }
+        // 회원가입 버튼의 onPressed에 이메일 인증 상태 확인 추가
+        onPressed: isEmailVerified
+            ? () async {
+                if (inputState == null) {
+                  return;
+                }
 
-          // 입력값 검증
-          if (inputState.nullcheck()) {
-            textmessageDialog(context, '입력되지 않은 값이 존재합니다');
-            return;
-          }
+                if (inputState.nullcheck()) {
+                  textmessageDialog(context, '입력되지 않은 값이 존재합니다');
+                  return;
+                }
 
-          if (!inputState.samePWcheck()) {
-            textmessageDialog(context, '비밀번호와 비밀번호 확인이 일치하지 않습니다');
-            return;
-          }
+                if (!inputState.samePWcheck()) {
+                  textmessageDialog(context, '비밀번호와 비밀번호 확인이 일치하지 않습니다');
+                  return;
+                }
 
-          try {
-            // 학번과 학년을 정수형으로 변환
-            final studentId =
-                int.tryParse(inputState.join_numberController.text);
-            final email = inputState.join_emailController.text;
-            final password = inputState.join_pwController.text;
-            final name = inputState.join_nameController.text;
-            final major = inputState.join_majorController.text;
-            final grade = int.tryParse(inputState.join_Grade ?? '');
-            final gender = inputState.join_Gender ?? '';
-            final residence = inputState.join_homeController.text;
+                // 학번과 학년을 정수형으로 변환
+                final studentId =
+                    int.tryParse(inputState.join_numberController.text);
+                final email = inputState.join_emailController.text;
+                final password = inputState.join_pwController.text;
+                final name = inputState.join_nameController.text;
+                final major = inputState.join_majorController.text;
+                final grade = int.tryParse(inputState.join_Grade ?? '');
+                final gender = inputState.join_Gender ?? '';
+                final residence = inputState.join_homeController.text;
 
-            // 유효성 검사 (studentId와 grade가 올바른 정수인지 확인)
-            if (studentId == null || grade == null) {
-              textmessageDialog(context, '학번과 학년은 숫자로 입력해주세요.');
-              return;
-            }
+                if (studentId == null || grade == null) {
+                  textmessageDialog(context, '학번과 학년은 숫자로 입력해주세요.');
+                  return;
+                }
 
-            // 회원가입 API 호출
-            final response = await AuthApi.register(
-              studentId,
-              email,
-              password,
-              name,
-              major,
-              grade,
-              gender,
-              residence,
-            );
+                try {
+                  final response = await AuthApi.register(
+                    studentId,
+                    email,
+                    password,
+                    name,
+                    major,
+                    grade,
+                    gender,
+                    residence,
+                  );
 
-            if (response.statusCode == 200) {
-              // 회원가입 성공 시 알림창 표시
-              finishJoinDialog(context);
-            } else {
-              // 회원가입 실패 시 오류 메시지 출력
-              final responseBody = json.decode(response.body);
-              textmessageDialog(context, responseBody['error'] ?? '회원가입 실패');
-            }
-          } catch (error) {
-            // 예외 처리
-            textmessageDialog(context, '회원가입 중 오류가 발생했습니다');
-            print('Registration error: $error');
-          }
-        },
+                  if (response.statusCode == 200) {
+                    finishJoinDialog(context);
+                  } else {
+                    final responseBody = json.decode(response.body);
+                    textmessageDialog(
+                        context, responseBody['error'] ?? '회원가입 실패');
+                  }
+                } catch (error) {
+                  textmessageDialog(context, '회원가입 중 오류가 발생했습니다');
+                  print('Registration error: $error');
+                }
+              }
+            : null,
         style: OutlinedButton.styleFrom(
           side: const BorderSide(
             width: 1.25,

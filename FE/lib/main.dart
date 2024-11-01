@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:FE/join_page.dart';
 import 'package:FE/api/auth_api.dart';
 import 'package:provider/provider.dart'; // auth_api.dart 파일 추가하여 API 호출
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(
@@ -196,18 +197,29 @@ class _LoginInputFieldsState extends State<LoginInputFields> {
 
 // 버튼 - 로그인, 회원가입
 class LoginButtons extends StatelessWidget {
-  const LoginButtons({super.key});
+  const LoginButtons({
+    required this.idController,
+    required this.pwController,
+    super.key,
+  });
 
-  // 로그인 버튼 클릭 시 API 호출
   Future<void> _handleLogin(
       BuildContext context, String email, String password) async {
     try {
       // auth_api.dart 파일의 login 함수 호출 후 응답 상태 코드 확인
       final response = await AuthApi.login(email, password);
 
-      if (response.statusCode == 200) {
-        print('로그인 성공');
-        // 로그인 성공 시 CharacterPage로 이동
+      // 로그인 성공 여부 확인 (result에서 직접 확인)
+      if (result.containsKey('accessToken') &&
+          result.containsKey('refreshToken')) {
+        print('로그인 성공: ${result['message']}');
+
+        // 로그인 성공 시 accessToken과 refreshToken 저장
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', result['accessToken'] ?? '');
+        await prefs.setString('refreshToken', result['refreshToken'] ?? '');
+
+        // 로그인 성공 시 페이지 이동
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -215,7 +227,9 @@ class LoginButtons extends StatelessWidget {
           ),
         );
       } else {
-        throw Exception('로그인 실패');
+        print('로그인 실패: ${result['message'] ?? '알 수 없는 오류'}');
+        // 로그인 실패 시 알림창 표시
+        showloginfailDialog(context); // 로그인 실패 시 다이얼로그 호출
       }
     } catch (error) {
       print('로그인 실패: $error');
