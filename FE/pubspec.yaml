@@ -68,14 +68,12 @@ flutter:
    - assets/images/chatbot_image.png
    - assets/images/chatbot_login.png
    - assets/images/character_image.png
-   - assets/images/basic_image.png
    - assets/images/character_mile.png
    - assets/images/character_maha.png
    - assets/images/character_feet.png
    - assets/images/chat_maha.png
    - assets/images/chat_mile.png
    - assets/images/chat_feet.png
-   - assets/images/chat_basic.png
 
 
   # The following line ensures that the Material Icons font is

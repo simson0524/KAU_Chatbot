@@ -222,19 +222,20 @@ class _ChattingPageState extends State<ChattingPage> {
                 child: ListView.builder(
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
+                    bool isMine =
+                        messages[index]['isMine'] ?? false; // 기본값 false 추가
+
                     return ChatBubble(
-                      profileImage: messages[index]['isMine']
-                          ? ''
-                          : _chatCharacterImage(),
-                      name:
-                          messages[index]['isMine'] ? '' : widget.characterName,
+                      profileImage: isMine ? '' : _chatCharacterImage(),
+                      name: isMine ? '' : widget.characterName,
                       message: messages[index]['message'],
                       time: messages[index]['time'],
-                      isMine: messages[index]['isMine'],
+                      isMine: isMine,
                     );
                   },
                 ),
               ),
+
               // Message input field and send button
               Padding(
                 padding:
