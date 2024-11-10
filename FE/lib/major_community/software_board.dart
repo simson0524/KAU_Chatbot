@@ -111,7 +111,7 @@ class _SoftwareBoardPageState extends State<SoftwareBoardPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => SoftwarePostDetailPage(
-                                post: filteredPosts[index], // 클릭된 게시물의 데이터를 전달
+                                post: filteredPosts[index], // 클릭된 게시물의 데이터 전달
                               ),
                             ),
                           );
@@ -119,8 +119,7 @@ class _SoftwareBoardPageState extends State<SoftwareBoardPage> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: Stack(
-                            clipBehavior:
-                                Clip.none, // Stack의 범위를 넘어가는 요소가 잘리지 않도록 설정
+                            clipBehavior: Clip.none,
                             children: [
                               //제목 박스
                               Container(
@@ -163,8 +162,9 @@ class _SoftwareBoardPageState extends State<SoftwareBoardPage> {
               ],
             ),
           ),
+          //검색어 입력 부분
           Positioned(
-            bottom: 10, // 화면의 맨 아래에 고정
+            bottom: 10,
             left: 10,
             right: 10,
             child: Padding(
@@ -195,8 +195,9 @@ class _SoftwareBoardPageState extends State<SoftwareBoardPage> {
               ),
             ),
           ),
+          //글 등록 버튼
           Positioned(
-            top: kToolbarHeight - 40.0, // 위치 설정
+            top: kToolbarHeight - 40.0,
             right: 16.0,
             child: Container(
               decoration: BoxDecoration(
@@ -270,7 +271,7 @@ class NewSoftwarePostPage extends StatelessWidget {
       ),
       body: GestureDetector(
         onTap: () {
-          FocusScope.of(context).unfocus(); // 포커스를 제거하여 키보드 닫힘
+          FocusScope.of(context).unfocus();
         },
         child: Stack(
           children: [
@@ -319,7 +320,7 @@ class NewSoftwarePostPage extends StatelessWidget {
                       child: SingleChildScrollView(
                         child: TextField(
                           controller: contentController,
-                          maxLines: null, // 여러 줄 입력 가능
+                          maxLines: null,
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             labelText: '내용',
@@ -429,7 +430,7 @@ class _SoftwarePostDetailPageState extends State<SoftwarePostDetailPage> {
       ),
       body: GestureDetector(
         onTap: () {
-          FocusScope.of(context).unfocus(); // 포커스를 제거하여 키보드 닫힘
+          FocusScope.of(context).unfocus();
         },
         child: Stack(
           children: [
@@ -495,7 +496,7 @@ class _SoftwarePostDetailPageState extends State<SoftwarePostDetailPage> {
                   Expanded(
                     child: ListView.builder(
                       padding: const EdgeInsets.only(
-                          top: 10.0, left: 15.0, right: 85.0), //전체 여백
+                          top: 10.0, left: 15.0, right: 85.0),
                       itemCount: comments.length,
                       itemBuilder: (context, index) {
                         return Padding(
@@ -539,6 +540,7 @@ class _SoftwarePostDetailPageState extends State<SoftwarePostDetailPage> {
                       },
                     ),
                   ),
+                  //댓글 달기
                   Row(
                     children: [
                       Expanded(
@@ -553,16 +555,16 @@ class _SoftwarePostDetailPageState extends State<SoftwarePostDetailPage> {
                             controller: commentController,
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: '댓글 작성',
+                              hintText: '답글을 입력하세요',
+                              suffixIcon: IconButton(
+                                icon: Icon(Icons.subdirectory_arrow_left),
+                                onPressed: () {
+                                  addComment(commentController.text);
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.send),
-                        onPressed: () {
-                          addComment(commentController.text);
-                        },
                       ),
                     ],
                   ),

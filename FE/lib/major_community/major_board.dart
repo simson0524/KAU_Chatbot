@@ -4,14 +4,15 @@ import 'package:flutter/material.dart';
 
 class MajorBoard extends StatelessWidget {
   final List<String> departments = [
-    '스마트드론공학과',
+    '소프트웨어학과',
     '항공우주공학과',
     'AI자율주행시스템공학과',
     '컴퓨터공학과',
-    '소프트웨어학과',
+    '스마트드론공학과',
     '항공운항학과',
     '항공교통물류학과',
     '경영학과',
+    '신소재공학과',
     '자유전공학과',
   ];
 
@@ -102,6 +103,8 @@ class MajorBoard extends StatelessWidget {
                                   case '항공교통물류학과':
                                     return SoftwareBoardPage();
                                   case '경영학과':
+                                    return SoftwareBoardPage();
+                                  case '신소재공학과':
                                     return SoftwareBoardPage();
                                   case '자유전공학과':
                                     return SoftwareBoardPage();
