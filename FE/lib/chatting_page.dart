@@ -21,7 +21,7 @@ class _ChattingPageState extends State<ChattingPage> {
   final TextEditingController _controller = TextEditingController();
   final ChatDao _chatDao = ChatDao();
   late String token;
-  int chatId = 1;
+  int chatId = 0;
   List<Map<String, dynamic>> messages = [];
 
   //상단바 관련
@@ -59,15 +59,25 @@ class _ChattingPageState extends State<ChattingPage> {
 
   // Load messages from local SQLite
   Future<void> _loadMessagesFromLocal() async {
-    final localMessages = await _chatDao.fetchMessages(chatId);
+    final localMessages = await _chatDao.fetchAllMessages(); // 모든 메시지를 불러오기
     if (localMessages.isEmpty) {
       _receiveMessage("안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요!");
     } else {
       setState(() {
-        messages = localMessages;
+        messages = localMessages.map((msg) {
+          return {
+            'message': msg['message'],
+            'time': msg['timestamp'],
+            'isMine': msg['sender'] == 'user', // sender 값을 기반으로 isMine 설정
+            'character': msg['character'],
+          };
+        }).toList();
       });
     }
   }
+
+
+
 
   // Store message in SQLite and send to server
   Future<void> _sendMessage() async {
@@ -84,6 +94,9 @@ class _ChattingPageState extends State<ChattingPage> {
         });
       });
       _controller.clear();
+
+      // Get a new chatId for the response
+      chatId = await _chatDao.getNewChatId();
 
       await _chatDao.insertMessage(
         messageText,
@@ -102,13 +115,6 @@ class _ChattingPageState extends State<ChattingPage> {
         String botAnswer = response['answer']; // 응답의 'answer' 필드 사용
         _receiveMessage(botAnswer);
 
-        await _chatDao.insertMessage(
-          botAnswer,
-          "bot",
-          currentTime,
-          chatId,
-          widget.characterName,
-        );
       } catch (error) {
         print("Error sending question to server: $error");
       }
@@ -118,6 +124,10 @@ class _ChattingPageState extends State<ChattingPage> {
 // Display bot's response and store it in SQLite
   void _receiveMessage(String messageText) async {
     String currentTime = DateFormat('HH:mm').format(DateTime.now());
+
+    // Get a new chatId for the response
+    chatId = await _chatDao.getNewChatId();
+
     setState(() {
       messages.add({
         'message': messageText,
