@@ -1,15 +1,17 @@
 import 'package:FE/chatting_page.dart';
+import 'package:FE/major_community/aviation_board.dart';
+import 'package:FE/major_community/engineering_board.dart';
 import 'package:FE/major_community/software_board.dart';
 import 'package:flutter/material.dart';
 
 class MajorBoard extends StatelessWidget {
   final List<String> departments = [
-    '소프트웨어학과',
-    '항공우주공학과',
-    'AI자율주행시스템공학과',
-    '컴퓨터공학과',
-    '스마트드론공학과',
-    '항공운항학과',
+    '소프트웨어학과', //페이지이름: software_board
+    '항공우주기계공학과', //engineering_board
+    'AI자율주행시스템공학과', //ai_board
+    '컴퓨터공학과', //computer_board
+    '스마트드론공학과', //smartdrone_board
+    '항공운항학과', //aviaition_board
     '항공교통물류학과',
     '경영학과',
     '신소재공학과',
@@ -90,8 +92,8 @@ class MajorBoard extends StatelessWidget {
                                 switch (departments[index]) {
                                   case '소프트웨어학과':
                                     return SoftwareBoardPage();
-                                  case '항공우주공학과':
-                                    return SoftwareBoardPage();
+                                  case '항공우주기계공학과':
+                                    return EngineeringBoardPage();
                                   case 'AI자율주행시스템공학과':
                                     return SoftwareBoardPage();
                                   case '컴퓨터공학과':
@@ -99,7 +101,7 @@ class MajorBoard extends StatelessWidget {
                                   case '스마트드론공학과':
                                     return SoftwareBoardPage();
                                   case '항공운항학과':
-                                    return SoftwareBoardPage();
+                                    return AviationBoard();
                                   case '항공교통물류학과':
                                     return SoftwareBoardPage();
                                   case '경영학과':
