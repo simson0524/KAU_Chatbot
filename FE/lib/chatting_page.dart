@@ -32,23 +32,29 @@ class _ChattingPageState extends State<ChattingPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _initializeChat();
-      await _loadMessagesFromLocal();
+      bool isInitialized = await _initializeChat();
+      if (isInitialized) {
+        await _loadMessagesFromLocal();
+      } else {
+        // Navigate to login or show an error message if needed
+        print("Initialization failed. Token is missing.");
+      }
     });
   }
 
-  // Initialize token and chatId
-  Future<void> _initializeChat() async {
+// Initialize token and chatId
+  Future<bool> _initializeChat() async {
     final prefs = await SharedPreferences.getInstance();
     token = prefs.getString("accessToken") ??
         ''; // Default to an empty string if null
     chatId = await _chatDao.getNewChatId();
 
     if (token.isEmpty) {
-      // Handle the case when token is missing, perhaps navigate to login or show a message
       print("Token is missing. Please login.");
-      // Optionally, add navigation to the login screen here
+      // Optionally navigate to the login screen or handle the missing token case here
+      return false; // Indicate initialization failed due to missing token
     }
+    return true; // Indicate successful initialization
   }
 
   // Load messages from local SQLite
@@ -109,8 +115,8 @@ class _ChattingPageState extends State<ChattingPage> {
     }
   }
 
-// Display bot's response
-  void _receiveMessage(String messageText) {
+// Display bot's response and store it in SQLite
+  void _receiveMessage(String messageText) async {
     String currentTime = DateFormat('HH:mm').format(DateTime.now());
     setState(() {
       messages.add({
@@ -120,6 +126,15 @@ class _ChattingPageState extends State<ChattingPage> {
         'character': widget.characterName,
       });
     });
+
+    // Store the bot's response in SQLite
+    await _chatDao.insertMessage(
+      messageText,
+      "bot",
+      currentTime,
+      chatId,
+      widget.characterName,
+    );
   }
 
   // UI and other methods remain unchanged...
