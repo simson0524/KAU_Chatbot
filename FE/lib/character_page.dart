@@ -133,7 +133,7 @@ class Maha extends StatelessWidget {
         );
       },
       child: Container(
-        width: 126,
+        width: 130,
         height: 189,
         decoration: const BoxDecoration(
           image: DecorationImage(
