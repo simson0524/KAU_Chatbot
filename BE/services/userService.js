@@ -30,6 +30,11 @@ exports.generateCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// 임시 비밀번호 생성
+exports.generateTempPassword = () => {
+    return Math.random().toString(36).slice(2);
+}
+
 // 로그인 되었는지 확인하는 미들웨어
 exports.loginRequired = (req, res, next) => {
     const authHeader = req.headers['authorization'];
