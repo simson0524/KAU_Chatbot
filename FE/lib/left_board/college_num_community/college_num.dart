@@ -1,28 +1,22 @@
 import 'package:FE/chatting_page.dart';
-import 'package:FE/major_community/ai_board.dart';
-import 'package:FE/major_community/atc_board.dart';
-import 'package:FE/major_community/aviation_board.dart';
-import 'package:FE/major_community/business_board.dart';
-import 'package:FE/major_community/computer_board.dart';
-import 'package:FE/major_community/engineering_board.dart';
-import 'package:FE/major_community/material_board.dart';
-import 'package:FE/major_community/smartdrone_board.dart';
-import 'package:FE/major_community/software_board.dart';
-import 'package:FE/major_community/undeclared_board.dart';
+import 'package:FE/left_board/college_num_community/board_19.dart';
+import 'package:FE/left_board/college_num_community/board_20.dart';
+import 'package:FE/left_board/college_num_community/board_21.dart';
+import 'package:FE/left_board/college_num_community/board_22.dart';
+import 'package:FE/left_board/college_num_community/board_23.dart';
+import 'package:FE/left_board/college_num_community/board_24.dart';
+import 'package:FE/left_board/college_num_community/board_etc.dart';
 import 'package:flutter/material.dart';
 
-class MajorBoard extends StatelessWidget {
+class CollegeNum extends StatelessWidget {
   final List<String> departments = [
-    '소프트웨어학과', //페이지이름: software_board
-    '항공우주기계공학과', //engineering_board
-    'AI자율주행시스템공학과', //ai_board
-    '컴퓨터공학과', //computer_board
-    '스마트드론공학과', //smartdrone_board
-    '항공운항학과', //aviaition_board
-    '항공교통물류학과', //atc_board
-    '경영학과', //business_board
-    '신소재공학과', //material_board
-    '자유전공학과', //undeclared_board
+    '24학번', //페이지이름: board_24
+    '23학번',
+    '22학번',
+    '21학번',
+    '20학번',
+    '19학번',
+    '18학번 이전', //board_etc
   ];
 
   @override
@@ -91,32 +85,26 @@ class MajorBoard extends StatelessWidget {
                       ),
                       trailing: GestureDetector(
                         onTap: () {
-                          // 학과별 페이지로 이동하는 Navigator 코드
+                          // 학번별 페이지로 이동  코드
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) {
                                 switch (departments[index]) {
-                                  case '소프트웨어학과':
-                                    return SoftwareBoardPage();
-                                  case '항공우주기계공학과':
-                                    return EngineeringBoardPage();
-                                  case 'AI자율주행시스템공학과':
-                                    return AiBoardPage();
-                                  case '컴퓨터공학과':
-                                    return ComputerBoardPage();
-                                  case '스마트드론공학과':
-                                    return SmartdroneBoardPage();
-                                  case '항공운항학과':
-                                    return AviationBoard();
-                                  case '항공교통물류학과':
-                                    return AtcBoardPage();
-                                  case '경영학과':
-                                    return BusinessBoardPage();
-                                  case '신소재공학과':
-                                    return MaterialBoardPage();
-                                  case '자유전공학과':
-                                    return UndeclaredBoardPage();
+                                  case '24학번':
+                                    return Board24Page();
+                                  case '23학번':
+                                    return Board23Page();
+                                  case '22학번':
+                                    return Board22Page();
+                                  case '21학번':
+                                    return Board21Page();
+                                  case '20학번':
+                                    return Board20Page();
+                                  case '19힉번':
+                                    return Board19Page();
+                                  case '18학번 이전':
+                                    return BoardEtcPage();
                                   default:
                                     return Scaffold(
                                       body: Center(
