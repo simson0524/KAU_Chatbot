@@ -3,20 +3,20 @@ import os
 from datetime import datetime
 import shutil
 
-# subprocess.run(['python', 'crawling/delet/delet_deadline.py'], check=True)
+subprocess.run(['python', 'crawling/delet/delet_deadline.py'], check=True)
 
-# subprocess.run(['python', 'crawling/external_page/Scholarship_crawler.py'], check=True)
-# subprocess.run(['python', 'crawling/external_page/Yozeumgeotdeul_activity_crawler.py'], check=True)
-# subprocess.run(['python', 'crawling/external_page/Yozeumgeotdeul_contest_crawler.py'], check=True)
-# subprocess.run(['python', 'crawling/external_page/Yozeumgeotdeul_education_crawler.py'], check=True)
-# subprocess.run(['python', 'crawling/school_page/school_all_crawl.py'], check=True)
+subprocess.run(['python', 'crawling/external_page/Scholarship_crawler.py'], check=True)
+subprocess.run(['python', 'crawling/external_page/Yozeumgeotdeul_activity_crawler.py'], check=True)
+subprocess.run(['python', 'crawling/external_page/Yozeumgeotdeul_contest_crawler.py'], check=True)
+subprocess.run(['python', 'crawling/external_page/Yozeumgeotdeul_education_crawler.py'], check=True)
+subprocess.run(['python', 'crawling/school_page/school_all_crawl.py'], check=True)
 
-# subprocess.run(['python', 'crawling/delet/delet_duplicate.py'], check=True)
+subprocess.run(['python', 'crawling/delet/delet_duplicate.py'], check=True)
 
-# subprocess.run(['python', 'crawling/convert_to_text/combin_yozeum.py'], check=True)
+subprocess.run(['python', 'crawling/convert_to_text/combin_yozeum.py'], check=True)
 
-# subprocess.run(['python', 'crawling/convert_to_text/dreamspon_convert.py'], check=True)
-# subprocess.run(['python', 'crawling/convert_to_text/yozeumgeotdeul_convert.py'], check=True)
+subprocess.run(['python', 'crawling/convert_to_text/dreamspon_convert.py'], check=True)
+subprocess.run(['python', 'crawling/convert_to_text/yozeumgeotdeul_convert.py'], check=True)
 subprocess.run(['python', 'crawling/convert_to_text/school_convert.py'], check=True)
 
 subprocess.run(['python', 'crawling/convert_to_text/max_tag.py'], check=True)
