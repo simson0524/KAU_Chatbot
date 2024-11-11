@@ -106,7 +106,7 @@ for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것�
 
     # 공지 이미지 추출하기(학교공지와 다르게 포스터)
     image_url_elements = driver.find_elements(By.XPATH, '//figure[@class="relative aspect-poster overflow-hidden rounded-lg border border-neutral-200"]//img')
-    image_url = [ img.get_attribute('src') for img in image_url_elements ]
+    image_url = image_url_elements[0].get_attribute('src')
     
 
     # 공지 첨부파일 추출하기(대신에 태그 넣었습니다^^)

@@ -78,8 +78,8 @@ for index, row in new_urls.iterrows():
             date = datetime.now().strftime("%Y-%m-%d")  # 현재 날짜 저장
 
         # 이미지 URL 추출
-        images = [img.get_attribute('src') for img in driver.find_elements(By.CSS_SELECTOR, "#divViewConts img")]
-        images = ', '.join(images) if images else "없음"
+        images = driver.find_elements(By.CSS_SELECTOR, "#divViewConts img")
+        image = images[0].get_attribute('src') if images else "없음"
 
         # 첨부파일 추출
         attachments = []
@@ -99,7 +99,7 @@ for index, row in new_urls.iterrows():
         new_data.append({
             'idx': custom_id,
             'text': content,
-            'img': images,
+            'img': image,
             'files': attachments,
             'title': title,
             'published_date': date,
