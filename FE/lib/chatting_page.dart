@@ -29,37 +29,7 @@ class _ChattingPageState extends State<ChattingPage> {
   //상단바 관련
   bool right_isDrawerOpen = false;
 
-  void right_openDrawer() {
-    setState(() {
-      if (left_isDrawerOpen) {
-        left_isDrawerOpen = false;
-      }
-      right_isDrawerOpen = true;
-    });
-  }
-
-  void right_closeDrawer() {
-    setState(() {
-      right_isDrawerOpen = false;
-    });
-  }
-
   bool left_isDrawerOpen = false;
-
-  void left_openDrawer() {
-    setState(() {
-      if (right_isDrawerOpen) {
-        right_isDrawerOpen = false;
-      }
-      left_isDrawerOpen = true;
-    });
-  }
-
-  void left_closeDrawer() {
-    setState(() {
-      left_isDrawerOpen = false;
-    });
-  }
 
   // 첫 안내 자동 메시지
   @override
@@ -110,9 +80,6 @@ class _ChattingPageState extends State<ChattingPage> {
     }
   }
 
-
-
-
   // Store message in SQLite and send to server
   Future<void> _sendMessage() async {
     String messageText = _controller.text.trim();
@@ -148,7 +115,6 @@ class _ChattingPageState extends State<ChattingPage> {
         // 서버 응답에서 answer 추출
         String botAnswer = response['answer']; // 응답의 'answer' 필드 사용
         _receiveMessage(botAnswer);
-
       } catch (error) {
         print("Error sending question to server: $error");
       }

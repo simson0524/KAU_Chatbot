@@ -59,7 +59,7 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
-flutter:  
+flutter:
   uses-material-design: true
   assets:
    - assets/images/login_image.png
@@ -75,8 +75,6 @@ flutter:
    - assets/images/chat_mile.png
    - assets/images/chat_feet.png
    - assets/images/character_friend.png
- 
-    
 
 
 
