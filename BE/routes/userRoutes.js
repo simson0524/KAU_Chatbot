@@ -6,20 +6,31 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const userService = require('../services/userService');
 
+// 로그인
 router.post('/login', userController.userLogin);
 
+// 회원가입
 router.post('/register', userController.userSignUp);
 
-router.put('/:student_id', userService.loginRequired, userController.updateUser);
+// 사용자 정보 가져오기
+router.get('/', userService.loginRequired, userController.getUserData);
 
-router.put('/:student_id/password', userService.loginRequired, userController.updatePassword);
+// 사용자 정보 수정
+router.put('/', userService.loginRequired, userController.updateUser);
 
-router.delete('/:student_id', userService.loginRequired, userController.deleteUser);
+// 사용자 비밀번호 수정
+router.put('/password', userService.loginRequired, userController.updatePassword);
 
+// 사용자 탈퇴
+router.delete('/', userService.loginRequired, userController.deleteUser);
+
+// 이메일로 인증번호 전송
 router.post('/send-email', userController.sendEmail);
 
+// 이메일 일치 확인
 router.post('/verify-email', userController.verifyCode);
 
+// Access Token 재발급
 router.post('/token', userController.getToken);
 
 module.exports = router;

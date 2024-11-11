@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import chromedriver_autoinstaller
 import time
 import pandas as pd
-import requests
+import re
 import random
 
 # 로그인 정보 입력시 인간처럼 보이게 하기 위해

@@ -1,5 +1,6 @@
 const chatService = require('../services/chatService');
 const chatModel = require('../models/chatModel');
+const db = require('../config/dbConfig');
 
     // 대화 세션 시작을 처리하는 컨트롤러
     exports.startChat = async (req, res) => {
@@ -43,31 +44,51 @@ const chatModel = require('../models/chatModel');
 // 챗봇에게 질문을 처리하는 컨트롤러 (대화 ID 포함)
 exports.askQuestion = async (req, res) => {
     try {
-        const { chat_id } = req.params;
-        const { question } = req.body;
+        const { question, chat_character = "마하"} = req.body;
+        const student_id = req.user.student_id;
 
-        // 질문에 대한 챗봇 응답 생성
-        const response = await chatService.generateResponse(question);
+        // 디버깅 로그
+        console.log("student_id:", student_id);
 
-        // 질문과 응답을 데이터베이스에 저장
-        await chatModel.saveChat(chat_id, question, response);
+        // const conversation_id = result[0].insertId;
+
+        // 질문에 대한 챗봇 응답 생성 (실제 코드)
+        // const { answer, tag } = await chatService.generateAIResponse(question, chat_character);
+
+        // 테스트용 더미데이터
+        const answer = "This is a sample answer."; // 임의의 답변
+        const tag = "sampleTag2"; // 임의의 태그
+        
+        // chat 테이블에 질문과 응답 저장 (선택된 캐릭터와 함께 저장)
+        await chatModel.saveChat({
+            student_id,
+            question,
+            response: answer,
+            chat_character,
+            created_at: new Date()
+        });
+
+        // tags 테이블에 태그 저장 또는 업데이트
+        await chatModel.saveOrUpdateTags(student_id, tag);
 
         // 챗봇 응답 반환
-        res.status(200).json({ response });
+        res.status(200).json({ answer, tag });
+
+        
     } catch (error) {
         console.error("Error in askQuestion:", error); // 에러 로깅 추가
         res.status(500).json({ error: '질문 처리에 실패했습니다.' });
     }
 };
 
-// 대화 기록 조회를 처리하는 컨트롤러 (대화 ID 포함)
+// 대화 기록 조회를 처리하는 컨트롤러
 exports.getFilteredChatHistory = async (req, res) => {
     try {
-        const { conversation_id } = req.params;
+        const student_id = req.user.student_id; // req.user에서 student_id 가져오기
         const { date, content } = req.query;
         
-        //필터링된 대화 기록을 가져옴
-        const history = await chatService.getFilteredChatHistory(conversation_id, date, content);
+        // 필터링된 대화 기록을 가져옴
+        const history = await chatService.getFilteredChatHistory(student_id, date, content);
 
         res.status(200).json({ history });
     } catch (error) {
@@ -76,12 +97,3 @@ exports.getFilteredChatHistory = async (req, res) => {
     }
 };
 
-// AI 서버로 메시지를 전달하는 컨트롤러
-exports.forwardToAI = async (req, res) => {
-    try {
-        const aiResponse = await chatService.forwardToAI(req.body.message);
-        res.status(200).json({ response: aiResponse });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to communicate with AI server' });
-    }
-};

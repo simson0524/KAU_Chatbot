@@ -1,36 +1,62 @@
-from langchain.chains import RetrievalQA
-from langchain.llms import OpenAI
-
+from langchain_core.prompts.chat import ChatPromptTemplate
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
 """
 [RAG using LangChain - 4] QA chain 설정하기
 
 실제 RAG 시스템의 틀을 구현한 qa_chain함수를 정의한 py파일입니다.
 """
-def qa_chain(model_name, query_history, query, vector_store, chain_type='stuff'):
+load_dotenv()
+
+def qa_chain(query, vector_store, character):
     """user query와 query history를 가지고 document를 retrieve하고 답변을 generate해주는 함수
 
     Args:
-        model_name (str): 사용할 llm 모델명
-        query_history (str): 사용자와 AI의 이전 대화기록
         query (str): 사용자의 현재 쿼리
         vector_store (Chroma): 벡터 DB
-        chain_type (str, optional): chain type으로 사용할 것. Defaults to 'stuff'.
+        character (str): 페르소나
 
     Returns:
         str: LangChain이 생성한 답변
     """
-    # QA chain 설정(모델명, 체인유형, 검색기)
-    QA_chain = RetrievalQA.from_chain_type(
-        llm=model_name,
-        chain_type=chain_type,
-        retriever=vector_store.retriever()
-    )
+    # OpenAI 모델 설정
+    llm = ChatOpenAI(model='gpt-4o-mini')
 
-    # 모델에 넣어줄 쿼리는 이전 쿼리 기록과 현재 사용자의 쿼리의 합
-    # TODO : 나중에 앱 서버에서 api 요청 날려주는 request객체의 틀과 맞춰서 수정해야 함
-    full_query = f"{query_history}\n\nUser: {query}"
+    # 검색기 설정
+    retriever = vector_store.as_retriever()
+
+    # 캐릭터에 따른 페르소나 부여(언어)
+    prompt = None
+
+    if character == 'maha':
+        prompt = "You must answer the question in Korean. Use the given context to answer the question. Context: {context}"
+    elif character == 'mile':
+        prompt = "You must answer the question in English. Use the given context to answer the question. Context: {context}"
+    elif character == 'feet':
+        prompt = "You must answer the question in Chinese. Use the given context to answer the question. Context: {context}"
+
+    context = vector_store.similarity_search(query=query, k=1)[0].page_content
+
+    # Prompt Template Customizing
+    prompt_template = ChatPromptTemplate([
+        ('system', prompt),
+        ('human', '{input}')
+    ])
+
+    QA_chain = create_stuff_documents_chain(
+        llm=llm,
+        prompt=prompt_template
+    )
+    chain = create_retrieval_chain(retriever, QA_chain)
 
     # LangChain이 생성한 답변
-    result = QA_chain.run( full_query )
+    result = chain.invoke(
+        {
+            'context': context,
+            'input': query
+        }
+    )
 
     return result

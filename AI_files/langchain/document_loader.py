@@ -43,13 +43,9 @@ def document_loader(csv_file_path):
 
     documents = []
     for index, row in data.iterrows():
-        # NaN 값을 체크하고, 빈 문자열로 대체
-        if pd.isna(row[TEXT]):
-            continue  # page_content에 빈 데이터가 있으면 해당 행을 스킵합니다.
-
-        documents.append(
+            documents.append(
             Document(
-                page_content=str(row[TEXT]),  # 문자열로 변환하여 사용
+                page_content=str(row[TEXT] if pd.notna(row[TEXT]) else ''),  # 문자열로 변환하여 사용
                 metadata={
                     FILE_DOWNLOAD_URL: row[FILE_DOWNLOAD_URL] if pd.notna(row[FILE_DOWNLOAD_URL]) else "",
                     ORIGIN_URL:        row[ORIGIN_URL] if pd.notna(row[ORIGIN_URL]) else "",

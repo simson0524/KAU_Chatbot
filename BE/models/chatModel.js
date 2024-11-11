@@ -28,33 +28,89 @@ exports.createChatSession = async (student_id, chat_character) => {
     }
 };
 
-// 사용자의 질문을 저장하는 함수 (대화 ID 포함)
-exports.saveChat = async (chat_id, question, response) => {
-    // 질문을 DB에 저장하고 결과를 반환
-    const result = await db.query('INSERT INTO message (chat_id, question, response) VALUES (?, ?, ?)', [chat_id, question, response]);
-    
-    // 성공적으로 저장되면 결과를 반환
-    return result[0]; // MySQL2의 경우 결과 배열의 첫 번째 요소가 결과입니다.
+// 사용자의 질문을 저장하는 함수 
+exports.saveChat = async ({student_id, question, response, chat_character, created_at }) => {
+    const sql = `
+        INSERT INTO chat (student_id, question, response, chat_character, created_at)
+        VALUES (?, ?, ?, ?, ?)
+    `;
+    const result = await db.query(sql, [student_id, question, response, chat_character, created_at]);
+    return result[0];
 };
 
 // 특정 대화 세션의 대화 기록을 조회하는 함수 (대화 ID 포함)
-exports.getFilteredHistory = async (conversation_id, date, content) => {
+exports.getFilteredChatHistory = async (student_id, date, content) => {
     try {
-        // SQL 쿼리에서 날짜와 내용 조건을 추가하여 필터링
-        const query = `
-            SELECT * FROM chat 
-            WHERE conversation_id = ? 
-            AND DATE(created_at) = ? 
-            AND (question LIKE ? OR response LIKE ?)`;
+        // 기본 쿼리와 파라미터 설정
+        let query = `SELECT * FROM chat WHERE student_id = ?`;
+        const params = [student_id];
         
-        // '%'를 사용해서 content 부분 매칭을 지원
-        const [rows] = await db.query(query, [conversation_id, date, `%${content}%`, `%${content}%`]);
+        // 날짜가 제공된 경우 조건 추가
+        if (date) {
+            query += ` AND DATE(created_at) = ?`;
+            params.push(date);
+        }
         
+        // 내용이 제공된 경우 조건 추가 (질문 / 응답에 포함되는지 확인)
+        if (content) {
+            query += ` AND (question LIKE ? OR response LIKE ?)`;
+            params.push(`%${content}%`, `%${content}%`);
+        }
+        
+        // 쿼리 실행
+        const [rows] = await db.query(query, params);
         return rows;
 
     } catch (error) {
         console.error("Error in getFilteredHistory:", error);
         throw error;
     }
-    
+};
+
+
+// AI 서버에서 받아온 태그 값 업데이트
+exports.saveOrUpdateTags = async (student_id, newTag) => { 
+    try {
+        // 기존 tags 조회
+        const [existingTagsResult] = await db.query(
+            'SELECT tags FROM tag_sequence WHERE student_id = ?', 
+            [student_id]
+        );
+
+        let updatedTags;
+        if (existingTagsResult.length > 0) {
+            let existingTags = existingTagsResult[0].tags;
+
+            // 기존 태그가 문자열인 경우 JSON 파싱 시도
+            if (typeof existingTags === 'string') {
+                try {
+                    existingTags = JSON.parse(existingTags);
+                } catch (error) {
+                    console.error("Failed to parse tags as JSON. Converting to JSON array:", error);
+                    existingTags = []; // 파싱 실패 시 빈 배열로 초기화
+                }
+            }
+
+            // 새로운 태그가 기존 태그에 없다면 추가
+            if (!existingTags.includes(newTag)) {
+                existingTags.push(newTag);
+            }
+            updatedTags = JSON.stringify(existingTags);
+        } else {
+            // 기존 태그가 없으면 새로운 태그 배열로 초기화
+            updatedTags = JSON.stringify([newTag]);
+        }
+
+        // tag_sequence 테이블 업데이트 또는 삽입
+        const sql = `
+            INSERT INTO tag_sequence (student_id, tags) VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE tags = ?
+        `;
+        const values = [student_id, updatedTags, updatedTags];
+        await db.query(sql, values);
+
+    } catch (error) {
+        console.error("Error in saveOrUpdateTags:", error);
+        throw error;
+    }
 };

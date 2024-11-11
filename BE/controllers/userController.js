@@ -40,10 +40,10 @@ exports.userLogin = async (req, res) => {
             return res.status(400).json({error: '비밀번호를 잘못 입력하셨습니다'});
         }
         // JWT 토큰 생성 -> secret-key는 .env에 저장 필요
-        const accessToken = jwt.sign({email: user.email}, 'access-secretKey', {expiresIn: '1h'});
-        const refreshToken = jwt.sign({email: user.email}, 'refresh-secretKey', {expiresIn: '1d'});
+        const accessToken = jwt.sign({student_id: user.student_id}, 'access-secretKey', {expiresIn: '1h'});
+        const refreshToken = jwt.sign({student_id: user.student_id}, 'refresh-secretKey', {expiresIn: '1d'});
 
-        userModel.saveRefToken(user.email, refreshToken); // Refresh Token은 DB에 저장
+        await userModel.saveRefToken(user.student_id, refreshToken); // Refresh Token은 DB에 저장
 
         res.status(200).json({accessToken, refreshToken, "message": "로그인이 성공하였습니다."});
 
@@ -92,14 +92,11 @@ exports.sendEmail = async (req, res) => {
 // 이메일에 전송한 인증번호와 사용자가 입력한 인증번호가 같은지 확인
 exports.verifyCode = async (req, res) => {
     const email = req.body.email;
-    const code = req.body.code;
-
-    console.log(email, code);
+    const code = req.body.code.toString();
 
     try {
 
         const storedCode = await redisClient.v4.get(email);
-        console.log(storedCode);
 
         if (storedCode === null) {
             return res.status(400).json('인증번호가 만료되었거나 존재하지 않습니다.');
@@ -119,11 +116,30 @@ exports.verifyCode = async (req, res) => {
     }
 }
 
+// 사용자 정보 가져오는 페이지
+exports.getUserData = async (req, res) => {
+    
+    try {
+        const student_id = req.user.student_id;
+        const user = await userModel.findUserByStudentId(student_id);
+
+        if (!user) {
+            return res.status(404).json({error: '사용자가 존재하지 않습니다.'});
+        }
+
+        res.status(200).json(user);
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({'message': '회원 정보를 가져오기 못했습니다.'})
+    }
+}
+
 // 사용자 정보 수정
 exports.updateUser = async (req, res) => {
 
     try {
-        const student_id = req.params.student_id;
+        const student_id = req.user.student_id;
         const { name, major, grade, residence } = req.body;
 
         const user = await userModel.findUserByStudentId(student_id);
@@ -144,7 +160,7 @@ exports.updateUser = async (req, res) => {
 exports.updatePassword = async (req, res) => {
 
     try {
-        const student_id = req.params.student_id;
+        const student_id = req.user.student_id;
         const { password, new_password } = req.body;
 
         // 해당 학번의 사용자가 있는지 확인
@@ -176,7 +192,7 @@ exports.updatePassword = async (req, res) => {
 exports.deleteUser = async (req, res) => {
 
     try {
-        const student_id = req.params.student_id;
+        const student_id = req.user.student_id;
         
         // 해당 학번의 사용자가 있는지 확인
         const user = await userModel.findUserByStudentId(student_id);
