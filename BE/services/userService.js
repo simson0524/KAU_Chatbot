@@ -20,7 +20,7 @@ exports.getMailOptions = (to, authNumber) => {
         from: 'jewoo2000@kau.kr',
         to: to, // 도착 메일 주소
         subject: '이메일 인증',
-        html: `<h3>산학 프로젝트 7조 - 이메일 인증 테스트<h3></p></p>
+        html: `<h3>KAU RAG - 이메일 인증<h3></p></p>
                 <h2>${authNumber}<h2>`
     }
 }

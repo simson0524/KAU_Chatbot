@@ -92,7 +92,7 @@ exports.sendEmail = async (req, res) => {
 // 이메일에 전송한 인증번호와 사용자가 입력한 인증번호가 같은지 확인
 exports.verifyCode = async (req, res) => {
     const email = req.body.email;
-    const code = req.body.code.toString();
+    const code = req.body.code.toString(); // Data Type이 안맞아서 오류가 발생하지 않도록 둘 모두 String으로 동일하게 적용
 
     try {
 
