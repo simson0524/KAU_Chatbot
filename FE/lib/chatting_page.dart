@@ -7,6 +7,8 @@ import 'package:FE/db/chat_dao.dart'; // ChatDao import for SQLite
 import 'package:FE/api/chat_api.dart'; // ChatApi import for server interaction
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:FE/major_community/major_board.dart';
 
 class ChattingPage extends StatefulWidget {
   final String characterName;
@@ -26,8 +28,40 @@ class _ChattingPageState extends State<ChattingPage> {
 
   //상단바 관련
   bool right_isDrawerOpen = false;
+
+  void right_openDrawer() {
+    setState(() {
+      if (left_isDrawerOpen) {
+        left_isDrawerOpen = false;
+      }
+      right_isDrawerOpen = true;
+    });
+  }
+
+  void right_closeDrawer() {
+    setState(() {
+      right_isDrawerOpen = false;
+    });
+  }
+
   bool left_isDrawerOpen = false;
 
+  void left_openDrawer() {
+    setState(() {
+      if (right_isDrawerOpen) {
+        right_isDrawerOpen = false;
+      }
+      left_isDrawerOpen = true;
+    });
+  }
+
+  void left_closeDrawer() {
+    setState(() {
+      left_isDrawerOpen = false;
+    });
+  }
+
+  // 첫 안내 자동 메시지
   @override
   void initState() {
     super.initState();
@@ -550,17 +584,78 @@ class LeftDrawerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      elevation: 5,
-      child: Container(
-        width: 250,
-        height: MediaQuery.of(context).size.height,
-        color: Colors.white,
-        child: const Center(
-          child: Text(
-            '왼쪽상단바 10주차 진행',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14),
+    return Positioned(
+      top: 0,
+      left: 0,
+      child: Material(
+        elevation: 5,
+        child: Container(
+          width: 250,
+          height: MediaQuery.of(context).size.height,
+          color: Colors.white,
+          child: Row(
+            children: [
+              Container(
+                width: 1.0,
+                color: Colors.black,
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    //학교 공지 게시판
+                    boardNavigation(
+                        context, '학교 공지 게시판', PwMemberInfo(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    // 외부사이트 게시판
+                    boardNavigation(
+                        context, '외부 사이트 게시판', PwMemberInfo(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    // 학과별 커뮤니티 게시판
+                    boardNavigation(
+                        context, '학과별 커뮤니티 게시판', MajorBoard(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    //학번별 커뮤니티 게시판
+                    boardNavigation(
+                        context, '학번별 커뮤니티 게시판', PwMemberInfo(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    //학교 문의 게시판
+                    boardNavigation(
+                        context, '학교 문의 게시판', PwMemberInfo(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    // 이미지
+                    Spacer(),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 20),
+                      height: 120,
+                      child: Image.asset(
+                        'assets/images/character_friend.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -655,5 +750,28 @@ void showLogoutDialog(BuildContext context) {
         ),
       );
     },
+  );
+}
+
+Widget boardNavigation(
+    BuildContext context, String text, Widget page, VoidCallback onClose) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => page),
+      );
+      onClose();
+    },
+    child: Container(
+      padding: EdgeInsets.symmetric(vertical: 10.0),
+      child: Center(
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14),
+        ),
+      ),
+    ),
   );
 }

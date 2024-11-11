@@ -188,6 +188,32 @@ exports.updatePassword = async (req, res) => {
     }
 }
 
+// 비밀번호 찾기 -> 새 비밀번호 생성해서 전달
+exports.getNewPassword = async (req, res) => {
+    try {
+        const email = req.body.email;
+
+        // 해당 이메일의 학생이 있는지 확인
+        const user = await userModel.findUserByEmail(email);
+        if (!user) {
+            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
+        }
+
+        const tempPassword = userService.generateTempPassword();
+
+        // 임시 비밀번호 해싱
+        const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
+        
+        // 임시 비밀번호 저장
+        await userModel.updateUserPassword(user.student_id, hashedTempPassword);
+        res.status(200).json({'message': '임시 비밀번호 전달을 성공하였습니다.', "임시 비밀번호": tempPassword});
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json('사용자 비밀번호 찾기 중 오류가 발생했습니다.');
+    }
+}
+
 // 사용자 탈퇴
 exports.deleteUser = async (req, res) => {
 

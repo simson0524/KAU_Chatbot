@@ -1,16 +1,18 @@
 import pandas as pd
-import openai
+from openai import OpenAI
 import re
+import os
 
-# OpenAI API 키 설정
-openai.api_key = ''
+client = OpenAI(
+    api_key = ''
+)
 
 # 1. HTML 원문 요약 함수
 def summarize_html(html_content):
     if pd.isna(html_content) or html_content.strip() == "":
         return "No HTML content available"
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",  # gpt-4o-mini 사용
             messages=[
                 {"role": "system", "content": """주어진 HTML에서 텍스트만 추출해서 내용을 정확하게 작성해. 표는 사용하지 말고 텍스트로 설명해줘. 관련있는 태그도 달아줘. 'text:'로 시작하고, 관련 있는 태그는 'tag:'로 시작하는 형식으로 출력해.
@@ -26,14 +28,15 @@ def summarize_html(html_content):
                  2. 설문 내용 및 방식
                  ...
 
-                tag: ['교육과정 개선', '학생 참여', '교육 모니터링', '대학 혁신']
+                tag: ['tag1_start', 'tag2', 'tag3', 'tag4', 'tag5_end']
                 
                 주의: 시작말과 마무리말을 사용하지 말고 예시처럼 작성해.
+                주의: 이때 tag는 가장 연관이 있는 순서부터 작성 및 최대 5개까지만 작성.
                 """},
                 {"role": "user", "content": html_content}
             ]
         )
-        return response['choices'][0]['message']['content'].strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Error in summarizing: {str(e)}"
 
@@ -45,7 +48,7 @@ def summarize_image(image_url):
     if pd.isna(image_url) or image_url.strip() == "" or image_url.lower() == "없음":
         return "No image available"
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "너는 이미지의 내용을 텍스트로 정리해주는 어시스턴트야"},
@@ -64,16 +67,17 @@ def summarize_image(image_url):
                  2. 설문 내용 및 방식
                  ...
 
-                tag: ['교육과정 개선', '학생 참여', '교육 모니터링', '대학 혁신']
+                tag: ['tag1_start', 'tag2', 'tag3', 'tag4', 'tag5_end']
                 
                 주의: 시작말과 마무리말을 사용하지 말고 예시처럼 작성해.
+                주의: 이때 tag는 가장 연관이 있는 순서부터 작성 및 최대 5개까지만 작성.
                          """},
                         {"type": "image_url", "image_url": {"url": image_url}}
                     ]
                 }
             ]
         )
-        return response['choices'][0]['message']['content'].strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Error in summarizing image: {str(e)}"
 

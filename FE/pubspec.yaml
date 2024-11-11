@@ -74,6 +74,12 @@ flutter:
    - assets/images/chat_maha.png
    - assets/images/chat_mile.png
    - assets/images/chat_feet.png
+   - assets/images/character_friend.png
+ 
+    
+
+
+
 
 
   # The following line ensures that the Material Icons font is

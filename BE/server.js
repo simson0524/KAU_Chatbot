@@ -17,6 +17,7 @@ const startServer = async () => {
         server.listen(port,'0.0.0.0', () => {
             console.log(`Server is running on port ${port}`);
         });
+
     } catch (error) {
         console.error('Error starting the server:', error);
         process.exit(1); // 에러 발생 시 서버 종료
