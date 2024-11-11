@@ -266,10 +266,8 @@ class _JoinInputState extends State<JoinInput> {
                       child: SizedBox(
                         width: 100,
                         height: 55,
-                        child: Positioned.fill(
-                          child: CustomPaint(
-                            painter: DottedLineHorizontalPainter(),
-                          ),
+                        child: CustomPaint(
+                          painter: DottedLineHorizontalPainter(),
                         ),
                       ),
                     ),
@@ -608,10 +606,8 @@ class _JoinInputState extends State<JoinInput> {
                       child: SizedBox(
                         width: 40,
                         height: 55,
-                        child: Positioned.fill(
-                          child: CustomPaint(
-                            painter: DottedLineHorizontalPainter(),
-                          ),
+                        child: CustomPaint(
+                          painter: DottedLineHorizontalPainter(),
                         ),
                       ),
                     ),
