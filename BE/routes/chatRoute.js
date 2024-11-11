@@ -7,12 +7,15 @@ const userService = require('../services/userService');
 router.post('/start', userService.loginRequired, chatController.startChat);
 
 // 챗봇에게 질문 (대화 ID 필요)
-router.post('/conversation/:chat_id/ask', userService.loginRequired, chatController.askQuestion);
+router.post('/ask', userService.loginRequired, chatController.askQuestion);
 
 // 대화 기록 조회 (대화 ID 필요)
-router.get('/conversation/:conversation_id/history', userService.loginRequired, chatController.getFilteredChatHistory);
+router.get('/history/:student_id', userService.loginRequired, chatController.getFilteredChatHistory);
+
+
+router.post('/get-ai-response', userService.loginRequired, chatController.getAIResponse);
 
 // AI 서버로 메시지 전달 (대화 내용 전달)
-router.post('/chatbot/ai', userService.loginRequired, chatController.forwardToAI);
+//router.post('/chatbot/ai', userService.loginRequired, chatController.forwardToAI);
 
 module.exports = router;

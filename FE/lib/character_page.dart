@@ -27,29 +27,29 @@ class CharacterPage extends StatelessWidget {
               ),
             ),
           ),
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                const CharacterImage(),
-                const SizedBox(height: 60),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 200, child: Mile()),
-                    const SizedBox(width: 10),
-                    SizedBox(height: 200, child: Maha()),
-                    const SizedBox(width: 10),
-                    SizedBox(height: 131, child: Feet())
-                  ],
+          Column(
+            children: [
+              Expanded(
+                child: const SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      CharacterImage(),
+                      SizedBox(height: 60),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(height: 200, child: Mile()),
+                          SizedBox(width: 10),
+                          SizedBox(height: 200, child: Maha()),
+                          SizedBox(width: 10),
+                          SizedBox(height: 131, child: Feet())
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                SizedBox(height: 70),
-                Padding(
-                  padding: EdgeInsets.only(left: 250.0),
-                  child: Basic(),
-                ),
-                SizedBox(height: 100),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -135,7 +135,7 @@ class Maha extends StatelessWidget {
         );
       },
       child: Container(
-        width: 126,
+        width: 130,
         height: 189,
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -169,33 +169,6 @@ class Feet extends StatelessWidget {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/character_feet.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class Basic extends StatelessWidget {
-  const Basic({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Provider.of<CharacterProvider>(context, listen: false)
-            .setCharacter('KAU 챗봇');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
-        );
-      },
-      child: Container(
-        width: 100,
-        height: 26,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/basic_image.png'),
             fit: BoxFit.cover,
           ),
         ),

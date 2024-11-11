@@ -1,20 +1,22 @@
 # main.py
-
-from langchain.embeddings import HuggingFaceEmbeddings
+import os
+from langchain_openai import OpenAIEmbeddings
 from db_loader import db_loader
 from qa_chain import qa_chain
 
-# 벡터 DB 정보 설정
-COLLECTION_NAME = "vectorDB_1.0"  # 생성된 벡터 DB의 이름
-DB_PATH = "DB/vectorDB_1.0"  # 벡터 DB의 저장 경로
 
-# 기본 임베딩 설정
-embedding_function = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+COLLECTION_NAME1 = "vectorDB_1.3_1"  # 벡터 DB 컬렉션 이름
+COLLECTION_NAME2 = "vectorDB_1.3_2"  # 벡터 DB 컬렉션 이름
+DB_PATH = f"DB/{COLLECTION_NAME1}"  # 로컬에 벡터 DB를 저장할 경로
+
+# OpenAI API 키 설정
+os.environ["OPENAI_API_KEY"] = ""
+EMBEDDING_FUNCTION = OpenAIEmbeddings(model="text-embedding-ada-002")
 
 # 벡터 DB 로드
 vector_store = db_loader(
-    embedding_function=embedding_function,
-    collection_name=COLLECTION_NAME,
+    embedding_function=EMBEDDING_FUNCTION,
+    collection_name=COLLECTION_NAME1,
     path=DB_PATH
 )
 
@@ -25,9 +27,8 @@ else:
     print("벡터 DB가 성공적으로 로드되었습니다.")
 
 # 사용자의 질문에 대해 답변과 URL 제공
-def get_answer_with_url(query, query_history=''):
-    model_name = 'gpt-3.5-turbo'  # 사용할 LLM 모델
-    answer = qa_chain(model_name, query_history, query, vector_store)
+def get_answer_with_url(query):
+    answer = qa_chain(query, vector_store)
     
     # 유사도 검색 수행 및 URL 정보 포함
     results = vector_store.similarity_search(query, k=1)

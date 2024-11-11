@@ -1,4 +1,3 @@
-from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from langchain.embeddings import OpenAIEmbeddings
 from custom_embeddings import *
@@ -11,16 +10,9 @@ from db_loader import db_loader
 from qa_chain import qa_chain
 
 """
-앱 서버에서 챗봇 채팅 api 요청이 들어올 때 처리하는 py파일입니다.
+챗봇 채팅 테스트하는 py파일입니다.
 """
 load_dotenv()
-
-# 가용 모델명
-chat_gpt_model_name_list = ('gpt-4o', 'chatgpt-4o-latest', 'gpt-4o-mini',
-                             'gpt-4-turbo', 'gpt-3.5-turbo')
-gemini_model_name_list = ('gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.0-pro')
-
-app = FastAPI()
 
 vector_store = db_loader(
     embedding_function=EMBEDDING_FUNCTION,
@@ -52,19 +44,15 @@ def get_answer_with_url(query, character):
 
 
 
-# server에서 RAG 인스턴스로 쿼리를 받는 Request객체 정의
-class QueryRequest(BaseModel):
-    query: str
-    character: str
+while True:
+    signal = input("테스트를 중단하고 싶으면 'exit'을 입력하십시오 ->")
+    if signal == 'exit':
+        break
 
-@app.post("/chat")
-async def chat(query_request: QueryRequest):
-    query = query_request.query
-    character = query_request.character
-    
+    character = input("maha, mile, feet 중 캐릭터를 입력하십시오 ->")
+    query = input("질문할 내용을 입력하십시오 ->")
+
     answer = get_answer_with_url(query, character)
     
-    # TODO : user query의 tag쏴줄거 지정하기
-    tag = None
+    print('답변 ->', answer, '\n\n\n')
 
-    return {'answer': answer, 'tag': tag}
