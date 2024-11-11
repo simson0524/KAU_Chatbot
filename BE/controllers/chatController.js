@@ -50,14 +50,12 @@ exports.askQuestion = async (req, res) => {
         // 디버깅 로그
         console.log("student_id:", student_id);
 
-        // const conversation_id = result[0].insertId;
-
         // 질문에 대한 챗봇 응답 생성 (실제 코드)
-        // const { answer, tag } = await chatService.generateAIResponse(question, chat_character);
+        const { answer, tag } = await chatService.generateAIResponse(question, chat_character);
 
         // 테스트용 더미데이터
-        const answer = "This is a sample answer."; // 임의의 답변
-        const tag = "sampleTag2"; // 임의의 태그
+        //const answer = "This is a sample answer."; // 임의의 답변
+        //const tag = "sampleTag2"; // 임의의 태그
         
         // chat 테이블에 질문과 응답 저장 (선택된 캐릭터와 함께 저장)
         await chatModel.saveChat({
@@ -96,4 +94,15 @@ exports.getFilteredChatHistory = async (req, res) => {
         res.status(500).json({ error: 'Failed to get chat history' });
     }
 };
+
+// recsys 컨트롤러
+exports.getAIResponse = async (req, res) => {
+    try {
+      const studentId = req.user.student_id;
+      const answer = await aiService.getAIResponse(studentId);
+      res.json({ answer });
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching AI response' });
+    }
+  };
 

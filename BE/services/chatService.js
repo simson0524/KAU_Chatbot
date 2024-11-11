@@ -47,3 +47,20 @@ exports.generateAIResponse = async (question, character) => {
         throw new Error("AI 서버와의 통신에 실패했습니다.");
     }
 };
+
+// 태그값 ai서버로 넘겨주고 답변 받아오기
+exports.getAIResponse = async (studentId) => {
+    // 학생 ID에 해당하는 tags를 DB에서 가져옴
+    const tags = await tagModel.getTagsForStudent(studentId);
+  
+    if (!tags || tags.length === 0) {
+      throw new Error('No tags found for this student');
+    }
+  
+    // AI 서버에 tags만 보내기
+    const response = await axios.post(aiServerUrl, {
+      tags // student_id는 포함시키지 않음
+    });
+  
+    return response.data;
+  };
