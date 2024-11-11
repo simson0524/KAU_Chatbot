@@ -1,7 +1,14 @@
 import 'package:FE/chatting_page.dart';
+import 'package:FE/major_community/ai_board.dart';
+import 'package:FE/major_community/atc_board.dart';
 import 'package:FE/major_community/aviation_board.dart';
+import 'package:FE/major_community/business_board.dart';
+import 'package:FE/major_community/computer_board.dart';
 import 'package:FE/major_community/engineering_board.dart';
+import 'package:FE/major_community/material_board.dart';
+import 'package:FE/major_community/smartdrone_board.dart';
 import 'package:FE/major_community/software_board.dart';
+import 'package:FE/major_community/undeclared_board.dart';
 import 'package:flutter/material.dart';
 
 class MajorBoard extends StatelessWidget {
@@ -12,10 +19,10 @@ class MajorBoard extends StatelessWidget {
     '컴퓨터공학과', //computer_board
     '스마트드론공학과', //smartdrone_board
     '항공운항학과', //aviaition_board
-    '항공교통물류학과',
-    '경영학과',
-    '신소재공학과',
-    '자유전공학과',
+    '항공교통물류학과', //atc_board
+    '경영학과', //business_board
+    '신소재공학과', //material_board
+    '자유전공학과', //undeclared_board
   ];
 
   @override
@@ -95,21 +102,21 @@ class MajorBoard extends StatelessWidget {
                                   case '항공우주기계공학과':
                                     return EngineeringBoardPage();
                                   case 'AI자율주행시스템공학과':
-                                    return SoftwareBoardPage();
+                                    return AiBoardPage();
                                   case '컴퓨터공학과':
-                                    return SoftwareBoardPage();
+                                    return ComputerBoardPage();
                                   case '스마트드론공학과':
-                                    return SoftwareBoardPage();
+                                    return SmartdroneBoardPage();
                                   case '항공운항학과':
                                     return AviationBoard();
                                   case '항공교통물류학과':
-                                    return SoftwareBoardPage();
+                                    return AtcBoardPage();
                                   case '경영학과':
-                                    return SoftwareBoardPage();
+                                    return BusinessBoardPage();
                                   case '신소재공학과':
-                                    return SoftwareBoardPage();
+                                    return MaterialBoardPage();
                                   case '자유전공학과':
-                                    return SoftwareBoardPage();
+                                    return UndeclaredBoardPage();
                                   default:
                                     return Scaffold(
                                       body: Center(

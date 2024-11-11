@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: ComputerBoardPage(),
+    home: UndeclaredBoardPage(),
   ));
 }
 
 // 게시판 화면
-class ComputerBoardPage extends StatefulWidget {
+class UndeclaredBoardPage extends StatefulWidget {
   @override
-  _ComputerBoardPageState createState() => _ComputerBoardPageState();
+  _UndeclaredBoardPageState createState() => _UndeclaredBoardPageState();
 }
 
-class _ComputerBoardPageState extends State<ComputerBoardPage> {
+class _UndeclaredBoardPageState extends State<UndeclaredBoardPage> {
   List<Map<String, String>> posts = [];
   List<Map<String, String>> filteredPosts = [];
   TextEditingController searchController = TextEditingController();
@@ -55,7 +55,7 @@ class _ComputerBoardPageState extends State<ComputerBoardPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('컴퓨터공학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('자유전공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -110,7 +110,7 @@ class _ComputerBoardPageState extends State<ComputerBoardPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ComputerPostDetailPage(
+                              builder: (context) => UndeclaredPostDetailPage(
                                 post: filteredPosts[index], // 클릭된 게시물의 데이터 전달
                               ),
                             ),
@@ -213,7 +213,7 @@ class _ComputerBoardPageState extends State<ComputerBoardPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => NewComputerPostPage(
+                      builder: (context) => NewUndeclaredPostPage(
                         onAddPost: addPost,
                       ),
                     ),
@@ -229,12 +229,12 @@ class _ComputerBoardPageState extends State<ComputerBoardPage> {
 }
 
 // 글 등록 페이지
-class NewComputerPostPage extends StatelessWidget {
+class NewUndeclaredPostPage extends StatelessWidget {
   final Function(String, String) onAddPost;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
 
-  NewComputerPostPage({required this.onAddPost});
+  NewUndeclaredPostPage({required this.onAddPost});
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +242,7 @@ class NewComputerPostPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('컴퓨터공학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('자유전공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -372,16 +372,17 @@ class NewComputerPostPage extends StatelessWidget {
 }
 
 // 글 상세 페이지
-class ComputerPostDetailPage extends StatefulWidget {
+class UndeclaredPostDetailPage extends StatefulWidget {
   final Map<String, String> post;
 
-  ComputerPostDetailPage({required this.post});
+  UndeclaredPostDetailPage({required this.post});
 
   @override
-  _ComputerPostDetailPageState createState() => _ComputerPostDetailPageState();
+  _UndeclaredPostDetailPageState createState() =>
+      _UndeclaredPostDetailPageState();
 }
 
-class _ComputerPostDetailPageState extends State<ComputerPostDetailPage> {
+class _UndeclaredPostDetailPageState extends State<UndeclaredPostDetailPage> {
   List<Map<String, String>> comments = [];
   TextEditingController commentController = TextEditingController();
 
@@ -401,7 +402,7 @@ class _ComputerPostDetailPageState extends State<ComputerPostDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('컴퓨터공학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('자유전공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),

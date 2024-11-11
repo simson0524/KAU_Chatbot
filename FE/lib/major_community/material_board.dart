@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: ComputerBoardPage(),
+    home: MaterialBoardPage(),
   ));
 }
 
 // 게시판 화면
-class ComputerBoardPage extends StatefulWidget {
+class MaterialBoardPage extends StatefulWidget {
   @override
-  _ComputerBoardPageState createState() => _ComputerBoardPageState();
+  _MaterialBoardPageState createState() => _MaterialBoardPageState();
 }
 
-class _ComputerBoardPageState extends State<ComputerBoardPage> {
+class _MaterialBoardPageState extends State<MaterialBoardPage> {
   List<Map<String, String>> posts = [];
   List<Map<String, String>> filteredPosts = [];
   TextEditingController searchController = TextEditingController();
@@ -55,7 +55,7 @@ class _ComputerBoardPageState extends State<ComputerBoardPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('컴퓨터공학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('신소재공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -110,7 +110,7 @@ class _ComputerBoardPageState extends State<ComputerBoardPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ComputerPostDetailPage(
+                              builder: (context) => MaterialPostDetailPage(
                                 post: filteredPosts[index], // 클릭된 게시물의 데이터 전달
                               ),
                             ),
@@ -213,7 +213,7 @@ class _ComputerBoardPageState extends State<ComputerBoardPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => NewComputerPostPage(
+                      builder: (context) => NewMaterialPostPage(
                         onAddPost: addPost,
                       ),
                     ),
@@ -229,12 +229,12 @@ class _ComputerBoardPageState extends State<ComputerBoardPage> {
 }
 
 // 글 등록 페이지
-class NewComputerPostPage extends StatelessWidget {
+class NewMaterialPostPage extends StatelessWidget {
   final Function(String, String) onAddPost;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
 
-  NewComputerPostPage({required this.onAddPost});
+  NewMaterialPostPage({required this.onAddPost});
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +242,7 @@ class NewComputerPostPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('컴퓨터공학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('신소재공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -372,16 +372,16 @@ class NewComputerPostPage extends StatelessWidget {
 }
 
 // 글 상세 페이지
-class ComputerPostDetailPage extends StatefulWidget {
+class MaterialPostDetailPage extends StatefulWidget {
   final Map<String, String> post;
 
-  ComputerPostDetailPage({required this.post});
+  MaterialPostDetailPage({required this.post});
 
   @override
-  _ComputerPostDetailPageState createState() => _ComputerPostDetailPageState();
+  _MaterialPostDetailPageState createState() => _MaterialPostDetailPageState();
 }
 
-class _ComputerPostDetailPageState extends State<ComputerPostDetailPage> {
+class _MaterialPostDetailPageState extends State<MaterialPostDetailPage> {
   List<Map<String, String>> comments = [];
   TextEditingController commentController = TextEditingController();
 
@@ -401,7 +401,7 @@ class _ComputerPostDetailPageState extends State<ComputerPostDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('컴퓨터공학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('신소재공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
