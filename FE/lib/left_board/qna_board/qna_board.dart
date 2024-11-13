@@ -24,12 +24,13 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
     filteredPosts = posts;
   }
 
-  void addPost(String title, String content) {
+  void addPost(String title, String content, String name) {
     setState(() {
       posts.add({
         'title': title,
         'content': content,
-        'date': DateTime.now().toString().split(' ')[0]
+        'date': DateTime.now().toString().split(' ')[0],
+        'name': name,
       });
       filteredPosts = posts;
     });
@@ -55,7 +56,7 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('학교 문의 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('학교문의 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -230,7 +231,7 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
 
 // 글 등록 페이지
 class NewQnaPostPage extends StatelessWidget {
-  final Function(String, String) onAddPost;
+  final Function(String, String, String) onAddPost;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
 
@@ -242,7 +243,7 @@ class NewQnaPostPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('학교 문의 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('학교문의 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -317,16 +318,39 @@ class NewQnaPostPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.all(12.0),
-                      child: SingleChildScrollView(
-                        child: TextField(
-                          controller: contentController,
-                          maxLines: null,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelText: '내용',
+                      child: Stack(
+                        children: [
+                          SingleChildScrollView(
+                            child: TextField(
+                              controller: contentController,
+                              maxLines: null,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                labelText: '내용',
+                              ),
+                              keyboardType: TextInputType.multiline,
+                            ),
                           ),
-                          keyboardType: TextInputType.multiline,
-                        ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.0, vertical: 2.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Text(
+                                '작성자: 홍길동', //DB에서 이름 불러오기
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -337,9 +361,17 @@ class NewQnaPostPage extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          onAddPost(
-                              titleController.text, contentController.text);
-                          Navigator.pop(context);
+                          String dbname = '홍길동'; //db연결 전 임시 이름
+                          //제목 또는 내용의 입력값이 없는 경우
+                          if (titleController.text.isEmpty ||
+                              contentController.text.isEmpty) {
+                            textmessageDialog(context, '제목과 내용 모두 입력해주세요.');
+                          } else {
+                            //글 등록
+                            onAddPost(titleController.text,
+                                contentController.text, dbname);
+                            Navigator.pop(context);
+                          }
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -401,7 +433,7 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('학교 문의 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('학교문의 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -473,17 +505,43 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                   SizedBox(
                     width: double.infinity,
                     child: Container(
+                      constraints: BoxConstraints(
+                        minHeight: 50.0,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.all(12.0),
-                      child: SingleChildScrollView(
-                        child: Text(
-                          widget.post['content']!,
-                          style: TextStyle(fontSize: 16.0),
-                        ),
+                      child: Stack(
+                        children: [
+                          SingleChildScrollView(
+                            child: Text(
+                              widget.post['content']!,
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.0, vertical: 2.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Text(
+                                '작성자: ${widget.post['name']}', // 임시로 표시할 작성자 이름
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -540,6 +598,7 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                       },
                     ),
                   ),
+                  //댓글 달기 권한 부여 필요
                   //댓글 달기
                   Row(
                     children: [
@@ -553,14 +612,19 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: TextField(
                             controller: commentController,
+                            //여기에 권한 여부에따라 활성화 비활성화 코드 작성
+                            //ex, 권한 체크 변수를 bool canComment라고 하면 enabled: canComment, 코드 추가 ( ture일때만 작성가능하게)
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText: '답글을 입력하세요',
                               suffixIcon: IconButton(
                                 icon: Icon(Icons.subdirectory_arrow_left),
-                                onPressed: () {
+                                onPressed:
+                                    //위처럼 권한 체크시 이 부분에 canComment ? 추가
+                                    () {
                                   addComment(commentController.text);
                                 },
+                                //위처럼 권한 체크 시 이 부분에 : null , 추가하여 권한 없을 시 동작하지 않게
                               ),
                             ),
                           ),
@@ -576,4 +640,51 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
       ),
     );
   }
+}
+
+//텍스트 다이얼로그알림
+void textmessageDialog(BuildContext context, String dialogmessage) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      //아무 클릭 없을 시 5초 뒤 자동으로 알림 닫기
+      Future.delayed(const Duration(seconds: 5), () {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      });
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
+          side: const BorderSide(color: Colors.black, width: 1.5),
+        ),
+        child: SizedBox(
+          //dialog 사이즈
+          width: 150,
+          height: 70,
+          child: Padding(
+            padding:
+                const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    dialogmessage,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

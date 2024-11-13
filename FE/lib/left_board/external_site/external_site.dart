@@ -110,7 +110,7 @@ class _ExternalSitePageState extends State<ExternalSitePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ExternalSiteDetailPage(
+                              builder: (context) => ExternalSitePostDetailPage(
                                 post: filteredPosts[index], // 클릭된 게시물의 데이터 전달
                               ),
                             ),
@@ -202,16 +202,18 @@ class _ExternalSitePageState extends State<ExternalSitePage> {
 }
 
 // 글 상세 페이지
-class ExternalSiteDetailPage extends StatefulWidget {
+class ExternalSitePostDetailPage extends StatefulWidget {
   final Map<String, String> post;
 
-  ExternalSiteDetailPage({required this.post});
+  ExternalSitePostDetailPage({required this.post});
 
   @override
-  _ExternalSiteDetailPageState createState() => _ExternalSiteDetailPageState();
+  _ExternalSitePostDetailPageState createState() =>
+      _ExternalSitePostDetailPageState();
 }
 
-class _ExternalSiteDetailPageState extends State<ExternalSiteDetailPage> {
+class _ExternalSitePostDetailPageState
+    extends State<ExternalSitePostDetailPage> {
   List<Map<String, String>> comments = [];
   TextEditingController commentController = TextEditingController();
 

@@ -104,7 +104,6 @@ class LoginImage extends StatelessWidget {
 }
 
 // 입력 - 아이디, 비밀번호
-// 입력 - 아이디, 비밀번호
 class LoginInputFields extends StatefulWidget {
   // 컨트롤러를 받도록 수정
   final TextEditingController idController;

@@ -24,12 +24,13 @@ class _Board21PageState extends State<Board21Page> {
     filteredPosts = posts;
   }
 
-  void addPost(String title, String content) {
+  void addPost(String title, String content, String name) {
     setState(() {
       posts.add({
         'title': title,
         'content': content,
-        'date': DateTime.now().toString().split(' ')[0]
+        'date': DateTime.now().toString().split(' ')[0],
+        'name': name,
       });
       filteredPosts = posts;
     });
@@ -128,7 +129,7 @@ class _Board21PageState extends State<Board21Page> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(20.0),
+                                  borderRadius: BorderRadius.circular(21.0),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -173,7 +174,7 @@ class _Board21PageState extends State<Board21Page> {
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.black),
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(21.0),
                   color: Colors.white,
                 ),
                 child: Padding(
@@ -202,7 +203,7 @@ class _Board21PageState extends State<Board21Page> {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20.0),
+                borderRadius: BorderRadius.circular(21.0),
                 border: Border.all(color: Colors.black),
               ),
               padding:
@@ -230,7 +231,7 @@ class _Board21PageState extends State<Board21Page> {
 
 // 글 등록 페이지
 class New21PostPage extends StatelessWidget {
-  final Function(String, String) onAddPost;
+  final Function(String, String, String) onAddPost;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
 
@@ -295,7 +296,7 @@ class New21PostPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(21.0),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: TextField(
@@ -314,37 +315,68 @@ class New21PostPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.circular(21.0),
                       ),
                       padding: const EdgeInsets.all(12.0),
-                      child: SingleChildScrollView(
-                        child: TextField(
-                          controller: contentController,
-                          maxLines: null,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelText: '내용',
+                      child: Stack(
+                        children: [
+                          SingleChildScrollView(
+                            child: TextField(
+                              controller: contentController,
+                              maxLines: null,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                labelText: '내용',
+                              ),
+                              keyboardType: TextInputType.multiline,
+                            ),
                           ),
-                          keyboardType: TextInputType.multiline,
-                        ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.0, vertical: 2.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Text(
+                                '작성자: 홍길동', //DB에서 이름 불러오기
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 21),
                   // 등록 버튼
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       GestureDetector(
                         onTap: () {
-                          onAddPost(
-                              titleController.text, contentController.text);
-                          Navigator.pop(context);
+                          String dbname = '홍길동'; //db연결 전 임시 이름
+                          //제목 또는 내용의 입력값이 없는 경우
+                          if (titleController.text.isEmpty ||
+                              contentController.text.isEmpty) {
+                            textmessageDialog(context, '제목과 내용 모두 입력해주세요.');
+                          } else {
+                            //글 등록
+                            onAddPost(titleController.text,
+                                contentController.text, dbname);
+                            Navigator.pop(context);
+                          }
                         },
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(20.0),
+                            borderRadius: BorderRadius.circular(21.0),
                             border: Border.all(color: Colors.black),
                           ),
                           padding: EdgeInsets.symmetric(
@@ -457,7 +489,7 @@ class _Post21DetailPageState extends State<Post21DetailPage> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.circular(21.0),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Text(
@@ -473,21 +505,47 @@ class _Post21DetailPageState extends State<Post21DetailPage> {
                   SizedBox(
                     width: double.infinity,
                     child: Container(
+                      constraints: BoxConstraints(
+                        minHeight: 50.0,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.circular(21.0),
                       ),
                       padding: const EdgeInsets.all(12.0),
-                      child: SingleChildScrollView(
-                        child: Text(
-                          widget.post['content']!,
-                          style: TextStyle(fontSize: 16.0),
-                        ),
+                      child: Stack(
+                        children: [
+                          SingleChildScrollView(
+                            child: Text(
+                              widget.post['content']!,
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.0, vertical: 2.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Text(
+                                '작성자: ${widget.post['name']}', // 임시로 표시할 작성자 이름
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 21),
 
                   // 댓글 표시
                   Text('답글',
@@ -509,7 +567,7 @@ class _Post21DetailPageState extends State<Post21DetailPage> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(20.0),
+                                  borderRadius: BorderRadius.circular(21.0),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -548,7 +606,7 @@ class _Post21DetailPageState extends State<Post21DetailPage> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(20.0),
+                            borderRadius: BorderRadius.circular(21.0),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: TextField(
@@ -576,4 +634,51 @@ class _Post21DetailPageState extends State<Post21DetailPage> {
       ),
     );
   }
+}
+
+//텍스트 다이얼로그알림
+void textmessageDialog(BuildContext context, String dialogmessage) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      //아무 클릭 없을 시 5초 뒤 자동으로 알림 닫기
+      Future.delayed(const Duration(seconds: 5), () {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      });
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(21.0), //테두리 모서리 둥글게
+          side: const BorderSide(color: Colors.black, width: 1.5),
+        ),
+        child: SizedBox(
+          //dialog 사이즈
+          width: 150,
+          height: 70,
+          child: Padding(
+            padding:
+                const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    dialogmessage,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
