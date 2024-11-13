@@ -12,6 +12,7 @@
         "Joinfinish",
         "nullcheck",
         "showcheck",
-        "textmessage"
+        "textmessage",
+        "unfocus"
     ]
 }

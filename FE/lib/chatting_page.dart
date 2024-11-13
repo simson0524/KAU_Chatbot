@@ -1,4 +1,11 @@
 import 'dart:ui';
+
+import 'package:FE/character_provider.dart';
+import 'package:FE/left_board/college_num_community/college_num.dart';
+import 'package:FE/left_board/external_site/external_site.dart';
+import 'package:FE/left_board/qna_board/qna_board.dart';
+import 'package:FE/left_board/notice_board/notice_board.dart';
+import 'package:FE/left_board/major_community/major_board.dart';
 import 'package:FE/main.dart';
 import 'package:FE/pw_member_info.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +15,6 @@ import 'package:FE/api/chat_api.dart'; // ChatApi import for server interaction
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
-import 'package:FE/major_community/major_board.dart';
 
 class ChattingPage extends StatefulWidget {
   final String characterName;
@@ -578,7 +584,7 @@ class LeftDrawerWidget extends StatelessWidget {
                   children: [
                     //학교 공지 게시판
                     boardNavigation(
-                        context, '학교 공지 게시판', PwMemberInfo(), onClose),
+                        context, '학교 공지 게시판', NoticeBoardPage(), onClose),
                     Divider(
                       color: Colors.grey,
                       thickness: 1.0,
@@ -586,7 +592,7 @@ class LeftDrawerWidget extends StatelessWidget {
                     ),
                     // 외부사이트 게시판
                     boardNavigation(
-                        context, '외부 사이트 게시판', PwMemberInfo(), onClose),
+                        context, '외부 사이트 게시판', ExternalSitePage(), onClose),
                     Divider(
                       color: Colors.grey,
                       thickness: 1.0,
@@ -602,7 +608,7 @@ class LeftDrawerWidget extends StatelessWidget {
                     ),
                     //학번별 커뮤니티 게시판
                     boardNavigation(
-                        context, '학번별 커뮤니티 게시판', PwMemberInfo(), onClose),
+                        context, '학번별 커뮤니티 게시판', CollegeNum(), onClose),
                     Divider(
                       color: Colors.grey,
                       thickness: 1.0,
@@ -610,7 +616,7 @@ class LeftDrawerWidget extends StatelessWidget {
                     ),
                     //학교 문의 게시판
                     boardNavigation(
-                        context, '학교 문의 게시판', PwMemberInfo(), onClose),
+                        context, '학교 문의 게시판', QnaBoardPage(), onClose),
                     Divider(
                       color: Colors.grey,
                       thickness: 1.0,

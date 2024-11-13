@@ -1,14 +1,14 @@
 import 'package:FE/chatting_page.dart';
-import 'package:FE/major_community/ai_board.dart';
-import 'package:FE/major_community/atc_board.dart';
-import 'package:FE/major_community/aviation_board.dart';
-import 'package:FE/major_community/business_board.dart';
-import 'package:FE/major_community/computer_board.dart';
-import 'package:FE/major_community/engineering_board.dart';
-import 'package:FE/major_community/material_board.dart';
-import 'package:FE/major_community/smartdrone_board.dart';
-import 'package:FE/major_community/software_board.dart';
-import 'package:FE/major_community/undeclared_board.dart';
+import 'package:FE/left_board/major_community/ai_board.dart';
+import 'package:FE/left_board/major_community/atc_board.dart';
+import 'package:FE/left_board/major_community/aviation_board.dart';
+import 'package:FE/left_board/major_community/business_board.dart';
+import 'package:FE/left_board/major_community/computer_board.dart';
+import 'package:FE/left_board/major_community/engineering_board.dart';
+import 'package:FE/left_board/major_community/material_board.dart';
+import 'package:FE/left_board/major_community/smartdrone_board.dart';
+import 'package:FE/left_board/major_community/software_board.dart';
+import 'package:FE/left_board/major_community/undeclared_board.dart';
 import 'package:flutter/material.dart';
 
 class MajorBoard extends StatelessWidget {
@@ -19,7 +19,7 @@ class MajorBoard extends StatelessWidget {
     '컴퓨터공학과', //computer_board
     '스마트드론공학과', //smartdrone_board
     '항공운항학과', //aviaition_board
-    '항공교통물류학과', //atc_board
+    '항공교통물류학부', //atc_board
     '경영학과', //business_board
     '신소재공학과', //material_board
     '자유전공학과', //undeclared_board
@@ -109,7 +109,7 @@ class MajorBoard extends StatelessWidget {
                                     return SmartdroneBoardPage();
                                   case '항공운항학과':
                                     return AviationBoard();
-                                  case '항공교통물류학과':
+                                  case '항공교통물류학부':
                                     return AtcBoardPage();
                                   case '경영학과':
                                     return BusinessBoardPage();

@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: AtcBoardPage(),
+    home: SmartdroneBoardPage(),
   ));
 }
 
 // 게시판 화면
-class AtcBoardPage extends StatefulWidget {
+class SmartdroneBoardPage extends StatefulWidget {
   @override
-  _AtcBoardPageState createState() => _AtcBoardPageState();
+  _SmartdroneBoardPageState createState() => _SmartdroneBoardPageState();
 }
 
-class _AtcBoardPageState extends State<AtcBoardPage> {
+class _SmartdroneBoardPageState extends State<SmartdroneBoardPage> {
   List<Map<String, String>> posts = [];
   List<Map<String, String>> filteredPosts = [];
   TextEditingController searchController = TextEditingController();
@@ -24,12 +24,13 @@ class _AtcBoardPageState extends State<AtcBoardPage> {
     filteredPosts = posts;
   }
 
-  void addPost(String title, String content) {
+  void addPost(String title, String content, String name) {
     setState(() {
       posts.add({
         'title': title,
         'content': content,
-        'date': DateTime.now().toString().split(' ')[0]
+        'date': DateTime.now().toString().split(' ')[0],
+        'name': name,
       });
       filteredPosts = posts;
     });
@@ -55,7 +56,7 @@ class _AtcBoardPageState extends State<AtcBoardPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('항공교통물류학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('스마트드론공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -110,7 +111,7 @@ class _AtcBoardPageState extends State<AtcBoardPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => AtcPostDetailPage(
+                              builder: (context) => PostSmartdroneDetailPage(
                                 post: filteredPosts[index], // 클릭된 게시물의 데이터 전달
                               ),
                             ),
@@ -213,7 +214,7 @@ class _AtcBoardPageState extends State<AtcBoardPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => NewAtcPostPage(
+                      builder: (context) => NewSmartdronePostPage(
                         onAddPost: addPost,
                       ),
                     ),
@@ -229,12 +230,12 @@ class _AtcBoardPageState extends State<AtcBoardPage> {
 }
 
 // 글 등록 페이지
-class NewAtcPostPage extends StatelessWidget {
-  final Function(String, String) onAddPost;
+class NewSmartdronePostPage extends StatelessWidget {
+  final Function(String, String, String) onAddPost;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
 
-  NewAtcPostPage({required this.onAddPost});
+  NewSmartdronePostPage({required this.onAddPost});
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +243,7 @@ class NewAtcPostPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('항공교통물류학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('스마트드론공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -317,16 +318,39 @@ class NewAtcPostPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.all(12.0),
-                      child: SingleChildScrollView(
-                        child: TextField(
-                          controller: contentController,
-                          maxLines: null,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelText: '내용',
+                      child: Stack(
+                        children: [
+                          SingleChildScrollView(
+                            child: TextField(
+                              controller: contentController,
+                              maxLines: null,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                labelText: '내용',
+                              ),
+                              keyboardType: TextInputType.multiline,
+                            ),
                           ),
-                          keyboardType: TextInputType.multiline,
-                        ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.0, vertical: 2.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Text(
+                                '작성자: 홍길동', //DB에서 이름 불러오기
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -337,9 +361,17 @@ class NewAtcPostPage extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          onAddPost(
-                              titleController.text, contentController.text);
-                          Navigator.pop(context);
+                          String dbname = '홍길동'; //db연결 전 임시 이름
+                          //제목 또는 내용의 입력값이 없는 경우
+                          if (titleController.text.isEmpty ||
+                              contentController.text.isEmpty) {
+                            textmessageDialog(context, '제목과 내용 모두 입력해주세요.');
+                          } else {
+                            //글 등록
+                            onAddPost(titleController.text,
+                                contentController.text, dbname);
+                            Navigator.pop(context);
+                          }
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -372,16 +404,17 @@ class NewAtcPostPage extends StatelessWidget {
 }
 
 // 글 상세 페이지
-class AtcPostDetailPage extends StatefulWidget {
+class PostSmartdroneDetailPage extends StatefulWidget {
   final Map<String, String> post;
 
-  AtcPostDetailPage({required this.post});
+  PostSmartdroneDetailPage({required this.post});
 
   @override
-  _AtcPostDetailPageState createState() => _AtcPostDetailPageState();
+  _PostSmartdroneDetailPageState createState() =>
+      _PostSmartdroneDetailPageState();
 }
 
-class _AtcPostDetailPageState extends State<AtcPostDetailPage> {
+class _PostSmartdroneDetailPageState extends State<PostSmartdroneDetailPage> {
   List<Map<String, String>> comments = [];
   TextEditingController commentController = TextEditingController();
 
@@ -401,7 +434,7 @@ class _AtcPostDetailPageState extends State<AtcPostDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('항공교통물류학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('스마트드론공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -473,17 +506,43 @@ class _AtcPostDetailPageState extends State<AtcPostDetailPage> {
                   SizedBox(
                     width: double.infinity,
                     child: Container(
+                      constraints: BoxConstraints(
+                        minHeight: 50.0,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.all(12.0),
-                      child: SingleChildScrollView(
-                        child: Text(
-                          widget.post['content']!,
-                          style: TextStyle(fontSize: 16.0),
-                        ),
+                      child: Stack(
+                        children: [
+                          SingleChildScrollView(
+                            child: Text(
+                              widget.post['content']!,
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.0, vertical: 2.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Text(
+                                '작성자: ${widget.post['name']}', // 임시로 표시할 작성자 이름
+                                style: TextStyle(
+                                  fontSize: 12.0,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -576,4 +635,51 @@ class _AtcPostDetailPageState extends State<AtcPostDetailPage> {
       ),
     );
   }
+}
+
+//텍스트 다이얼로그알림
+void textmessageDialog(BuildContext context, String dialogmessage) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      //아무 클릭 없을 시 5초 뒤 자동으로 알림 닫기
+      Future.delayed(const Duration(seconds: 5), () {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      });
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
+          side: const BorderSide(color: Colors.black, width: 1.5),
+        ),
+        child: SizedBox(
+          //dialog 사이즈
+          width: 150,
+          height: 70,
+          child: Padding(
+            padding:
+                const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    dialogmessage,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
