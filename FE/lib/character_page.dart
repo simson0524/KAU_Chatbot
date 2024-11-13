@@ -1,5 +1,5 @@
 import 'package:FE/character_provider.dart';
-import 'package:FE/chatting_page.dart';
+import 'package:FE/main.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -99,10 +99,7 @@ class Mile extends StatelessWidget {
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
             .setCharacter('마일');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
-        );
+        finishallJoinDialog(context);
       },
       child: Container(
         width: 85,
@@ -127,10 +124,7 @@ class Maha extends StatelessWidget {
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
             .setCharacter('마하');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
-        );
+        finishallJoinDialog(context);
       },
       child: Container(
         width: 130,
@@ -155,10 +149,7 @@ class Feet extends StatelessWidget {
       onTap: () {
         Provider.of<CharacterProvider>(context, listen: false)
             .setCharacter('피트');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ChattingPage()),
-        );
+        finishallJoinDialog(context);
       },
       child: Container(
         width: 85,
@@ -172,4 +163,65 @@ class Feet extends StatelessWidget {
       ),
     );
   }
+}
+
+//회원가입 모두 완료 알림창
+void finishallJoinDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
+          side: const BorderSide(color: Colors.black, width: 1.5),
+        ),
+        child: SizedBox(
+          //dialog 사이즈
+          width: 220,
+          height: 100,
+          child: Padding(
+            padding:
+                const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  '회원가입이 모두 완료되었습니다. \n 재로그인해주세요.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10), //텍스트와 버튼 사이 간격
+                //캐릭터선택 버튼
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginPage()),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(width: 1.2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: const Text(
+                    '로그인',
+                    style: TextStyle(fontSize: 10, color: Colors.black),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

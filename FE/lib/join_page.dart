@@ -857,7 +857,7 @@ void finishJoinDialog(BuildContext context) {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text(
-                  '회원가입이 완료되었습니다. \n 다시 로그인 해주세요.',
+                  '회원가입 정보가 저장되었습니다.. \n 마지막 설정인 캐릭터 선택을 해주세요.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -866,13 +866,13 @@ void finishJoinDialog(BuildContext context) {
                   ),
                 ),
                 const SizedBox(height: 10), //텍스트와 버튼 사이 간격
-                //로그인 버튼
+                //캐릭터선택 버튼
                 OutlinedButton(
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const LoginPage()),
+                          builder: (context) => const CharacterPage()),
                     );
                   },
                   style: OutlinedButton.styleFrom(
@@ -882,7 +882,7 @@ void finishJoinDialog(BuildContext context) {
                     visualDensity: VisualDensity.compact,
                   ),
                   child: const Text(
-                    '로그인',
+                    '캐릭터 선택',
                     style: TextStyle(fontSize: 10, color: Colors.black),
                   ),
                 ),
