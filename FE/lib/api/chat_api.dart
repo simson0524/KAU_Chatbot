@@ -5,30 +5,36 @@ class ChatApi {
   // Sends a question to the chatbot and receives the response
   static Future<Map<String, dynamic>> sendQuestion(
       String token, String question, String character) async {
-    final url = Uri.parse('http://10.0.2.2:3000/chatbot/conversation/ask');
+    final url = Uri.parse('http://192.168.0.22:3000/chat/ask');
 
     try {
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization':
-              'Bearer $token', // Token added to Authorization header
+          'Authorization': 'Bearer $token',
         },
         body: json.encode({
           'question': question,
-          'chat_character':
-              character, // Include character parameter (default: 마하)
+          'chat_character': character,
         }),
       );
 
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
-        return {
-          'answer': responseBody['answer'],
-          'tag': responseBody['tag'], // Include tag data if necessary
-        };
+
+        if (responseBody['answer'] != null && responseBody['tag'] != null) {
+          return {
+            'answer': responseBody['answer'],
+            'tag': responseBody['tag'],
+          };
+        } else {
+          print('Unexpected response format: $responseBody');
+          throw Exception('Invalid response format');
+        }
       } else {
+        print(
+            'Error response: ${response.statusCode} ${response.reasonPhrase}');
         throw Exception('Failed to send question');
       }
     } catch (error) {

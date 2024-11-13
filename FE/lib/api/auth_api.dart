@@ -13,7 +13,7 @@ class AuthApi {
     String gender,
     String residence,
   ) async {
-    final url = Uri.parse('http://10.0.2.2:3000/user/register');
+    final url = Uri.parse('http://192.168.0.22:3000/user/register');
 
     try {
       final response = await http.post(
@@ -40,7 +40,7 @@ class AuthApi {
 
   // 이메일 인증번호 전송 API 호출 함수
   static Future<http.Response> sendEmailVerification(String email) async {
-    final url = Uri.parse('http://10.0.2.2:3000/user/send-email');
+    final url = Uri.parse('http://192.168.0.22:3000/user/send-email');
 
     try {
       final response = await http.post(
@@ -58,7 +58,7 @@ class AuthApi {
 
   // 이메일 인증번호 확인 API 호출 함수
   static Future<http.Response> verifyEmailCode(String email, int code) async {
-    final url = Uri.parse('http://10.0.2.2:3000/user/verify-email');
+    final url = Uri.parse('http://192.168.0.22:3000/user/verify-email');
 
     try {
       final response = await http.post(
@@ -80,7 +80,7 @@ class AuthApi {
   // 로그인 API 호출 함수
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
-    final url = Uri.parse('http://10.0.2.2:3000/user/login');
+    final url = Uri.parse('http://192.168.0.22:3000/user/login');
 
     try {
       final response = await http.post(
@@ -110,6 +110,28 @@ class AuthApi {
       return {
         'message': 'Login failed due to an error',
       };
+    }
+  }
+
+  // 비밀번호 변경 API 호출 함수
+  static Future<http.Response> changePassword(
+      String currentPassword, String newPassword) async {
+    final url = Uri.parse('http://192.168.0.22:3000/user/password');
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'passward': currentPassword,
+          'new_passward': newPassword,
+        }),
+      );
+
+      return response; // statusCode와 응답 본문을 포함하여 반환
+    } catch (error) {
+      print('Error occurred during password change: $error');
+      throw Exception('비밀번호 변경 중 오류가 발생했습니다.');
     }
   }
 }

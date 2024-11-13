@@ -114,3 +114,15 @@ exports.saveOrUpdateTags = async (student_id, newTag) => {
         throw error;
     }
 };
+
+
+// student_id로 태그값 찾기
+exports.getTagsForStudent = async (studentId) => {
+    const query = 'SELECT tags FROM tag_sequence WHERE student_id = ?';
+    const [rows] = await db.execute(query, [studentId]);
+  
+    if (rows.length > 0) {
+      return JSON.parse(rows[0].tags);
+    }
+    return null;
+  };

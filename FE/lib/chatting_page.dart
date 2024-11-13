@@ -29,76 +29,59 @@ class _ChattingPageState extends State<ChattingPage> {
   final TextEditingController _controller = TextEditingController();
   final ChatDao _chatDao = ChatDao();
   late String token;
-  int chatId = 1;
+  int chatId = 0;
   List<Map<String, dynamic>> messages = [];
 
   //상단바 관련
   bool right_isDrawerOpen = false;
 
-  void right_openDrawer() {
-    setState(() {
-      if (left_isDrawerOpen) {
-        left_isDrawerOpen = false;
-      }
-      right_isDrawerOpen = true;
-    });
-  }
-
-  void right_closeDrawer() {
-    setState(() {
-      right_isDrawerOpen = false;
-    });
-  }
-
   bool left_isDrawerOpen = false;
-
-  void left_openDrawer() {
-    setState(() {
-      if (right_isDrawerOpen) {
-        right_isDrawerOpen = false;
-      }
-      left_isDrawerOpen = true;
-    });
-  }
-
-  void left_closeDrawer() {
-    setState(() {
-      left_isDrawerOpen = false;
-    });
-  }
 
   // 첫 안내 자동 메시지
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _initializeChat();
-      await _loadMessagesFromLocal();
+      bool isInitialized = await _initializeChat();
+      if (isInitialized) {
+        await _loadMessagesFromLocal();
+      } else {
+        // Navigate to login or show an error message if needed
+        print("Initialization failed. Token is missing.");
+      }
     });
   }
 
-  // Initialize token and chatId
-  Future<void> _initializeChat() async {
+// Initialize token and chatId
+  Future<bool> _initializeChat() async {
     final prefs = await SharedPreferences.getInstance();
     token = prefs.getString("accessToken") ??
         ''; // Default to an empty string if null
     chatId = await _chatDao.getNewChatId();
 
     if (token.isEmpty) {
-      // Handle the case when token is missing, perhaps navigate to login or show a message
       print("Token is missing. Please login.");
-      // Optionally, add navigation to the login screen here
+      // Optionally navigate to the login screen or handle the missing token case here
+      return false; // Indicate initialization failed due to missing token
     }
+    return true; // Indicate successful initialization
   }
 
   // Load messages from local SQLite
   Future<void> _loadMessagesFromLocal() async {
-    final localMessages = await _chatDao.fetchMessages(chatId);
+    final localMessages = await _chatDao.fetchAllMessages(); // 모든 메시지를 불러오기
     if (localMessages.isEmpty) {
       _receiveMessage("안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요!");
     } else {
       setState(() {
-        messages = localMessages;
+        messages = localMessages.map((msg) {
+          return {
+            'message': msg['message'],
+            'time': msg['timestamp'],
+            'isMine': msg['sender'] == 'user', // sender 값을 기반으로 isMine 설정
+            'character': msg['character'],
+          };
+        }).toList();
       });
     }
   }
@@ -119,6 +102,9 @@ class _ChattingPageState extends State<ChattingPage> {
       });
       _controller.clear();
 
+      // Get a new chatId for the response
+      chatId = await _chatDao.getNewChatId();
+
       await _chatDao.insertMessage(
         messageText,
         "user",
@@ -135,23 +121,19 @@ class _ChattingPageState extends State<ChattingPage> {
         // 서버 응답에서 answer 추출
         String botAnswer = response['answer']; // 응답의 'answer' 필드 사용
         _receiveMessage(botAnswer);
-
-        await _chatDao.insertMessage(
-          botAnswer,
-          "bot",
-          currentTime,
-          chatId,
-          widget.characterName,
-        );
       } catch (error) {
         print("Error sending question to server: $error");
       }
     }
   }
 
-// Display bot's response
-  void _receiveMessage(String messageText) {
+// Display bot's response and store it in SQLite
+  void _receiveMessage(String messageText) async {
     String currentTime = DateFormat('HH:mm').format(DateTime.now());
+
+    // Get a new chatId for the response
+    chatId = await _chatDao.getNewChatId();
+
     setState(() {
       messages.add({
         'message': messageText,
@@ -160,6 +142,15 @@ class _ChattingPageState extends State<ChattingPage> {
         'character': widget.characterName,
       });
     });
+
+    // Store the bot's response in SQLite
+    await _chatDao.insertMessage(
+      messageText,
+      "bot",
+      currentTime,
+      chatId,
+      widget.characterName,
+    );
   }
 
   // UI and other methods remain unchanged...
@@ -262,19 +253,20 @@ class _ChattingPageState extends State<ChattingPage> {
                 child: ListView.builder(
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
+                    bool isMine =
+                        messages[index]['isMine'] ?? false; // 기본값 false 추가
+
                     return ChatBubble(
-                      profileImage: messages[index]['isMine']
-                          ? ''
-                          : _chatCharacterImage(),
-                      name:
-                          messages[index]['isMine'] ? '' : widget.characterName,
+                      profileImage: isMine ? '' : _chatCharacterImage(),
+                      name: isMine ? '' : widget.characterName,
                       message: messages[index]['message'],
                       time: messages[index]['time'],
-                      isMine: messages[index]['isMine'],
+                      isMine: isMine,
                     );
                   },
                 ),
               ),
+
               // Message input field and send button
               Padding(
                 padding:

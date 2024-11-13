@@ -20,7 +20,7 @@ exports.getMailOptions = (to, authNumber) => {
         from: 'jewoo2000@kau.kr',
         to: to, // 도착 메일 주소
         subject: '이메일 인증',
-        html: `<h3>산학 프로젝트 7조 - 이메일 인증 테스트<h3></p></p>
+        html: `<h3>KAU RAG - 이메일 인증<h3></p></p>
                 <h2>${authNumber}<h2>`
     }
 }
@@ -28,6 +28,11 @@ exports.getMailOptions = (to, authNumber) => {
 // 인증번호 생성
 exports.generateCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// 임시 비밀번호 생성
+exports.generateTempPassword = () => {
+    return Math.random().toString(36).slice(2);
 }
 
 // 로그인 되었는지 확인하는 미들웨어
