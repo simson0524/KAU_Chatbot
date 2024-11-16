@@ -108,7 +108,7 @@ class MajorBoard extends StatelessWidget {
                                   case '스마트드론공학과':
                                     return SmartdroneBoardPage();
                                   case '항공운항학과':
-                                    return AviationBoard();
+                                    return AviationBoardPage();
                                   case '항공교통물류학부':
                                     return AtcBoardPage();
                                   case '경영학과':
