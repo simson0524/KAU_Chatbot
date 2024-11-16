@@ -1,5 +1,7 @@
+import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -69,7 +71,10 @@ class _SoftwareBoardPageState extends State<SoftwareBoardPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },
@@ -256,7 +261,10 @@ class NewSoftwarePostPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },
@@ -446,7 +454,10 @@ class _PostSoftwareDetailPageState extends State<PostSoftwareDetailPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },

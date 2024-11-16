@@ -1,5 +1,7 @@
+import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -69,7 +71,10 @@ class _Board21PageState extends State<Board21Page> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },
@@ -256,7 +261,10 @@ class New21PostPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },
@@ -446,7 +454,10 @@ class _Post21DetailPageState extends State<Post21DetailPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },

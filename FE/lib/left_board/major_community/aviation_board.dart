@@ -1,5 +1,7 @@
+import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -69,7 +71,10 @@ class _AviationBoardPageState extends State<AviationBoardPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },
@@ -256,7 +261,10 @@ class NewAviationPostPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },
@@ -446,7 +454,10 @@ class _PostAviationDetailPageState extends State<PostAviationDetailPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },

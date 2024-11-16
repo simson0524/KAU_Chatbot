@@ -1,5 +1,7 @@
+import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -68,7 +70,10 @@ class _NoticeBoardPageState extends State<NoticeBoardPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },
@@ -244,7 +249,10 @@ class _NoticePostDetailPageState extends State<NoticePostDetailPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },

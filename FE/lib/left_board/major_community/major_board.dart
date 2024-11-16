@@ -1,3 +1,4 @@
+import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:FE/left_board/major_community/ai_board.dart';
 import 'package:FE/left_board/major_community/atc_board.dart';
@@ -10,6 +11,7 @@ import 'package:FE/left_board/major_community/smartdrone_board.dart';
 import 'package:FE/left_board/major_community/software_board.dart';
 import 'package:FE/left_board/major_community/undeclared_board.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MajorBoard extends StatelessWidget {
   final List<String> departments = [
@@ -44,7 +46,10 @@ class MajorBoard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },

@@ -1,3 +1,4 @@
+import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:FE/left_board/college_num_community/board_19.dart';
 import 'package:FE/left_board/college_num_community/board_20.dart';
@@ -7,6 +8,7 @@ import 'package:FE/left_board/college_num_community/board_23.dart';
 import 'package:FE/left_board/college_num_community/board_24.dart';
 import 'package:FE/left_board/college_num_community/board_etc.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CollegeNum extends StatelessWidget {
   final List<String> departments = [
@@ -38,7 +40,10 @@ class CollegeNum extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },
