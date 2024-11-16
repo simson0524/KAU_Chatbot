@@ -1,5 +1,6 @@
 import 'package:FE/character_page.dart';
 import 'package:FE/character_provider.dart';
+import 'package:FE/chatting_page.dart';
 import 'package:FE/find_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:FE/join_page.dart';
@@ -237,7 +238,7 @@ class LoginButtons extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const CharacterPage(), // 성공 시 이동할 페이지
+            builder: (context) => const ChattingPage(), // 성공 시 이동할 페이지
           ),
         );
       } else {

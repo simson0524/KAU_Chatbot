@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:FE/character_page.dart';
+import 'package:FE/chatting_page.dart';
 import 'package:FE/find_password_page.dart';
 import 'package:FE/main.dart';
 import 'package:flutter/material.dart';
@@ -696,13 +697,13 @@ class go_login extends StatelessWidget {
                   '비밀번호찾기 페이지로',
                   style: TextStyle(fontSize: 5, color: Colors.black),
                 )),
-            //캐릭터선택창 이동  페이지로 버튼은  추후 삭제 예정
+            //채팅창 이동  페이지로 버튼은  추후 삭제 예정
             TextButton(
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const CharacterPage()),
+                        builder: (context) => const ChattingPage()),
                   );
                 },
                 style: TextButton.styleFrom(
@@ -710,7 +711,7 @@ class go_login extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 ),
                 child: const Text(
-                  '캐릭터선택 페이지로',
+                  '채팅창 페이지로',
                   style: TextStyle(fontSize: 5, color: Colors.black),
                 ))
           ],
