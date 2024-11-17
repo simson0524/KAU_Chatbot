@@ -26,13 +26,14 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
     filteredPosts = posts;
   }
 
-  void addPost(String title, String content, String name) {
+  void addPost(String title, String content, String name, String department) {
     setState(() {
       posts.add({
         'title': title,
         'content': content,
         'date': DateTime.now().toString().split(' ')[0],
         'name': name,
+        'department': department,
       });
       filteredPosts = posts;
     });
@@ -149,6 +150,26 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
                                   ],
                                 ),
                               ),
+                              // 부서 표시
+                              Positioned(
+                                right: 10.0,
+                                bottom: 10.0,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 4.0, vertical: 2.0),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.black),
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  child: Text(
+                                    filteredPosts[index]
+                                        ['department']!, // 부서 표시
+                                    style: TextStyle(
+                                        fontSize: 12.0, color: Colors.black54),
+                                  ),
+                                ),
+                              ),
+
                               Positioned(
                                 right: -65.0,
                                 bottom: 0.0,
