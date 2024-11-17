@@ -12,6 +12,9 @@ router.post('/login', userController.userLogin);
 // 회원가입
 router.post('/register', userController.userSignUp);
 
+// 사용자의 채팅 캐릭터 설정
+router.post('/character', userController.setCharacter);
+
 // 사용자 정보 가져오기
 router.get('/', userService.loginRequired, userController.getUserData);
 
