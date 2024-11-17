@@ -159,14 +159,14 @@ exports.updateUser = async (req, res) => {
 
     try {
         const student_id = req.user.student_id;
-        const { name, major, grade, residence } = req.body;
+        const { name, major, grade, residence, chat_character } = req.body;
 
         const user = await userModel.findUserByStudentId(student_id);
         if (!user) {
             return res.status(400).json({error: '해당 학번의 사용자가 존재하지 않습니다.'});
         }
 
-        await userModel.updateUserInfo(student_id, name, major, grade, residence);
+        await userModel.updateUserInfo(student_id, name, major, grade, residence, chat_character);
         res.status(200).json({'message': '회원 정보 수정이 성공하였습니다.'});
     }
     catch (error) {

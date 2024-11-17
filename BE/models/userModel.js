@@ -44,10 +44,10 @@ exports.updateUserCharacter = async (email, chat_character) => {
 }
 
 // 사용자 정보 수정
-exports.updateUserInfo = async (student_id, name, major, grade, residence) => {
+exports.updateUserInfo = async (student_id, name, major, grade, residence, chat_character) => {
     const result = await db.query(
-        'UPDATE users SET name = ?, major = ?, grade = ?, residence = ? WHERE student_id = ?',
-        [name, major, grade, residence, student_id]
+        'UPDATE users SET name = ?, major = ?, grade = ?, residence = ?, chat_character = ? WHERE student_id = ?',
+        [name, major, grade, residence, chat_character, student_id]
     );
     return result;
 }
