@@ -24,13 +24,14 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
     filteredPosts = posts;
   }
 
-  void addPost(String title, String content, String name) {
+  void addPost(String title, String content, String name, String department) {
     setState(() {
       posts.add({
         'title': title,
         'content': content,
         'date': DateTime.now().toString().split(' ')[0],
         'name': name,
+        'department': department,
       });
       filteredPosts = posts;
     });
@@ -144,6 +145,26 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
                                   ],
                                 ),
                               ),
+                              // 부서 표시
+                              Positioned(
+                                right: 10.0,
+                                bottom: 10.0,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 4.0, vertical: 2.0),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.black),
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  child: Text(
+                                    filteredPosts[index]
+                                        ['department']!, // 부서 표시
+                                    style: TextStyle(
+                                        fontSize: 12.0, color: Colors.black54),
+                                  ),
+                                ),
+                              ),
+
                               Positioned(
                                 right: -65.0,
                                 bottom: 0.0,
@@ -231,9 +252,10 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
 
 // 글 등록 페이지
 class NewQnaPostPage extends StatelessWidget {
-  final Function(String, String, String) onAddPost;
+  final Function(String, String, String, String) onAddPost;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
+  String selectedDepartment = '학생처'; // 기본값 설정
 
   NewQnaPostPage({required this.onAddPost});
 
@@ -307,7 +329,61 @@ class NewQnaPostPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+
+                  SizedBox(height: 10),
+
+                  // 문의부서 선택 부분 추가
+                  Container(
+                    margin: EdgeInsets.only(bottom: 16.0), // 아래 여백 추가
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // '문의부서' 텍스트 박스
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 50.0, vertical: 12.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: Text(
+                            '문의부서',
+                            style: TextStyle(fontSize: 15.0),
+                          ),
+                        ),
+                        // 부서 선택 드롭다운
+                        Container(
+                          width: MediaQuery.of(context).size.width *
+                              0.4, // 절반 크기로 조정
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: DropdownButton<String>(
+                            value: selectedDepartment,
+                            isExpanded: true,
+                            items:
+                                ['학생처', '교무처', '기타'].map((String department) {
+                              return DropdownMenuItem<String>(
+                                value: department,
+                                child: Text(department),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                selectedDepartment = newValue;
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 2),
 
                   // 내용 입력 칸
                   Expanded(
@@ -368,8 +444,11 @@ class NewQnaPostPage extends StatelessWidget {
                             textmessageDialog(context, '제목과 내용 모두 입력해주세요.');
                           } else {
                             //글 등록
-                            onAddPost(titleController.text,
-                                contentController.text, dbname);
+                            onAddPost(
+                                titleController.text,
+                                contentController.text,
+                                dbname,
+                                selectedDepartment);
                             Navigator.pop(context);
                           }
                         },
@@ -486,16 +565,41 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                   SizedBox(
                     width: double.infinity,
                     child: Container(
+                      constraints: BoxConstraints(
+                        minHeight: 35.0,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text(
-                        widget.post['title']!,
-                        style: TextStyle(
-                            fontSize: 18.0, fontWeight: FontWeight.bold),
+                      child: Stack(
+                        children: [
+                          Text(
+                            widget.post['title']!,
+                            style: TextStyle(
+                                fontSize: 18.0, fontWeight: FontWeight.bold),
+                          ),
+                          // 부서 표시 코드 추가
+                          Positioned(
+                            right: 0,
+                            top: 4,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 4.0, vertical: 2.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: Text(
+                                ' ${widget.post['department']}', // 부서 표시
+                                style: TextStyle(
+                                    fontSize: 12.0, color: Colors.black54),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
