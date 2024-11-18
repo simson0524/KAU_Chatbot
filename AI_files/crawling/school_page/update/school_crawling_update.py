@@ -55,7 +55,7 @@ for index, row in new_urls.iterrows():
         if bbs_id_match and ntt_id_match:
             bbs_id = bbs_id_match.group(1)
             ntt_id = ntt_id_match.group(1)
-            custom_id = f"{bbs_id}{ntt_id}"  # 예: 011953654
+            custom_id = f"항공대공지_{bbs_id}{ntt_id}"  # 예: 011953654
         else:
             custom_id = f"ID_{index + 1}"  # 예외 상황에 대비한 기본 ID
 
