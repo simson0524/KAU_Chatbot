@@ -1,14 +1,19 @@
 import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:FE/left_board/major_community/ai_board.dart';
+import 'package:FE/left_board/major_community/airbusiness_board.dart';
+import 'package:FE/left_board/major_community/airelectronic_board.dart';
 import 'package:FE/left_board/major_community/atc_board.dart';
 import 'package:FE/left_board/major_community/aviation_board.dart';
 import 'package:FE/left_board/major_community/business_board.dart';
 import 'package:FE/left_board/major_community/computer_board.dart';
+import 'package:FE/left_board/major_community/electronic_board.dart';
 import 'package:FE/left_board/major_community/engineering_board.dart';
+import 'package:FE/left_board/major_community/international_board';
 import 'package:FE/left_board/major_community/material_board.dart';
 import 'package:FE/left_board/major_community/smartdrone_board.dart';
 import 'package:FE/left_board/major_community/software_board.dart';
+import 'package:FE/left_board/major_community/space_board.dart';
 import 'package:FE/left_board/major_community/undeclared_board.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,15 +21,21 @@ import 'package:provider/provider.dart';
 class MajorBoard extends StatelessWidget {
   final List<String> departments = [
     '소프트웨어학과', //페이지이름: software_board
-    '항공우주기계공학과', //engineering_board
-    'AI자율주행시스템공학과', //ai_board
-    '컴퓨터공학과', //computer_board
-    '스마트드론공학과', //smartdrone_board
     '항공운항학과', //aviaition_board
     '항공교통물류학부', //atc_board
+    '항공경영학과', //airbusiness_board
     '경영학과', //business_board
+    '항공우주공학과' //space_board
+        '기계항공공학과', //engineering_board
     '신소재공학과', //material_board
-    '자유전공학과', //undeclared_board
+    '항공우주기계공학과', //spaceengineering_board
+    '항공전자정보공학부', //airelectronic_board
+    '스마트드론공학과', //smartdrone_board
+    '전기전자공학과', //electronic_board
+    '컴퓨터공학과', //computer_board
+    'AI자율주행시스템공학과', //ai_board
+    '자유전공학부', //undeclared_board
+    '국제교류학부', //international_board
   ];
 
   @override
@@ -104,24 +115,37 @@ class MajorBoard extends StatelessWidget {
                                 switch (departments[index]) {
                                   case '소프트웨어학과':
                                     return SoftwareBoardPage();
-                                  case '항공우주기계공학과':
-                                    return EngineeringBoardPage();
-                                  case 'AI자율주행시스템공학과':
-                                    return AiBoardPage();
-                                  case '컴퓨터공학과':
-                                    return ComputerBoardPage();
-                                  case '스마트드론공학과':
-                                    return SmartdroneBoardPage();
                                   case '항공운항학과':
                                     return AviationBoardPage();
                                   case '항공교통물류학부':
                                     return AtcBoardPage();
+                                  case '항공경영학과':
+                                    return AirbusinessBoardPage();
                                   case '경영학과':
                                     return BusinessBoardPage();
+                                  case '항공우주공학과':
+                                    return SpaceBoardPage();
+                                  case '기계항공공학과':
+                                    return EngineeringBoardPage();
                                   case '신소재공학과':
                                     return MaterialBoardPage();
-                                  case '자유전공학과':
+                                  case '항공우주기계공학과':
+                                    return SpaceBoardPage();
+                                  case '항공전자정보공학부':
+                                    return AirelectronicBoardPage();
+                                  case '스마트드론공학과':
+                                    return SmartdroneBoardPage();
+                                  case '전지전자공학과':
+                                    return ElectronicBoardPage();
+                                  case '컴퓨터공학과':
+                                    return ComputerBoardPage();
+                                  case 'AI자율주행시스템공학과':
+                                    return AiBoardPage();
+                                  case '자유전공학부':
                                     return UndeclaredBoardPage();
+                                  case '국제교류학부':
+                                    return InternationalBoardPage();
+
                                   default:
                                     return Scaffold(
                                       body: Center(

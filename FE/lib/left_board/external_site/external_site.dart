@@ -1,5 +1,7 @@
+import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -68,7 +70,10 @@ class _ExternalSitePageState extends State<ExternalSitePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },
@@ -246,7 +251,10 @@ class _ExternalSitePostDetailPageState
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
+                  builder: (context) => ChattingPage(
+                    characterName:
+                        Provider.of<CharacterProvider>(context).character,
+                  ),
                 ),
               );
             },

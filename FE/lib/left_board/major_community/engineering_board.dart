@@ -58,7 +58,7 @@ class _EngineeringBoardPageState extends State<EngineeringBoardPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('항공우주기계공학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('기계항공공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -248,7 +248,7 @@ class NewEngineeringPostPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('항공우주기계공학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('기계항공공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -442,7 +442,7 @@ class _PostEngineeringDetailPageState extends State<PostEngineeringDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('항공우주기계공학과 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('기계항공공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),

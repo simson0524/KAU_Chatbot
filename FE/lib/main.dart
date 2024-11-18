@@ -235,12 +235,13 @@ class LoginButtons extends StatelessWidget {
         await prefs.setString('refreshToken', result['refreshToken'] ?? '');
 
         // 로그인 성공 시 페이지 이동
+        /*
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => const ChattingPage(), // 성공 시 이동할 페이지
           ),
-        );
+        ); */
       } else {
         print('로그인 실패: ${result['message'] ?? '알 수 없는 오류'}');
         // 로그인 실패 시 알림창 표시
@@ -269,6 +270,9 @@ class LoginButtons extends StatelessWidget {
                   final password = pwController.text;
                   _handleLogin(context, email, password); // 로그인 시도
                 },
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: Colors.white, // 흰색 배경 추가
+                ),
                 child: const Text(
                   '로그인',
                   style: TextStyle(fontSize: 15, color: Colors.black),
@@ -290,6 +294,9 @@ class LoginButtons extends StatelessWidget {
                     ),
                   );
                 },
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: Colors.white, // 흰색 배경 추가
+                ),
                 child: const Text(
                   '회원가입',
                   style: TextStyle(fontSize: 15, color: Colors.black),

@@ -266,10 +266,12 @@ void finish_member_info_Dialog(BuildContext context, String dialogmessage) {
     builder: (BuildContext context) {
       Future.delayed(const Duration(seconds: 5), () {
         if (Navigator.canPop(context)) {
+          /*
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const ChattingPage()),
           );
+          */
         }
       });
       return Dialog(

@@ -158,6 +158,7 @@ class _JoinInputState extends State<JoinInput> {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
+        backgroundColor: Colors.white,
         side: const BorderSide(width: 1.2),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
         visualDensity: VisualDensity.compact,
@@ -340,6 +341,7 @@ class _JoinInputState extends State<JoinInput> {
                 }
               },
               style: TextButton.styleFrom(
+                backgroundColor: Colors.white,
                 visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                 side: BorderSide(color: Colors.black),
               ),
@@ -418,6 +420,7 @@ class _JoinInputState extends State<JoinInput> {
                   }
                 },
                 style: TextButton.styleFrom(
+                  backgroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                   visualDensity: VisualDensity(horizontal: 1.0, vertical: 1.0),
                   side: BorderSide(color: Colors.black),
@@ -700,11 +703,13 @@ class go_login extends StatelessWidget {
             //채팅창 이동  페이지로 버튼은  추후 삭제 예정
             TextButton(
                 onPressed: () {
+                  /*
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const ChattingPage()),
                   );
+                  */
                 },
                 style: TextButton.styleFrom(
                   padding:
@@ -792,6 +797,7 @@ class Joinfinish extends StatelessWidget {
               }
             : null,
         style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
           side: const BorderSide(
             width: 1.25,
           ),

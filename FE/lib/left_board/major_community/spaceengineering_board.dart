@@ -5,17 +5,18 @@ import 'package:provider/provider.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: QnaBoardPage(),
+    home: SpaceengineeringBoardPage(),
   ));
 }
 
 // 게시판 화면
-class QnaBoardPage extends StatefulWidget {
+class SpaceengineeringBoardPage extends StatefulWidget {
   @override
-  _QnaBoardPageState createState() => _QnaBoardPageState();
+  _SpaceengineeringBoardPageState createState() =>
+      _SpaceengineeringBoardPageState();
 }
 
-class _QnaBoardPageState extends State<QnaBoardPage> {
+class _SpaceengineeringBoardPageState extends State<SpaceengineeringBoardPage> {
   List<Map<String, String>> posts = [];
   List<Map<String, String>> filteredPosts = [];
   TextEditingController searchController = TextEditingController();
@@ -26,14 +27,13 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
     filteredPosts = posts;
   }
 
-  void addPost(String title, String content, String name, String department) {
+  void addPost(String title, String content, String name) {
     setState(() {
       posts.add({
         'title': title,
         'content': content,
         'date': DateTime.now().toString().split(' ')[0],
         'name': name,
-        'department': department,
       });
       filteredPosts = posts;
     });
@@ -59,7 +59,7 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('학교문의 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('항공우주기계공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -117,7 +117,8 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => PostQnaDetailPage(
+                              builder: (context) =>
+                                  PostSpaceengineeringDetailPage(
                                 post: filteredPosts[index], // 클릭된 게시물의 데이터 전달
                               ),
                             ),
@@ -150,26 +151,6 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
                                   ],
                                 ),
                               ),
-                              // 부서 표시
-                              Positioned(
-                                right: 10.0,
-                                bottom: 10.0,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 4.0, vertical: 2.0),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.black),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: Text(
-                                    filteredPosts[index]
-                                        ['department']!, // 부서 표시
-                                    style: TextStyle(
-                                        fontSize: 12.0, color: Colors.black54),
-                                  ),
-                                ),
-                              ),
-
                               Positioned(
                                 right: -65.0,
                                 bottom: 0.0,
@@ -240,7 +221,7 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => NewQnaPostPage(
+                      builder: (context) => NewSpaceengineeringPostPage(
                         onAddPost: addPost,
                       ),
                     ),
@@ -256,13 +237,12 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
 }
 
 // 글 등록 페이지
-class NewQnaPostPage extends StatelessWidget {
-  final Function(String, String, String, String) onAddPost;
+class NewSpaceengineeringPostPage extends StatelessWidget {
+  final Function(String, String, String) onAddPost;
   final TextEditingController titleController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
-  String? selectedDepartment; //초기값 null 설정
 
-  NewQnaPostPage({required this.onAddPost});
+  NewSpaceengineeringPostPage({required this.onAddPost});
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +250,7 @@ class NewQnaPostPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('학교문의 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('항공우주기계공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -337,67 +317,7 @@ class NewQnaPostPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  // 문의부서 선택 부분 추가
-                  Container(
-                    margin: EdgeInsets.only(bottom: 16.0), // 아래 여백 추가
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // '문의부서' 텍스트 박스
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 50.0, vertical: 12.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          child: Text(
-                            '문의부서',
-                            style: TextStyle(fontSize: 15.0),
-                          ),
-                        ),
-                        // 부서 선택 드롭다운
-                        Container(
-                          width: MediaQuery.of(context).size.width *
-                              0.4, // 절반 크기로 조정
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: DropdownButton<String>(
-                            value: selectedDepartment,
-                            isExpanded: true,
-                            hint: Text('선택'),
-                            items: [
-                              '교무처',
-                              '학생처',
-                              '기획처',
-                              '연구협력처',
-                              '국제교류처',
-                              '사무처',
-                              '기타'
-                            ].map((String department) {
-                              return DropdownMenuItem<String>(
-                                value: department,
-                                child: Text(department),
-                              );
-                            }).toList(),
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                selectedDepartment = newValue;
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 2),
+                  SizedBox(height: 16),
 
                   // 내용 입력 칸
                   Expanded(
@@ -452,23 +372,16 @@ class NewQnaPostPage extends StatelessWidget {
                       GestureDetector(
                         onTap: () {
                           String dbname = '홍길동'; //db연결 전 임시 이름
-                          //제목 또는 내용 또는 부서의 입력값이 없는 경우
+                          //제목 또는 내용의 입력값이 없는 경우
                           if (titleController.text.isEmpty ||
-                              contentController.text.isEmpty ||
-                              selectedDepartment == null) {
-                            textmessageDialog(
-                                context, '제목과 내용 및 문의 부서를 모두 입력해주세요.');
-                            return;
+                              contentController.text.isEmpty) {
+                            textmessageDialog(context, '제목과 내용 모두 입력해주세요.');
+                          } else {
+                            //글 등록
+                            onAddPost(titleController.text,
+                                contentController.text, dbname);
+                            Navigator.pop(context);
                           }
-
-                          //글 등록
-                          onAddPost(
-                            titleController.text,
-                            contentController.text,
-                            dbname,
-                            selectedDepartment!,
-                          );
-                          Navigator.pop(context);
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -501,16 +414,18 @@ class NewQnaPostPage extends StatelessWidget {
 }
 
 // 글 상세 페이지
-class PostQnaDetailPage extends StatefulWidget {
+class PostSpaceengineeringDetailPage extends StatefulWidget {
   final Map<String, String> post;
 
-  PostQnaDetailPage({required this.post});
+  PostSpaceengineeringDetailPage({required this.post});
 
   @override
-  _PostQnaDetailPageState createState() => _PostQnaDetailPageState();
+  _PostSpaceengineeringDetailPageState createState() =>
+      _PostSpaceengineeringDetailPageState();
 }
 
-class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
+class _PostSpaceengineeringDetailPageState
+    extends State<PostSpaceengineeringDetailPage> {
   List<Map<String, String>> comments = [];
   TextEditingController commentController = TextEditingController();
 
@@ -530,7 +445,7 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('학교문의 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('항공우주기계공학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -586,41 +501,16 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                   SizedBox(
                     width: double.infinity,
                     child: Container(
-                      constraints: BoxConstraints(
-                        minHeight: 35.0,
-                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Stack(
-                        children: [
-                          Text(
-                            widget.post['title']!,
-                            style: TextStyle(
-                                fontSize: 18.0, fontWeight: FontWeight.bold),
-                          ),
-                          // 부서 표시 코드 추가
-                          Positioned(
-                            right: 0,
-                            top: 4,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 4.0, vertical: 2.0),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Text(
-                                ' ${widget.post['department']}', // 부서 표시
-                                style: TextStyle(
-                                    fontSize: 12.0, color: Colors.black54),
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        widget.post['title']!,
+                        style: TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -723,7 +613,6 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                       },
                     ),
                   ),
-                  //댓글 달기 권한 부여 필요
                   //댓글 달기
                   Row(
                     children: [
@@ -737,19 +626,14 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           child: TextField(
                             controller: commentController,
-                            //여기에 권한 여부에따라 활성화 비활성화 코드 작성
-                            //ex, 권한 체크 변수를 bool canComment라고 하면 enabled: canComment, 코드 추가 ( ture일때만 작성가능하게)
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText: '답글을 입력하세요',
                               suffixIcon: IconButton(
                                 icon: Icon(Icons.subdirectory_arrow_left),
-                                onPressed:
-                                    //위처럼 권한 체크시 이 부분에 canComment ? 추가
-                                    () {
+                                onPressed: () {
                                   addComment(commentController.text);
                                 },
-                                //위처럼 권한 체크 시 이 부분에 : null , 추가하여 권한 없을 시 동작하지 않게
                               ),
                             ),
                           ),
