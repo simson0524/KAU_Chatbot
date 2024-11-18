@@ -84,10 +84,6 @@ for i, link in enumerate( tqdm(CRAWLING_TARGET_URL, desc='Current Process : 드�
     rows = driver.find_elements(By.CSS_SELECTOR, 'div.bo_table table tbody tr')
 
     for row in rows:
-        # 고유 인덱스
-        idx = '드림스폰_일반장학금_' + str( k )
-        k += 1
-
         # 본문 내용 추출(불가능하므로 None)
         text = None
 
@@ -100,6 +96,11 @@ for i, link in enumerate( tqdm(CRAWLING_TARGET_URL, desc='Current Process : 드�
 
         # 원문 링크 추출
         url = title_element.get_attribute('href')
+
+        # URL에서 idx 값 추출
+        idx_match = re.search(r'idx=(\d+)', url)  # 정규식을 사용하여 idx 값을 추출
+        idx_value = idx_match.group(1)  # 매칭된 idx 값 (예: '7732')
+        idx = f"드림스폰_일반장학금_{idx_value}"  # 고유 인덱스로 저장
 
         # 첨부파일 대신 태그정보 포함
         hashtag_elements = row.find_elements(By.CSS_SELECTOR, 'div.hashtag span')

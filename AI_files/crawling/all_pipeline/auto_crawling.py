@@ -24,6 +24,8 @@ subprocess.run(['python', 'crawling/convert_to_text/max_tag.py'], check=True)
 subprocess.run(['python', 'crawling/convert_to_text/combin_website_csv.py'], check=True)
 subprocess.run(['python', 'crawling/convert_to_text/combin_data_csv.py'], check=True)
 
+subprocess.run(['python', 'crawling/convert_to_text/del_errorcode.py'], check=True)
+
 # 여러 파일 경로 설정
 file_paths = [
     "crawling/csv_files/드림스폰 일반장학금 변환.csv", "crawling/csv_files/드림스폰 일반장학금.csv", "crawling/csv_files/요즘것들 공모전.csv", "crawling/csv_files/요즘것들 대외활동.csv",
@@ -51,3 +53,5 @@ for file_path in file_paths:
         print(f"{file_path} 파일이 {destination_path}로 이동되었습니다.")
     else:
         print(f"{file_path} 파일을 찾을 수 없습니다.")
+
+subprocess.run(['python', 'data_send/send_csv.py'], check=True)

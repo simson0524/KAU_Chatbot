@@ -28,10 +28,8 @@ def summarize_html(html_content):
                  2. 설문 내용 및 방식
                  ...
 
-                tag: ['tag1_start', 'tag2', 'tag3', 'tag4', 'tag5_end']
                 
                 주의: 시작말과 마무리말을 사용하지 말고 예시처럼 작성해.
-                주의: 이때 tag는 가장 연관이 있는 순서부터 작성 및 최대 5개까지만 작성.
                 """},
                 {"role": "user", "content": html_content}
             ]
@@ -75,11 +73,8 @@ def summarize_image(image_url):
                  - 2024-1학기 전공 및 교양 교육과정을 대상으로 모니터링 실시
                  2. 설문 내용 및 방식
                  ...
-
-                tag: ['tag1_start', 'tag2', 'tag3', 'tag4', 'tag5_end']
                 
                 주의: 시작말과 마무리말을 사용하지 말고 예시처럼 작성해.
-                주의: 이때 tag는 가장 연관이 있는 순서부터 작성 및 최대 5개까지만 작성.
                          """},
                         {"type": "image_url", "image_url": {"url": image_url}}
                     ]
@@ -122,30 +117,19 @@ def extract_text_and_tag(text):
     else:
         extracted_text = text.strip()
     
-    # tag 부분 추출
-    tag_match = re.search(r"tag:\s*(\[[^\]]*\])", text)
-    if tag_match:
-        extracted_tag = eval(tag_match.group(1))  # 리스트로 변환
-    else:
-        extracted_tag = []
-    
-    return extracted_text, extracted_tag
+    return extracted_text
 
 # text_convert에서 text와 tag 추출
-df['text_convert_text'], df['text_convert_tag'] = zip(*df['text_convert'].apply(extract_text_and_tag))
+df['text_convert_text'] = df['text_convert'].apply(extract_text_and_tag)
 
 # img_convert에서 text와 tag 추출
-df['img_convert_text'], df['img_convert_tag'] = zip(*df['img_convert'].apply(extract_text_and_tag))
+df['img_convert_text'] = df['img_convert'].apply(extract_text_and_tag)
 
 # files 열에서 태그로 변환
-df['files_tag'] = df['files'].apply(lambda x: eval(x) if isinstance(x, str) else [])
+df['tag'] = df['files'].apply(lambda x: eval(x) if isinstance(x, str) else [])
 
 # text 합치기
 df['text'] = df['text_convert_text'] + "\n\n" + df['img_convert_text']
-
-# tag 합치기 (중복 제거)
-df['tag'] = df['text_convert_tag'] + df['img_convert_tag'] + df['files_tag']
-df['tag'] = df['tag'].apply(lambda x: list(set(x)))  # 중복 제거
 
 # files 열 비우기
 df['files'] = ""
