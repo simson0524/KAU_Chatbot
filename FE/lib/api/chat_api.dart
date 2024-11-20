@@ -5,7 +5,7 @@ class ChatApi {
   // Sends a question to the chatbot and receives the response
   static Future<Map<String, dynamic>> sendQuestion(
       String token, String question, String character) async {
-    final url = Uri.parse('http://192.168.0.22:3000/chat/ask');
+    final url = Uri.parse('http://3.37.153.10:3000:3000/chat/ask');
 
     try {
       final response = await http.post(
