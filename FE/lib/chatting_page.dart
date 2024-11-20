@@ -196,7 +196,7 @@ class _ChattingPageState extends State<ChattingPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
+        title: Text(
           'KAU CHATBOT',
           style: TextStyle(color: Colors.black),
         ),

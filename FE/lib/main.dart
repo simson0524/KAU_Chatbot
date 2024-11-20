@@ -1,4 +1,3 @@
-import 'package:FE/character_page.dart';
 import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:FE/find_password_page.dart';
@@ -24,7 +23,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      theme: ThemeData(
+        fontFamily: 'PoorStory',
+      ),
       title: 'login page',
       home: Scaffold(
         body: LoginPage(), // 로그인 페이지

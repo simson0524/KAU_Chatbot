@@ -703,13 +703,13 @@ class go_login extends StatelessWidget {
             //채팅창 이동  페이지로 버튼은  추후 삭제 예정
             TextButton(
                 onPressed: () {
-                  /*
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const ChattingPage()),
+                        builder: (context) => const ChattingPage(
+                              characterName: 'maha',
+                            )),
                   );
-                  */
                 },
                 style: TextButton.styleFrom(
                   padding:

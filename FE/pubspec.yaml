@@ -35,6 +35,7 @@ dependencies:
   path: ^1.8.0
   provider: ^6.0.0
   intl: ^0.17.0
+
   
   shared_preferences: ^2.0.9
 
@@ -75,10 +76,10 @@ flutter:
    - assets/images/chat_mile.png
    - assets/images/chat_feet.png
    - assets/images/character_friend.png
-
-
-
-
+  fonts:
+    - family: PoorStory
+      fonts:
+      - asset: assets/fonts/PoorStory-Regular.ttf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
