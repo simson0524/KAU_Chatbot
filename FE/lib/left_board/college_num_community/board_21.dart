@@ -71,10 +71,7 @@ class _Board21PageState extends State<Board21Page> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -261,10 +258,7 @@ class New21PostPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -454,10 +448,7 @@ class _Post21DetailPageState extends State<Post21DetailPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },

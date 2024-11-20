@@ -71,10 +71,7 @@ class _Board19PageState extends State<Board19Page> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -261,10 +258,7 @@ class New19PostPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -454,10 +448,7 @@ class _Post19DetailPageState extends State<Post19DetailPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },

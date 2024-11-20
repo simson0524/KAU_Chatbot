@@ -72,10 +72,7 @@ class _SpaceengineeringBoardPageState extends State<SpaceengineeringBoardPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -263,10 +260,7 @@ class NewSpaceengineeringPostPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -458,10 +452,7 @@ class _PostSpaceengineeringDetailPageState
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },

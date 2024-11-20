@@ -57,10 +57,7 @@ class MajorBoard extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },

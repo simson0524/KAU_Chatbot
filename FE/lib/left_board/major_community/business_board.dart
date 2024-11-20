@@ -71,10 +71,7 @@ class _BusinessBoardPageState extends State<BusinessBoardPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -261,10 +258,7 @@ class NewBusinessPostPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -454,10 +448,7 @@ class _PostBusinessDetailPageState extends State<PostBusinessDetailPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
