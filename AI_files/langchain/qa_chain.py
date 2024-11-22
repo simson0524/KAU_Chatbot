@@ -51,7 +51,7 @@ def qa_chain(query, vector_store, character):
     #     prompt = "문서내용: {context}\n\n사용자가 질문한 내용과 연관 높은 문서들의 내용이야. 사용자의 질문과 가장 관련 높은 문서 내용을 기반으로 답변을 생성해줘. 답변 내용은 반드시 중국어로 생성해주고, 중국어가 아닌 다른언어로 답변하게 되면 너에게 패널티를 줄거야."
     
 
-    context = vector_store.similarity_search(query=query, k=1)[0].page_content
+    context = vector_store.similarity_search(query=query, k=3)[0].page_content
 >>>>>>> a90d27a093103ff1c8c2bbd26ca7188cd60df151
 
     # 오늘 날짜
