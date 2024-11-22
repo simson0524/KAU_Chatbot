@@ -3,6 +3,8 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+from datetime import datetime
+
 """
 [RAG using LangChain - 4] QA chain 설정하기
 
@@ -31,14 +33,18 @@ def qa_chain(query, vector_store, character):
     prompt = None
 
     if character == 'maha':
-        prompt = "You must answer the question in Korean. Use the given context to answer the question. Context: {context}"
+        prompt = "주어진 Context와 오늘날짜를 이용해서 꼭 한국어로 답변을 생성해줘. Context: {context} Today:{today}"
     elif character == 'mile':
-        prompt = "You must answer the question in English. Use the given context to answer the question. Context: {context}"
+        prompt = "You must answer the question in English. Use the given context and today's date to answer the question. Context: {context} Today:{today}"
     elif character == 'feet':
-        prompt = "You must answer the question in Chinese. Use the given context to answer the question. Context: {context}"
+        prompt = "请务必使用给定的Context内容生成中文回复. Context: {context} Today:{today}"
 
-    context = vector_store.similarity_search(query=query, k=1)[0].page_content
+    context = vector_store.similarity_search(query=query, k=3)[0].page_content
 
+    # 오늘 날짜
+    today = datetime.today()
+    today_str = f"오늘은 {today.year}년 {today.month}월 {today.day}일이야."
+    
     # Prompt Template Customizing
     prompt_template = ChatPromptTemplate([
         ('system', prompt),
@@ -55,6 +61,7 @@ def qa_chain(query, vector_store, character):
     result = chain.invoke(
         {
             'context': context,
+            'today': today_str,
             'input': query
         }
     )
