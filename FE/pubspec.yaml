@@ -35,6 +35,8 @@ dependencies:
   path: ^1.8.0
   provider: ^6.0.0
   intl: ^0.17.0
+  flutter_launcher_icons: ^0.13.1
+
   
   shared_preferences: ^2.0.9
 
@@ -58,6 +60,11 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
+
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
@@ -75,10 +82,10 @@ flutter:
    - assets/images/chat_mile.png
    - assets/images/chat_feet.png
    - assets/images/character_friend.png
-
-
-
-
+  fonts:
+    - family: PoorStory
+      fonts:
+      - asset: assets/fonts/PoorStory-Regular.ttf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

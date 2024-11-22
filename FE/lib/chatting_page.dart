@@ -15,11 +15,10 @@ import 'package:FE/api/chat_api.dart'; // ChatApi import for server interaction
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:FE/api/auth_api.dart';
 
 class ChattingPage extends StatefulWidget {
-  final String characterName;
-
-  const ChattingPage({super.key, required this.characterName});
+  const ChattingPage({super.key});
 
   @override
   State<ChattingPage> createState() => _ChattingPageState();
@@ -53,18 +52,29 @@ class _ChattingPageState extends State<ChattingPage> {
   }
 
 // Initialize token and chatId
+  late String chatCharacter = '기본 캐릭터'; // 기본값 설정
+
   Future<bool> _initializeChat() async {
     final prefs = await SharedPreferences.getInstance();
-    token = prefs.getString("accessToken") ??
-        ''; // Default to an empty string if null
-    chatId = await _chatDao.getNewChatId();
+    token = prefs.getString("accessToken") ?? ''; // Token 가져오기
 
     if (token.isEmpty) {
       print("Token is missing. Please login.");
-      // Optionally navigate to the login screen or handle the missing token case here
-      return false; // Indicate initialization failed due to missing token
+      return false; // Token이 없으면 초기화 실패
     }
-    return true; // Indicate successful initialization
+
+    try {
+      // 서버에서 회원 정보 가져오기
+      final userInfo = await AuthApi.getUserInfo(token);
+      setState(() {
+        chatCharacter =
+            userInfo['chat_character'] ?? '기본 캐릭터'; // chat_character 설정
+      });
+      return true; // 성공적으로 초기화
+    } catch (error) {
+      print("Error fetching user info: $error");
+      return false; // 서버 요청 실패
+    }
   }
 
   // Load messages from local SQLite
@@ -97,7 +107,7 @@ class _ChattingPageState extends State<ChattingPage> {
           'message': messageText,
           'time': currentTime,
           'isMine': true,
-          'character': widget.characterName,
+          'character': chatCharacter,
         });
       });
       _controller.clear();
@@ -110,13 +120,13 @@ class _ChattingPageState extends State<ChattingPage> {
         "user",
         currentTime,
         chatId,
-        widget.characterName,
+        chatCharacter,
       );
 
       try {
         // API 호출 및 응답 처리
-        final response = await ChatApi.sendQuestion(
-            token, messageText, widget.characterName);
+        final response =
+            await ChatApi.sendQuestion(token, messageText, chatCharacter);
 
         // 서버 응답에서 answer 추출
         String botAnswer = response['answer']; // 응답의 'answer' 필드 사용
@@ -139,7 +149,7 @@ class _ChattingPageState extends State<ChattingPage> {
         'message': messageText,
         'time': currentTime,
         'isMine': false,
-        'character': widget.characterName,
+        'character': chatCharacter,
       });
     });
 
@@ -149,7 +159,7 @@ class _ChattingPageState extends State<ChattingPage> {
       "bot",
       currentTime,
       chatId,
-      widget.characterName,
+      chatCharacter,
     );
   }
 
@@ -163,11 +173,11 @@ class _ChattingPageState extends State<ChattingPage> {
 
   // Helper method to choose the correct character image
   String _chatCharacterImage() {
-    if (widget.characterName == '마일') {
+    if (chatCharacter == '마일') {
       return 'assets/images/chat_mile.png';
-    } else if (widget.characterName == '마하') {
+    } else if (chatCharacter == '마하') {
       return 'assets/images/chat_maha.png';
-    } else if (widget.characterName == '피트') {
+    } else if (chatCharacter == '피트') {
       return 'assets/images/chat_feet.png';
     } else {
       return 'assets/images/chat_basic.png'; // Default image
@@ -196,7 +206,7 @@ class _ChattingPageState extends State<ChattingPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
+        title: Text(
           'KAU CHATBOT',
           style: TextStyle(color: Colors.black),
         ),
@@ -258,7 +268,7 @@ class _ChattingPageState extends State<ChattingPage> {
 
                     return ChatBubble(
                       profileImage: isMine ? '' : _chatCharacterImage(),
-                      name: isMine ? '' : widget.characterName,
+                      name: isMine ? '' : chatCharacter,
                       message: messages[index]['message'],
                       time: messages[index]['time'],
                       isMine: isMine,

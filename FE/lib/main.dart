@@ -1,4 +1,3 @@
-import 'package:FE/character_page.dart';
 import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:FE/find_password_page.dart';
@@ -24,7 +23,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      theme: ThemeData(
+        fontFamily: 'PoorStory',
+      ),
       title: 'login page',
       home: Scaffold(
         body: LoginPage(), // 로그인 페이지
@@ -235,13 +237,13 @@ class LoginButtons extends StatelessWidget {
         await prefs.setString('refreshToken', result['refreshToken'] ?? '');
 
         // 로그인 성공 시 페이지 이동
-        /*
+
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => const ChattingPage(), // 성공 시 이동할 페이지
           ),
-        ); */
+        );
       } else {
         print('로그인 실패: ${result['message'] ?? '알 수 없는 오류'}');
         // 로그인 실패 시 알림창 표시

@@ -34,25 +34,25 @@ def get_answer_with_url(query, character):
     answer = answer['answer']
     
     # 유사도 검색 수행 및 URL 정보 포함
-    results = vector_store.similarity_search(query, k=1)
+    results = vector_store.similarity_search(query, 
+                                             k=5)
     if results:
-        print(type(answer), answer)
-        url = results[0].metadata.get('url', 'URL을 찾을 수 없습니다')
-        answer += f"\n\n관련 URL: {url}"
+        # # print(type(answer), answer)
+        # url = results[0].metadata.get('url', 'URL을 찾을 수 없습니다')
+        # answer += f"\n\n관련 URL: {url}"
+
+        for result in results:
+            url = result.metadata.get('url', 'URL을 찾을 수 없습니다.')
+            answer += f"\n\n관련 URL: {url}"
 
     return answer
 
 
 
 while True:
-    signal = input("테스트를 중단하고 싶으면 'exit'을 입력하십시오 ->")
-    if signal == 'exit':
-        break
-
     character = input("maha, mile, feet 중 캐릭터를 입력하십시오 ->")
     query = input("질문할 내용을 입력하십시오 ->")
 
     answer = get_answer_with_url(query, character)
     
     print('답변 ->', answer, '\n\n\n')
-
