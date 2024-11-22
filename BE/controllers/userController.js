@@ -116,6 +116,25 @@ exports.verifyCode = async (req, res) => {
     }
 }
 
+// 사용자 채팅 캐릭터 설정 페이지
+exports.setCharacter = async (req, res) => {
+    try {
+        const { email, chat_character } = req.body;
+
+        const user = await userModel.findUserByEmail(email);
+        if (!user) {
+            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
+        }
+
+        await userModel.updateUserCharacter(email, chat_character);
+        res.status(200).json({'message': '사용자의 채팅 캐릭터 설정이 성공하였습니다.'});
+
+    } catch (error) {
+        console.error('채팅 캐릭터 설정 중 오류: ', error);
+        res.status(500).json('채팅 캐릭터 설정 중 오류가 발생했습니다.');
+    }
+}
+
 // 사용자 정보 가져오는 페이지
 exports.getUserData = async (req, res) => {
     
@@ -140,14 +159,14 @@ exports.updateUser = async (req, res) => {
 
     try {
         const student_id = req.user.student_id;
-        const { name, major, grade, residence } = req.body;
+        const { name, major, grade, residence, chat_character } = req.body;
 
         const user = await userModel.findUserByStudentId(student_id);
         if (!user) {
             return res.status(400).json({error: '해당 학번의 사용자가 존재하지 않습니다.'});
         }
 
-        await userModel.updateUserInfo(student_id, name, major, grade, residence);
+        await userModel.updateUserInfo(student_id, name, major, grade, residence, chat_character);
         res.status(200).json({'message': '회원 정보 수정이 성공하였습니다.'});
     }
     catch (error) {
@@ -185,6 +204,32 @@ exports.updatePassword = async (req, res) => {
     catch (error) {
         console.error(error);
         res.status(500).json('사용자 비밀번호 수정 중 오류가 발생했습니다.');
+    }
+}
+
+// 비밀번호 찾기 -> 새 비밀번호 생성해서 전달
+exports.getNewPassword = async (req, res) => {
+    try {
+        const email = req.body.email;
+
+        // 해당 이메일의 학생이 있는지 확인
+        const user = await userModel.findUserByEmail(email);
+        if (!user) {
+            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
+        }
+
+        const tempPassword = userService.generateTempPassword();
+
+        // 임시 비밀번호 해싱
+        const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
+        
+        // 임시 비밀번호 저장
+        await userModel.updateUserPassword(user.student_id, hashedTempPassword);
+        res.status(200).json({'message': '임시 비밀번호 전달을 성공하였습니다.', "임시 비밀번호": tempPassword});
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json('사용자 비밀번호 찾기 중 오류가 발생했습니다.');
     }
 }
 

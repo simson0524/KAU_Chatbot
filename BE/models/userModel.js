@@ -33,11 +33,21 @@ exports.addUser = async (student_id, email, password, name, major, grade, gender
     return result;
 }
 
-// 사용자 정보 수정
-exports.updateUserInfo = async (student_id, name, major, grade, residence) => {
+// 사용자 채팅 캐릭터 설정
+exports.updateUserCharacter = async (email, chat_character) => {
     const result = await db.query(
-        'UPDATE users SET name = ?, major = ?, grade = ?, residence = ? WHERE student_id = ?',
-        [name, major, grade, residence, student_id]
+        'UPDATE users SET chat_character = ? WHERE email = ?',
+        [chat_character, email]
+    )
+
+    return result;
+}
+
+// 사용자 정보 수정
+exports.updateUserInfo = async (student_id, name, major, grade, residence, chat_character) => {
+    const result = await db.query(
+        'UPDATE users SET name = ?, major = ?, grade = ?, residence = ?, chat_character = ? WHERE student_id = ?',
+        [name, major, grade, residence, chat_character, student_id]
     );
     return result;
 }

@@ -37,9 +37,9 @@ class ChatDatabase {
 
   // Table creation function
   Future<void> _createDB(Database db, int version) async {
-    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
-    const intType = 'INTEGER NOT NULL';
-    const textType = 'TEXT NOT NULL';
+    const idType = 'INTEGER';
+    const intType = 'INTEGER';
+    const textType = 'TEXT';
 
     await db.execute('''
 CREATE TABLE chatMessages (

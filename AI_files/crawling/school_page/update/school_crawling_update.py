@@ -55,7 +55,7 @@ for index, row in new_urls.iterrows():
         if bbs_id_match and ntt_id_match:
             bbs_id = bbs_id_match.group(1)
             ntt_id = ntt_id_match.group(1)
-            custom_id = f"{bbs_id}{ntt_id}"  # 예: 011953654
+            custom_id = f"항공대공지_{bbs_id}{ntt_id}"  # 예: 011953654
         else:
             custom_id = f"ID_{index + 1}"  # 예외 상황에 대비한 기본 ID
 
@@ -78,8 +78,8 @@ for index, row in new_urls.iterrows():
             date = datetime.now().strftime("%Y-%m-%d")  # 현재 날짜 저장
 
         # 이미지 URL 추출
-        images = [img.get_attribute('src') for img in driver.find_elements(By.CSS_SELECTOR, "#divViewConts img")]
-        images = ', '.join(images) if images else "없음"
+        images = driver.find_elements(By.CSS_SELECTOR, "#divViewConts img")
+        image = images[0].get_attribute('src') if images else "없음"
 
         # 첨부파일 추출
         attachments = []
@@ -99,7 +99,7 @@ for index, row in new_urls.iterrows():
         new_data.append({
             'idx': custom_id,
             'text': content,
-            'img': images,
+            'img': image,
             'files': attachments,
             'title': title,
             'published_date': date,

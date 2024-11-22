@@ -1,4 +1,11 @@
 import 'dart:ui';
+
+import 'package:FE/character_provider.dart';
+import 'package:FE/left_board/college_num_community/college_num.dart';
+import 'package:FE/left_board/external_site/external_site.dart';
+import 'package:FE/left_board/qna_board/qna_board.dart';
+import 'package:FE/left_board/notice_board/notice_board.dart';
+import 'package:FE/left_board/major_community/major_board.dart';
 import 'package:FE/main.dart';
 import 'package:FE/pw_member_info.dart';
 import 'package:flutter/material.dart';
@@ -7,11 +14,11 @@ import 'package:FE/db/chat_dao.dart'; // ChatDao import for SQLite
 import 'package:FE/api/chat_api.dart'; // ChatApi import for server interaction
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:FE/api/auth_api.dart';
 
 class ChattingPage extends StatefulWidget {
-  final String characterName;
-
-  const ChattingPage({super.key, required this.characterName});
+  const ChattingPage({super.key});
 
   @override
   State<ChattingPage> createState() => _ChattingPageState();
@@ -21,44 +28,70 @@ class _ChattingPageState extends State<ChattingPage> {
   final TextEditingController _controller = TextEditingController();
   final ChatDao _chatDao = ChatDao();
   late String token;
-  int chatId = 1;
+  int chatId = 0;
   List<Map<String, dynamic>> messages = [];
 
   //상단바 관련
   bool right_isDrawerOpen = false;
+
   bool left_isDrawerOpen = false;
 
+  // 첫 안내 자동 메시지
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _initializeChat();
-      await _loadMessagesFromLocal();
+      bool isInitialized = await _initializeChat();
+      if (isInitialized) {
+        await _loadMessagesFromLocal();
+      } else {
+        // Navigate to login or show an error message if needed
+        print("Initialization failed. Token is missing.");
+      }
     });
   }
 
-  // Initialize token and chatId
-  Future<void> _initializeChat() async {
+// Initialize token and chatId
+  late String chatCharacter = '기본 캐릭터'; // 기본값 설정
+
+  Future<bool> _initializeChat() async {
     final prefs = await SharedPreferences.getInstance();
-    token = prefs.getString("accessToken") ??
-        ''; // Default to an empty string if null
-    chatId = await _chatDao.getNewChatId();
+    token = prefs.getString("accessToken") ?? ''; // Token 가져오기
 
     if (token.isEmpty) {
-      // Handle the case when token is missing, perhaps navigate to login or show a message
       print("Token is missing. Please login.");
-      // Optionally, add navigation to the login screen here
+      return false; // Token이 없으면 초기화 실패
+    }
+
+    try {
+      // 서버에서 회원 정보 가져오기
+      final userInfo = await AuthApi.getUserInfo(token);
+      setState(() {
+        chatCharacter =
+            userInfo['chat_character'] ?? '기본 캐릭터'; // chat_character 설정
+      });
+      return true; // 성공적으로 초기화
+    } catch (error) {
+      print("Error fetching user info: $error");
+      return false; // 서버 요청 실패
     }
   }
 
   // Load messages from local SQLite
   Future<void> _loadMessagesFromLocal() async {
-    final localMessages = await _chatDao.fetchMessages(chatId);
+    final localMessages = await _chatDao.fetchAllMessages(); // 모든 메시지를 불러오기
     if (localMessages.isEmpty) {
       _receiveMessage("안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요!");
     } else {
       setState(() {
-        messages = localMessages;
+        messages = localMessages.map((msg) {
+          return {
+            'message': msg['message'],
+            'time': msg['timestamp'],
+            'isMine': msg['sender'] == 'user', // sender 값을 기반으로 isMine 설정
+            'character': msg['character'],
+          };
+        }).toList();
       });
     }
   }
@@ -74,52 +107,60 @@ class _ChattingPageState extends State<ChattingPage> {
           'message': messageText,
           'time': currentTime,
           'isMine': true,
-          'character': widget.characterName,
+          'character': chatCharacter,
         });
       });
       _controller.clear();
+
+      // Get a new chatId for the response
+      chatId = await _chatDao.getNewChatId();
 
       await _chatDao.insertMessage(
         messageText,
         "user",
         currentTime,
         chatId,
-        widget.characterName,
+        chatCharacter,
       );
 
       try {
         // API 호출 및 응답 처리
-        final response = await ChatApi.sendQuestion(
-            token, messageText, widget.characterName);
+        final response =
+            await ChatApi.sendQuestion(token, messageText, chatCharacter);
 
         // 서버 응답에서 answer 추출
         String botAnswer = response['answer']; // 응답의 'answer' 필드 사용
         _receiveMessage(botAnswer);
-
-        await _chatDao.insertMessage(
-          botAnswer,
-          "bot",
-          currentTime,
-          chatId,
-          widget.characterName,
-        );
       } catch (error) {
         print("Error sending question to server: $error");
       }
     }
   }
 
-// Display bot's response
-  void _receiveMessage(String messageText) {
+// Display bot's response and store it in SQLite
+  void _receiveMessage(String messageText) async {
     String currentTime = DateFormat('HH:mm').format(DateTime.now());
+
+    // Get a new chatId for the response
+    chatId = await _chatDao.getNewChatId();
+
     setState(() {
       messages.add({
         'message': messageText,
         'time': currentTime,
         'isMine': false,
-        'character': widget.characterName,
+        'character': chatCharacter,
       });
     });
+
+    // Store the bot's response in SQLite
+    await _chatDao.insertMessage(
+      messageText,
+      "bot",
+      currentTime,
+      chatId,
+      chatCharacter,
+    );
   }
 
   // UI and other methods remain unchanged...
@@ -132,11 +173,11 @@ class _ChattingPageState extends State<ChattingPage> {
 
   // Helper method to choose the correct character image
   String _chatCharacterImage() {
-    if (widget.characterName == '마일') {
+    if (chatCharacter == '마일') {
       return 'assets/images/chat_mile.png';
-    } else if (widget.characterName == '마하') {
+    } else if (chatCharacter == '마하') {
       return 'assets/images/chat_maha.png';
-    } else if (widget.characterName == '피트') {
+    } else if (chatCharacter == '피트') {
       return 'assets/images/chat_feet.png';
     } else {
       return 'assets/images/chat_basic.png'; // Default image
@@ -165,7 +206,7 @@ class _ChattingPageState extends State<ChattingPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
+        title: Text(
           'KAU CHATBOT',
           style: TextStyle(color: Colors.black),
         ),
@@ -222,19 +263,20 @@ class _ChattingPageState extends State<ChattingPage> {
                 child: ListView.builder(
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
+                    bool isMine =
+                        messages[index]['isMine'] ?? false; // 기본값 false 추가
+
                     return ChatBubble(
-                      profileImage: messages[index]['isMine']
-                          ? ''
-                          : _chatCharacterImage(),
-                      name:
-                          messages[index]['isMine'] ? '' : widget.characterName,
+                      profileImage: isMine ? '' : _chatCharacterImage(),
+                      name: isMine ? '' : chatCharacter,
                       message: messages[index]['message'],
                       time: messages[index]['time'],
-                      isMine: messages[index]['isMine'],
+                      isMine: isMine,
                     );
                   },
                 ),
               ),
+
               // Message input field and send button
               Padding(
                 padding:
@@ -524,17 +566,78 @@ class LeftDrawerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      elevation: 5,
-      child: Container(
-        width: 250,
-        height: MediaQuery.of(context).size.height,
-        color: Colors.white,
-        child: const Center(
-          child: Text(
-            '왼쪽상단바 10주차 진행',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14),
+    return Positioned(
+      top: 0,
+      left: 0,
+      child: Material(
+        elevation: 5,
+        child: Container(
+          width: 250,
+          height: MediaQuery.of(context).size.height,
+          color: Colors.white,
+          child: Row(
+            children: [
+              Container(
+                width: 1.0,
+                color: Colors.black,
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    //학교 공지 게시판
+                    boardNavigation(
+                        context, '학교 공지 게시판', NoticeBoardPage(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    // 외부사이트 게시판
+                    boardNavigation(
+                        context, '외부 사이트 게시판', ExternalSitePage(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    // 학과별 커뮤니티 게시판
+                    boardNavigation(
+                        context, '학과별 커뮤니티 게시판', MajorBoard(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    //학번별 커뮤니티 게시판
+                    boardNavigation(
+                        context, '학번별 커뮤니티 게시판', CollegeNum(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    //학교 문의 게시판
+                    boardNavigation(
+                        context, '학교 문의 게시판', QnaBoardPage(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    // 이미지
+                    Spacer(),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 20),
+                      height: 120,
+                      child: Image.asset(
+                        'assets/images/character_friend.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -629,5 +732,28 @@ void showLogoutDialog(BuildContext context) {
         ),
       );
     },
+  );
+}
+
+Widget boardNavigation(
+    BuildContext context, String text, Widget page, VoidCallback onClose) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => page),
+      );
+      onClose();
+    },
+    child: Container(
+      padding: EdgeInsets.symmetric(vertical: 10.0),
+      child: Center(
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 14),
+        ),
+      ),
+    ),
   );
 }

@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:FE/api/auth_api.dart';
 import 'package:FE/main.dart';
 import 'package:flutter/material.dart';
 
@@ -38,14 +38,10 @@ class FindPasswordPage extends StatelessWidget {
                     child: Column(
                       children: [
                         const FindPWImage(),
-                        const SizedBox(height: 10), //입력칸 시작 높이
+                        const SizedBox(height: 10), // 입력칸 시작 높이
                         Stack(
                           children: [
                             FindPWInput(key: findPWInputKey),
-                            /*const Positioned(
-                              right: 0,
-                              child: FindPWbutton(),
-                            ),*/
                           ],
                         ),
                         const SizedBox(height: 2),
@@ -65,7 +61,7 @@ class FindPasswordPage extends StatelessWidget {
   }
 }
 
-//이미지
+// 이미지 위젯
 class FindPWImage extends StatelessWidget {
   const FindPWImage({super.key});
 
@@ -81,7 +77,7 @@ class FindPWImage extends StatelessWidget {
   }
 }
 
-//입력 - 이메일, 비밀번호, 비밀번호 확인
+// 입력 - 이메일, 비밀번호, 비밀번호 확인
 class FindPWInput extends StatefulWidget {
   const FindPWInput({super.key});
 
@@ -107,33 +103,28 @@ class _FindPWInputState extends State<FindPWInput> {
     _setCursorPosition();
   }
 
-  //비밀번호 보기 버튼 관련
   void _showPW() {
     setState(() {
       _isobscured = false;
     });
-
-    Timer(Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 3), () {
       setState(() {
         _isobscured = true;
       });
     });
   }
 
-  //비밀번호 보기 버튼 관련
   void _showcheckPW() {
     setState(() {
       _ischeckobscured = false;
     });
-
-    Timer(Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 3), () {
       setState(() {
         _ischeckobscured = true;
       });
     });
   }
 
-  //비밀번호 보기 버튼
   Widget buildOutlineButton(String text, VoidCallback onPressed) {
     return OutlinedButton(
       onPressed: onPressed,
@@ -149,28 +140,24 @@ class _FindPWInputState extends State<FindPWInput> {
     );
   }
 
-  //비밀번호 일치 여부 검증
   bool samePWcheck() {
     return find_pwController.text == find_checkpwController.text;
   }
 
   bool nullcheck() {
     String emailinput = find_emailController.text.split('@')[0];
-
     return emailinput.isEmpty ||
         find_pwController.text.isEmpty ||
         find_checkpwController.text.isEmpty ||
         find_emailcodeController.text.isEmpty;
   }
 
-  //커서를 이메일입력부분으로 제한
   void _setCursorPosition() {
     find_emailController.selection = TextSelection.fromPosition(
       TextPosition(offset: find_emailController.text.length - domain.length),
     );
   }
 
-  //@kau.kr는 지우지 못하고 그 앞에만 수정가능하게
   void _cursorControl(String value) {
     if (!value.endsWith(domain)) {
       setState(() {
@@ -198,7 +185,6 @@ class _FindPWInputState extends State<FindPWInput> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 이메일 입력칸
               Flexible(
                 flex: 7,
                 child: Container(
@@ -221,20 +207,30 @@ class _FindPWInputState extends State<FindPWInput> {
                   ),
                 ),
               ),
-              // 인증번호 발송 버튼
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   String emailinput = find_emailController.text.trim();
                   if (emailinput == '@kau.kr' || emailinput.isEmpty) {
                     textmessageDialog(context, '이메일을 입력해주세요.');
                   } else {
-                    textmessageDialog(
-                        context, '이메일 인증번호 메일을 보냈습니다. \n 이메일을 확인해주세요.');
+                    try {
+                      final response =
+                          await AuthApi.sendEmailVerification(emailinput);
+                      if (response.statusCode == 200) {
+                        textmessageDialog(
+                            context, '이메일 인증번호 메일을 보냈습니다. \n 이메일을 확인해주세요.');
+                      } else {
+                        textmessageDialog(
+                            context, '이메일 전송에 실패했습니다. 다시 시도해주세요.');
+                      }
+                    } catch (error) {
+                      textmessageDialog(context, '오류가 발생했습니다: $error');
+                    }
                   }
-                }, // 버튼 동작
+                },
                 style: TextButton.styleFrom(
                   visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
-                  side: BorderSide(color: Colors.black),
+                  side: const BorderSide(color: Colors.black),
                 ),
                 child: const Text(
                   '인증번호\n    발송',
@@ -242,7 +238,6 @@ class _FindPWInputState extends State<FindPWInput> {
                 ),
               ),
               const SizedBox(width: 10.0),
-              // 인증번호 입력칸
               Flexible(
                 flex: 3,
                 child: Container(
@@ -268,28 +263,34 @@ class _FindPWInputState extends State<FindPWInput> {
                   ),
                 ),
               ),
-              // 이메일 인증번호 확인 버튼
               Positioned(
                 right: 0,
                 left: 75,
                 top: 10,
                 bottom: 10,
                 child: TextButton(
-                  onPressed: () {
-                    /*
-                if (인증번호 맞을 시){
-                  textmessageDialog(context, '이메일 인증이 확인되었습니다.');
-                } else{
-                  textmessageDialog(context, '인증번호가 맞지 않습니다. \n 이메일과 인증번호를 다시 확인해주세요')
-                }
-                */
-                  }, // 버튼 동작
+                  onPressed: () async {
+                    try {
+                      final response = await AuthApi.verifyEmailCode(
+                        find_emailController.text.trim(),
+                        int.parse(find_emailcodeController.text.trim()),
+                      );
+                      if (response.statusCode == 200) {
+                        textmessageDialog(context, '이메일 인증이 확인되었습니다.');
+                      } else {
+                        textmessageDialog(
+                            context, '인증번호가 맞지 않습니다. \n 이메일과 인증번호를 다시 확인해주세요.');
+                      }
+                    } catch (error) {
+                      textmessageDialog(context, '오류가 발생했습니다: $error');
+                    }
+                  },
                   style: TextButton.styleFrom(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4.0, vertical: 2.0),
                     visualDensity:
                         VisualDensity(horizontal: 1.0, vertical: 1.0),
-                    side: BorderSide(color: Colors.black),
+                    side: const BorderSide(color: Colors.black),
                     minimumSize: Size(0, 0),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -311,7 +312,6 @@ class _FindPWInputState extends State<FindPWInput> {
                     painter: DottedLineHorizontalPainter(),
                   ),
                 ),
-                //변경 비밀번호 입력
                 Row(
                   children: [
                     Expanded(
@@ -323,7 +323,7 @@ class _FindPWInputState extends State<FindPWInput> {
                         obscureText: _isobscured,
                       ),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     buildOutlineButton('비밀번호 보기', _showPW),
                   ],
                 ),
@@ -340,7 +340,6 @@ class _FindPWInputState extends State<FindPWInput> {
                     painter: DottedLineHorizontalPainter(),
                   ),
                 ),
-                //변경 비밀번호 확인 입력
                 Row(
                   children: [
                     Expanded(
@@ -365,7 +364,7 @@ class _FindPWInputState extends State<FindPWInput> {
   }
 }
 
-//로그인페이지로 이동
+// 로그인 페이지로 이동
 class go_login extends StatelessWidget {
   const go_login({super.key});
 
@@ -394,7 +393,7 @@ class go_login extends StatelessWidget {
   }
 }
 
-//비밀번호 변경 버튼
+// 비밀번호 변경 버튼
 class FindPWfinish extends StatelessWidget {
   const FindPWfinish({super.key});
 
@@ -406,7 +405,7 @@ class FindPWfinish extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 10, right: 100, left: 100),
       child: OutlinedButton(
-        onPressed: () {
+        onPressed: () async {
           if (inputState == null) {
             return;
           }
@@ -415,13 +414,22 @@ class FindPWfinish extends StatelessWidget {
             return;
           }
           if (inputState.samePWcheck()) {
-            finishFindpwDialog(context);
+            try {
+              final response = await AuthApi.changePassword(
+                inputState.find_pwController.text.trim(),
+                inputState.find_checkpwController.text.trim(),
+              );
+              if (response.statusCode == 200) {
+                finishFindpwDialog(context);
+              } else {
+                textmessageDialog(context, '비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+              }
+            } catch (error) {
+              textmessageDialog(context, '오류가 발생했습니다: $error');
+            }
           } else {
             textmessageDialog(context, '비밀번호와 비밀번호 확인이 일치하지 않습니다');
           }
-          /*
-          이메일 인증이 안되었을 시 조건 -> 조건문 안에는 textmessageDialog(context, '이메일 인증이 완료되지 않았습니다.');
-          */
         },
         style: OutlinedButton.styleFrom(
           side: const BorderSide(
@@ -437,13 +445,13 @@ class FindPWfinish extends StatelessWidget {
   }
 }
 
-//점선 표현
+// 점선 표현
 class DottedLineHorizontalPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = const Color.fromARGB(255, 90, 90, 90)
-      ..strokeWidth = 1.5 // 두께
+      ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
     const dashWidth = 8;
@@ -466,12 +474,11 @@ class DottedLineHorizontalPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-//텍스트 알림
+// 텍스트 알림
 void textmessageDialog(BuildContext context, String dialogmessage) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      //아무 클릭 없을 시 5초 뒤 자동으로 알림 닫기
       Future.delayed(const Duration(seconds: 5), () {
         if (Navigator.canPop(context)) {
           Navigator.pop(context);
@@ -479,16 +486,14 @@ void textmessageDialog(BuildContext context, String dialogmessage) {
       });
       return Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
+          borderRadius: BorderRadius.circular(20.0),
           side: const BorderSide(color: Colors.black, width: 1.5),
         ),
         child: SizedBox(
-          //dialog 사이즈
           width: 150,
           height: 70,
           child: Padding(
-            padding:
-                const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
+            padding: const EdgeInsets.only(bottom: 3.0, top: 5.0),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
@@ -513,7 +518,7 @@ void textmessageDialog(BuildContext context, String dialogmessage) {
   );
 }
 
-//비밀번호 변경 성공 알림창
+// 비밀번호 변경 성공 알림창
 void finishFindpwDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -525,16 +530,14 @@ void finishFindpwDialog(BuildContext context) {
       });
       return Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
+          borderRadius: BorderRadius.circular(20.0),
           side: const BorderSide(color: Colors.black, width: 1.5),
         ),
         child: SizedBox(
-          //dialog 사이즈
           width: 220,
           height: 100,
           child: Padding(
-            padding:
-                const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
+            padding: const EdgeInsets.only(bottom: 3.0, top: 5.0),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -548,8 +551,7 @@ void finishFindpwDialog(BuildContext context) {
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 10), //텍스트와 버튼 사이 간격
-                //로그인 버튼
+                const SizedBox(height: 10),
                 OutlinedButton(
                   onPressed: () {
                     Navigator.pushReplacement(

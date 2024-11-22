@@ -93,9 +93,6 @@ for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것�
     driver.get( 'https://www.allforyoung.com' + link )
     time.sleep(2)
 
-    # 고유 인덱스
-    idx = '요즘것들_대외활동_'+str(len(target_links)-i-1) 
-
     # 공지 제목 추출
     title = driver.find_element(By.XPATH, '//div[@class="space-y-4"]/h2')
     title = title.text
@@ -106,7 +103,7 @@ for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것�
 
     # 공지 이미지 추출하기(학교공지와 다르게 포스터)
     image_url_elements = driver.find_elements(By.XPATH, '//figure[@class="relative aspect-poster overflow-hidden rounded-lg border border-neutral-200"]//img')
-    image_url = [ img.get_attribute('src') for img in image_url_elements ]
+    image_url = image_url_elements[0].get_attribute('src')
     
 
     # 공지 첨부파일 추출하기(대신에 태그 넣었습니다^^)
@@ -121,6 +118,11 @@ for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것�
 
     # 현재 사이트 url 추출하기
     url = 'https://www.allforyoung.com' + link
+
+    # URL에서 idx 값 추출
+    idx_match = re.search(r'/posts/(\d+)', url)  # 정규식을 사용하여 idx 값을 추출
+    idx_value = idx_match.group(1)  # 매칭된 idx 값 (예: '7732')
+    idx = f"요즘것들_대외활동_{idx_value}"  # 고유 인덱스로 저장
 
     # 접수마감일자 추출하기
     deadline_date_elements = driver.find_elements(By.XPATH, '//div[contains(@class, "flex items-center space-x-4")]//p')

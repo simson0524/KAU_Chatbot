@@ -13,7 +13,7 @@ class AuthApi {
     String gender,
     String residence,
   ) async {
-    final url = Uri.parse('http://10.0.2.2:3000/user/register');
+    final url = Uri.parse('http://3.37.153.10:3000/ user/register');
 
     try {
       final response = await http.post(
@@ -40,7 +40,7 @@ class AuthApi {
 
   // 이메일 인증번호 전송 API 호출 함수
   static Future<http.Response> sendEmailVerification(String email) async {
-    final url = Uri.parse('http://10.0.2.2:3000/user/send-email');
+    final url = Uri.parse('http://3.37.153.10:3000/user/send-email');
 
     try {
       final response = await http.post(
@@ -58,7 +58,7 @@ class AuthApi {
 
   // 이메일 인증번호 확인 API 호출 함수
   static Future<http.Response> verifyEmailCode(String email, int code) async {
-    final url = Uri.parse('http://10.0.2.2:3000/user/verify-email');
+    final url = Uri.parse('http://3.37.153.10:3000/user/verify-email');
 
     try {
       final response = await http.post(
@@ -80,7 +80,7 @@ class AuthApi {
   // 로그인 API 호출 함수
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
-    final url = Uri.parse('http://10.0.2.2:3000/user/login');
+    final url = Uri.parse('http://3.37.153.10:3000/user/login');
 
     try {
       final response = await http.post(
@@ -110,6 +110,74 @@ class AuthApi {
       return {
         'message': 'Login failed due to an error',
       };
+    }
+  }
+
+  // 비밀번호 변경 API 호출 함수
+  static Future<http.Response> changePassword(
+      String currentPassword, String newPassword) async {
+    final url = Uri.parse('http://3.37.153.10:3000/user/password');
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'passward': currentPassword,
+          'new_passward': newPassword,
+        }),
+      );
+
+      return response; // statusCode와 응답 본문을 포함하여 반환
+    } catch (error) {
+      print('Error occurred during password change: $error');
+      throw Exception('비밀번호 변경 중 오류가 발생했습니다.');
+    }
+  }
+
+  // 채팅 캐릭터 설정 API 호출 함수
+  static Future<http.Response> setChatCharacter(
+      String email, String chatCharacter) async {
+    final url = Uri.parse('http://3.37.153.10:3000/user/character');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'chat_character': chatCharacter,
+        }),
+      );
+
+      return response; // statusCode와 응답 본문을 포함하여 반환
+    } catch (error) {
+      print('Error occurred while setting chat character: $error');
+      throw Exception('채팅 캐릭터 설정 중 오류가 발생했습니다.');
+    }
+  }
+
+  // 회원 정보 가져오기 API 호출 함수
+  static Future<Map<String, dynamic>> getUserInfo(String accessToken) async {
+    final url = Uri.parse('http://3.37.153.10:3000/user');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken', // Access token 헤더에 추가
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body); // JSON 데이터 반환
+      } else {
+        throw Exception('Failed to fetch user info');
+      }
+    } catch (error) {
+      print('Error occurred while fetching user info: $error');
+      throw Exception('회원 정보 가져오는 중 오류가 발생했습니다.');
     }
   }
 }

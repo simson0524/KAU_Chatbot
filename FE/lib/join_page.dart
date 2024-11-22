@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:FE/character_page.dart';
+import 'package:FE/chatting_page.dart';
 import 'package:FE/find_password_page.dart';
 import 'package:FE/main.dart';
 import 'package:flutter/material.dart';
@@ -157,6 +158,7 @@ class _JoinInputState extends State<JoinInput> {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
+        backgroundColor: Colors.white,
         side: const BorderSide(width: 1.2),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
         visualDensity: VisualDensity.compact,
@@ -266,10 +268,8 @@ class _JoinInputState extends State<JoinInput> {
                       child: SizedBox(
                         width: 100,
                         height: 55,
-                        child: Positioned.fill(
-                          child: CustomPaint(
-                            painter: DottedLineHorizontalPainter(),
-                          ),
+                        child: CustomPaint(
+                          painter: DottedLineHorizontalPainter(),
                         ),
                       ),
                     ),
@@ -341,6 +341,7 @@ class _JoinInputState extends State<JoinInput> {
                 }
               },
               style: TextButton.styleFrom(
+                backgroundColor: Colors.white,
                 visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                 side: BorderSide(color: Colors.black),
               ),
@@ -419,6 +420,7 @@ class _JoinInputState extends State<JoinInput> {
                   }
                 },
                 style: TextButton.styleFrom(
+                  backgroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                   visualDensity: VisualDensity(horizontal: 1.0, vertical: 1.0),
                   side: BorderSide(color: Colors.black),
@@ -608,10 +610,8 @@ class _JoinInputState extends State<JoinInput> {
                       child: SizedBox(
                         width: 40,
                         height: 55,
-                        child: Positioned.fill(
-                          child: CustomPaint(
-                            painter: DottedLineHorizontalPainter(),
-                          ),
+                        child: CustomPaint(
+                          painter: DottedLineHorizontalPainter(),
                         ),
                       ),
                     ),
@@ -700,21 +700,24 @@ class go_login extends StatelessWidget {
                   '비밀번호찾기 페이지로',
                   style: TextStyle(fontSize: 5, color: Colors.black),
                 )),
-            //캐릭터선택창 이동  페이지로 버튼은  추후 삭제 예정
+            //채팅창 이동  페이지로 버튼은  추후 삭제 예정
             TextButton(
                 onPressed: () {
+                  /*
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const CharacterPage()),
-                  );
+                        builder: (context) => const ChattingPage(
+                              ,
+                            )),
+                  );*/
                 },
                 style: TextButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 ),
                 child: const Text(
-                  '캐릭터선택 페이지로',
+                  '채팅창 페이지로',
                   style: TextStyle(fontSize: 5, color: Colors.black),
                 ))
           ],
@@ -795,6 +798,7 @@ class Joinfinish extends StatelessWidget {
               }
             : null,
         style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
           side: const BorderSide(
             width: 1.25,
           ),
@@ -887,28 +891,33 @@ void textmessageDialog(BuildContext context, String dialogmessage) {
 
 //회원가입 성공 알림창
 void finishJoinDialog(BuildContext context) {
+  final _JoinInputState? inputState = joinPWInputKey.currentState;
+  if (inputState == null) return; // inputState가 null일 경우 처리
+
+  final email = inputState.join_emailController.text; // 이메일 가져오기
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
+          borderRadius: BorderRadius.circular(20.0), // 테두리 모서리 둥글게
           side: const BorderSide(color: Colors.black, width: 1.5),
         ),
         child: SizedBox(
-          //dialog 사이즈
+          // dialog 사이즈
           width: 220,
           height: 100,
           child: Padding(
             padding:
-                const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
+                const EdgeInsets.only(bottom: 3.0, top: 5.0), // dialog의 내부 여백
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text(
-                  '회원가입이 완료되었습니다. \n 다시 로그인 해주세요.',
+                  '회원가입 정보가 저장되었습니다. \n 마지막 설정인 캐릭터 선택을 해주세요.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -916,14 +925,16 @@ void finishJoinDialog(BuildContext context) {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 10), //텍스트와 버튼 사이 간격
-                //로그인 버튼
+                const SizedBox(height: 10), // 텍스트와 버튼 사이 간격
+                // 캐릭터선택 버튼
                 OutlinedButton(
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const LoginPage()),
+                        builder: (context) =>
+                            CharacterPage(email: email), // 이메일 전달
+                      ),
                     );
                   },
                   style: OutlinedButton.styleFrom(
@@ -933,7 +944,7 @@ void finishJoinDialog(BuildContext context) {
                     visualDensity: VisualDensity.compact,
                   ),
                   child: const Text(
-                    '로그인',
+                    '캐릭터 선택',
                     style: TextStyle(fontSize: 10, color: Colors.black),
                   ),
                 ),

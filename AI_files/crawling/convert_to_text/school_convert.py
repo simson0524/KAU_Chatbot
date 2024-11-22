@@ -1,16 +1,18 @@
 import pandas as pd
-import openai
+from openai import OpenAI
 import re
+import os
 
-# OpenAI API 키 설정
-openai.api_key = ''
+client = OpenAI(
+    api_key = ''
+)
 
 # 1. HTML 원문 요약 함수
 def summarize_html(html_content):
     if pd.isna(html_content) or html_content.strip() == "":
         return "No HTML content available"
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",  # gpt-4o-mini 사용
             messages=[
                 {"role": "system", "content": """주어진 HTML에서 텍스트만 추출해서 내용을 정확하게 작성해. 표는 사용하지 말고 텍스트로 설명해줘. 관련있는 태그도 달아줘. 'text:'로 시작하고, 관련 있는 태그는 'tag:'로 시작하는 형식으로 출력해.
@@ -25,15 +27,13 @@ def summarize_html(html_content):
                  - 2024-1학기 전공 및 교양 교육과정을 대상으로 모니터링 실시
                  2. 설문 내용 및 방식
                  ...
-
-                tag: ['교육과정 개선', '학생 참여', '교육 모니터링', '대학 혁신']
                 
                 주의: 시작말과 마무리말을 사용하지 말고 예시처럼 작성해.
                 """},
                 {"role": "user", "content": html_content}
             ]
         )
-        return response['choices'][0]['message']['content'].strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Error in summarizing: {str(e)}"
 
@@ -45,7 +45,7 @@ def summarize_image(image_url):
     if pd.isna(image_url) or image_url.strip() == "" or image_url.lower() == "없음":
         return "No image available"
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "너는 이미지의 내용을 텍스트로 정리해주는 어시스턴트야"},
@@ -64,8 +64,6 @@ def summarize_image(image_url):
                  2. 설문 내용 및 방식
                  ...
 
-                tag: ['교육과정 개선', '학생 참여', '교육 모니터링', '대학 혁신']
-                
                 주의: 시작말과 마무리말을 사용하지 말고 예시처럼 작성해.
                          """},
                         {"type": "image_url", "image_url": {"url": image_url}}
@@ -73,9 +71,34 @@ def summarize_image(image_url):
                 }
             ]
         )
-        return response['choices'][0]['message']['content'].strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Error in summarizing image: {str(e)}"
+    
+# title 기반 tag 추출
+def tag_title(title_content):
+    if pd.isna(title_content) or title_content.strip() == "":
+        return "No HTML content available"
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",  # gpt-4o-mini 사용
+            messages=[
+                {"role": "system", "content": """주어진 제목에서 관련있는 태그를 달아줘. 관련 있는 태그는 'tag:'로 시작하는 형식으로 출력해.
+                
+                예시:
+                tag: ['tag1_start', 'tag2', 'tag3_end']
+                
+                주의: 이때 tag는 가장 연관이 있는 순서부터 작성 및 최대 3개까지만 작성.
+                주의: 시작말과 마무리말을 사용하지 말고 예시처럼 작성해.
+                """},
+                {"role": "user", "content": title_content}
+            ]
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        return f"Error in summarizing: {str(e)}"
+
+import re
 
 
 # 3. CSV 파일 로드
@@ -85,9 +108,10 @@ df = pd.read_csv(file_path)
 # 4. HTML 원문과 이미지 요약 생성
 df['text_convert'] = df['text'].apply(summarize_html)
 df['img_convert'] = df['img'].apply(summarize_image)
+df['tag'] = df['title'].apply(tag_title)
 
 # 5. 필요한 열만 선택하여 새로운 데이터프레임 생성
-result_df = df[['idx', 'text_convert', 'img_convert', 'files', 'url', 'title', 'published_date', 'deadline_date']]
+result_df = df[['idx', 'text_convert', 'img_convert', 'files', 'url', 'title', 'published_date', 'deadline_date', 'tag']]
 
 # 6. 결과를 새로운 CSV 파일로 저장
 output_file_path = 'crawling/csv_files/항공대 공지 변환.csv'
@@ -100,14 +124,18 @@ print(f"Summary saved to {output_file_path}")
 df = pd.read_csv(output_file_path)
 
 # text_convert와 img_convert에서 text와 tag 부분을 추출하는 함수 정의
-def extract_text_and_tag(text):
+def extract_text(text):
     # text 부분 추출
     text_match = re.search(r"text:\s*(.*?)\n\s*tag:", text, re.DOTALL)
     if text_match:
         extracted_text = text_match.group(1).strip()
     else:
         extracted_text = text.strip()
-    
+        
+    return extracted_text
+
+# text_convert와 img_convert에서 text와 tag 부분을 추출하는 함수 정의
+def extract_tag(text):
     # tag 부분 추출
     tag_match = re.search(r"tag:\s*(\[[^\]]*\])", text)
     if tag_match:
@@ -115,20 +143,18 @@ def extract_text_and_tag(text):
     else:
         extracted_tag = []
     
-    return extracted_text, extracted_tag
+    return extracted_tag
 
 # text_convert에서 text와 tag 추출
-df['text_convert_text'], df['text_convert_tag'] = zip(*df['text_convert'].apply(extract_text_and_tag))
+df['text_convert_text'] = df['text_convert'].apply(extract_text)
 
 # img_convert에서 text와 tag 추출
-df['img_convert_text'], df['img_convert_tag'] = zip(*df['img_convert'].apply(extract_text_and_tag))
+df['img_convert_text'] = df['img_convert'].apply(extract_text)
+
+df['tag'] = df['tag'].apply(extract_tag)
 
 # text 합치기
 df['text'] = df['text_convert_text'] + "\n\n" + df['img_convert_text']
-
-# tag 합치기 (중복 제거)
-df['tag'] = df['text_convert_tag'] + df['img_convert_tag']
-df['tag'] = df['tag'].apply(lambda x: list(set(x)))
 
 # 필요한 열만 남기기
 df_result = df[['idx', 'text', 'files', 'url', 'title', 'published_date', 'deadline_date', 'tag']]
