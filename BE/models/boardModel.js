@@ -1,6 +1,12 @@
 const db = require('../config/dbConfig');
 
 
+// 해당 아이디의 게시판이 있는지 조회
+exports.findBoardById = async (board_id) => {
+    const [board] = await db.query('SELECT title FROM boards where id = ?', [board_id]);
+    return board[0];
+}
+
 // 학과 게시판 조회
 exports.getMajorBoard = async (major_identifier) => {
     const [boards] = await db.query("SELECT id, author, title, created_at FROM boards where board_type = '학과' and identifier = ?", [major_identifier]);
@@ -57,6 +63,15 @@ exports.deleteBoard = async (board_id) => {
     const [result] = await db.query(
         "delete From boards where id = ?",
         [board_id]
+    );
+    return result;
+}
+
+// 게시판 수정
+exports.updateBoard = async (board_id, title, content) => {
+    const result = await db.query(
+        'UPDATE boards SET title = ?, content =? WHERE id = ?',
+        [title, content, board_id]
     );
     return result;
 }
