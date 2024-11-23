@@ -30,6 +30,8 @@ class _ChattingPageState extends State<ChattingPage> {
   late String token;
   int chatId = 0;
   List<Map<String, dynamic>> messages = [];
+// Initialize token and chatId
+  late String chatCharacter = '마하'; // 기본값 설정
 
   //상단바 관련
   bool right_isDrawerOpen = false;
@@ -50,9 +52,6 @@ class _ChattingPageState extends State<ChattingPage> {
       }
     });
   }
-
-// Initialize token and chatId
-  late String chatCharacter = '마하'; // 기본값 설정
 
   Future<bool> _initializeChat() async {
     final prefs = await SharedPreferences.getInstance();
