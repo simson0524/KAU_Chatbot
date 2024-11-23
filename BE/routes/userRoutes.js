@@ -9,6 +9,9 @@ const userService = require('../services/userService');
 // 로그인
 router.post('/login', userController.userLogin);
 
+// 본인 확인
+router.post('/check', userController.checkUser);
+
 // 회원가입
 router.post('/register', userController.userSignUp);
 

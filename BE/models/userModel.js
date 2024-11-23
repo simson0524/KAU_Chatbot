@@ -66,6 +66,40 @@ exports.deleteUser = async (student_id) => {
     const result = await db.query(
         'DELETE FROM users WHERE student_id = ?', [student_id]
     )
+    return result;
+}
+
+// 사용자 관련된 데이터 삭제
+exports.deleteUserRelatedData = async (student_id) => {
+    const deleteChat = await db.query(
+        'DELETE FROM chat WHERE student_id = ?', [student_id]
+    );
+    
+    const deleteChatRoom = await db.query(
+        'DELETE FROM chat_room WHERE student_id = ?', [student_id]
+    );
+    
+    const deleteInquiryBoard = await db.query(
+        'DELETE FROM inquiry_board WHERE student_id = ?', [student_id]
+    );
+    
+    const deleteTagSequence = await db.query(
+        'DELETE FROM tag_sequence WHERE student_id = ?', [student_id]
+    );
+    
+    const deleteBoard = await db.query(
+        'DELETE FROM boards WHERE author = ?', [student_id]
+    );
+
+    return {deleteChat, deleteChatRoom, deleteInquiryBoard, deleteTagSequence};
+}
+
+// 사용자 관련된 태그 데이터 삭제
+exports.deleteChatDataByUser = async (student_id) => {
+    const result = await db.query(
+        'DELETE FROM tag_sequence WHERE student_id = ?', [student_id]
+    )
+    return result;
 }
 
 // DB에 입력된 Refresh Token이 있는지 확인

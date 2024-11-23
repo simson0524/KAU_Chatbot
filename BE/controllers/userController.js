@@ -53,6 +53,31 @@ exports.userLogin = async (req, res) => {
     }
 }
 
+exports.checkUser = async (req, res) => {
+
+    try {
+        const { email, password } = req.body;
+
+        // 이메일로 사용자 찾기
+        const user = await userModel.findUserByEmail(email); // db에 입력한 정보의 사용자가 있는지 검색하기
+        if (!user) {
+            return res.status(400).json({error: '이메일을 잘못 입력하셨습니다'});
+        }
+
+        // 비밀번호 확인
+        const isPasswordValid = await bcrypt.compare(password, user.password); // 입력한 비밀번호와 암호화되어 저장된 비밀번호가 맞는지 확인
+        if (!isPasswordValid) {
+            return res.status(400).json({error: '비밀번호를 잘못 입력하셨습니다'});
+        }
+
+        res.status(200).json({accessToken, refreshToken, "message": "사용자 확인에 성공하였습니다."});
+
+    } catch (error) {
+        console.error('사용자 확인 중 오류: ', error);
+        res.status(500).json('사용자 확인 중 오류가 발생했습니다.');
+    }
+}
+
 exports.userSignUp = async (req, res) => {
     const { student_id, email, password, name, major, grade, gender, residence } = req.body;
 
@@ -225,6 +250,9 @@ exports.deleteUser = async (req, res) => {
         if (!user) {
             return res.status(400).json({error: '해당 학번의 사용자가 존재하지 않습니다.'});
         }
+
+        // 사용자 삭제할 때 관련된 데이터도 삭제
+        await userModel.deleteUserRelatedData(student_id);
 
         // User 테이블에서 사용자 삭제
         await userModel.deleteUser(student_id);
