@@ -3,7 +3,7 @@ const db = require('../config/dbConfig');
 
 // 해당 아이디의 게시판이 있는지 조회
 exports.findBoardById = async (board_id) => {
-    const [board] = await db.query('SELECT title FROM boards where id = ?', [board_id]);
+    const [board] = await db.query('SELECT author, title FROM boards where id = ?', [board_id]);
     return board[0];
 }
 

@@ -27,12 +27,6 @@ exports.getDetailMajorBoard = async (req, res) => {
         const major_identifier = req.params.major_identifier;
         const board_id = req.params.board_id;
 
-        // 해당 아이디의 게시판이 있는지 확인
-        const hasBoard = await boardModel.findBoardById(board_id);
-        if (!hasBoard) {
-            return res.status(400).json({error: '해당 아이디의 사용자가 존재하지 않습니다.'});
-        }
-
         const board = await boardModel.getDetailBoard(board_id);
         const comments = await boardModel.getComments(board_id);
         res.status(200).json({'message': '게시판 상세 조회에 성공하였습니다.', board, comments});
@@ -69,12 +63,6 @@ exports.createMajorComments = async (req, res) => {
         const major_identifier = req.params.major_identifier;
         const board_id = req.params.board_id;
 
-        // 해당 아이디의 게시판이 있는지 확인
-        const hasBoard = await boardModel.findBoardById(board_id);
-        if (!hasBoard) {
-            return res.status(400).json({error: '해당 아이디의 사용자가 존재하지 않습니다.'});
-        }
-
         await boardModel.createComment(board_id, student_id, content);
         res.status(201).json({'message': '학과 게시판 댓글 생성이 성공하였습니다.'});
     }
@@ -90,12 +78,6 @@ exports.getMajorBoardUpdate = async (req, res) => {
         const student_id = req.user.student_id;
         const major_identifier = req.params.major_identifier;
         const board_id = req.params.board_id;
-
-        // 해당 아이디의 게시판이 있는지 확인
-        const hasBoard = await boardModel.findBoardById(board_id);
-        if (!hasBoard) {
-            return res.status(400).json({error: '해당 아이디의 사용자가 존재하지 않습니다.'});
-        }
 
         const board = await boardModel.getDetailBoard(board_id);
         res.status(200).json({'message': '학과 게시판 수정 페이지 조회에 성공하였습니다.', board});
@@ -129,12 +111,6 @@ exports.getDetailStudentBoard = async (req, res) => {
         const student_id = req.user.student_id;
         const student_identifier = req.params.student_identifier;
         const board_id = req.params.board_id;
-
-        // 해당 아이디의 게시판이 있는지 확인
-        const hasBoard = await boardModel.findBoardById(board_id);
-        if (!hasBoard) {
-            return res.status(400).json({error: '해당 아이디의 사용자가 존재하지 않습니다.'});
-        }
 
         const board = await boardModel.getDetailBoard(board_id);
         const comments = await boardModel.getComments(board_id);
@@ -172,12 +148,6 @@ exports.createStudentComments = async (req, res) => {
         const student_identifier = req.params.student_identifier;
         const board_id = req.params.board_id;
 
-        // 해당 아이디의 게시판이 있는지 확인
-        const hasBoard = await boardModel.findBoardById(board_id);
-        if (!hasBoard) {
-            return res.status(400).json({error: '해당 아이디의 사용자가 존재하지 않습니다.'});
-        }
-
         await boardModel.createComment(board_id, student_id, content);
         res.status(201).json({'message': '학번 게시판 댓글 생성이 성공하였습니다.'});
     }
@@ -195,12 +165,6 @@ exports.getStudentBoardUpdate = async (req, res) => {
         const student_identifier = req.params.student_identifier;
         const board_id = req.params.board_id;
 
-        // 해당 아이디의 게시판이 있는지 확인
-        const hasBoard = await boardModel.findBoardById(board_id);
-        if (!hasBoard) {
-            return res.status(400).json({error: '해당 아이디의 사용자가 존재하지 않습니다.'});
-        }
-
         const board = await boardModel.getDetailBoard(board_id);
         res.status(200).json({'message': '학번 게시판 수정 페이지 조회에 성공하였습니다.', board});
 
@@ -215,12 +179,6 @@ exports.deleteBoard = async (req, res) => {
     try {
         const board_id = req.params.board_id;
         const student_id = req.user.student_id;
-
-        // 해당 아이디의 게시판이 있는지 확인
-        const hasBoard = await boardModel.findBoardById(board_id);
-        if (!hasBoard) {
-            return res.status(400).json({error: '해당 아이디의 사용자가 존재하지 않습니다.'});
-        }
 
         const result = await boardModel.deleteBoard(board_id);
         console.log(result);
@@ -238,12 +196,6 @@ exports.updateBoard = async (req, res) => {
         const board_id = req.params.board_id;
         const student_id = req.user.student_id;
         const { title, content } = req.body;
-
-        // 해당 아이디의 게시판이 있는지 확인
-        const hasBoard = await boardModel.findBoardById(board_id);
-        if (!hasBoard) {
-            return res.status(400).json({error: '해당 아이디의 사용자가 존재하지 않습니다.'});
-        }
 
         await boardModel.updateBoard(board_id, title, content);
         res.status(200).json({'message': '게시판 수정이 성공하였습니다.'});
