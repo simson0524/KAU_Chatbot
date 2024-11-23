@@ -2,6 +2,9 @@ import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:FE/api/qna_board_api.dart'; // QnaBoardApi 임포트
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 void main() {
   runApp(MaterialApp(
@@ -9,21 +12,62 @@ void main() {
   ));
 }
 
-// 게시판 화면
 class QnaBoardPage extends StatefulWidget {
   @override
   _QnaBoardPageState createState() => _QnaBoardPageState();
 }
 
+// 게시판 화면
 class _QnaBoardPageState extends State<QnaBoardPage> {
   List<Map<String, String>> posts = [];
   List<Map<String, String>> filteredPosts = [];
+  String? accessToken;
   TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    filteredPosts = posts;
+    loadAccessToken();
+  }
+
+  // SharedPreferences에서 AccessToken 로드
+  Future<void> loadAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    accessToken = prefs.getString('accessToken');
+
+    if (accessToken == null || accessToken!.isEmpty) {
+      textmessageDialog(context, '로그인이 필요합니다.');
+      Navigator.pushReplacementNamed(context, '/login');
+      return;
+    }
+
+    fetchInquiries(); // 토큰 로드 후 게시글 가져오기
+  }
+
+  Future<void> fetchInquiries() async {
+    if (accessToken == null) return;
+
+    try {
+      final response = await QnaBoardApi.getInquiries(accessToken!);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          posts = data.map<Map<String, String>>((item) {
+            return {
+              'title': item['title'],
+              'content': item['content'],
+              'date': item['created_at'],
+              'department': item['department_name'],
+            };
+          }).toList();
+          filteredPosts = posts;
+        });
+      } else {
+        textmessageDialog(context, '문의 게시판 데이터를 불러오는데 실패했습니다.');
+      }
+    } catch (e) {
+      textmessageDialog(context, '네트워크 오류가 발생했습니다.');
+    }
   }
 
   void addPost(String title, String content, String name, String department) {
@@ -261,6 +305,51 @@ class NewQnaPostPage extends StatelessWidget {
 
   NewQnaPostPage({required this.onAddPost});
 
+  Future<void> submitPost(BuildContext context) async {
+    String? accessToken;
+    final prefs = await SharedPreferences.getInstance();
+    accessToken = prefs.getString('accessToken');
+
+    if (accessToken == null || accessToken.isEmpty) {
+      textmessageDialog(context, '로그인이 필요합니다.');
+      Navigator.pushReplacementNamed(context, '/login');
+      return;
+    }
+
+    if (titleController.text.isEmpty ||
+        contentController.text.isEmpty ||
+        selectedDepartment == null) {
+      textmessageDialog(context, '제목, 내용 및 문의 부서를 모두 입력해주세요.');
+      return;
+    }
+
+    try {
+      final response = await QnaBoardApi.createInquiry(
+        titleController.text,
+        contentController.text,
+        selectedDepartment!,
+        accessToken,
+      );
+
+      if (response.statusCode == 201) {
+        textmessageDialog(context, '문의가 성공적으로 등록되었습니다.');
+        onAddPost(
+          titleController.text,
+          contentController.text,
+          '홍길동', // Replace with dynamic name if needed
+          selectedDepartment!,
+        );
+        Navigator.pop(context); // Close the page
+      } else {
+        textmessageDialog(context, '문의 등록에 실패했습니다.');
+        print('Response: ${response.body}');
+      }
+    } catch (error) {
+      textmessageDialog(context, '네트워크 오류가 발생했습니다.');
+      print('Error creating inquiry: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -373,7 +462,6 @@ class NewQnaPostPage extends StatelessWidget {
                               '연구협력처',
                               '국제교류처',
                               '사무처',
-                              '기타'
                             ].map((String department) {
                               return DropdownMenuItem<String>(
                                 value: department,

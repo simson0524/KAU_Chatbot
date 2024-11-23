@@ -102,7 +102,7 @@ class Mile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        _selectCharacter(context, '마일', email); // 이메일 전달
+        _selectCharacter(context, 'mile', email); // 이메일 전달
       },
       child: Container(
         width: 85,
@@ -127,7 +127,7 @@ class Maha extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        _selectCharacter(context, '마하', email); // 이메일 전달
+        _selectCharacter(context, 'maha', email); // 이메일 전달
       },
       child: Container(
         width: 130,
@@ -152,7 +152,7 @@ class Feet extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        _selectCharacter(context, '피트', email); // 이메일 전달
+        _selectCharacter(context, 'feet', email); // 이메일 전달
       },
       child: Container(
         width: 85,
