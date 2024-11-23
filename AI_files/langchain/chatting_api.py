@@ -9,6 +9,7 @@ from var_config import (EMBEDDING_FUNCTION,
 from dotenv import load_dotenv
 from db_loader import db_loader
 from qa_chain import qa_chain
+import os, json
 
 """
 앱 서버에서 챗봇 채팅 api 요청이 들어올 때 처리하는 py파일입니다.
@@ -38,17 +39,18 @@ else:
 
 # 사용자의 질문에 대해 답변과 URL 제공
 def get_answer_with_url(query, character):
-    answer = qa_chain(query, vector_store, character)
+    answer, tags = qa_chain(query, vector_store, character)
     answer = answer['answer']
     
     # 유사도 검색 수행 및 URL 정보 포함
-    results = vector_store.similarity_search(query, k=1)
+    results = vector_store.similarity_search(query, k=3)
     if results:
-        print(type(answer), answer)
-        url = results[0].metadata.get('url', 'URL을 찾을 수 없습니다')
-        answer += f"\n\n관련 URL: {url}"
+        for result in results:
+            print(type(answer), answer)
+            url = result.metadata.get('url', 'URL을 찾을 수 없습니다')
+            answer += f"\n\n관련 URL: {url}"
 
-    return answer
+    return answer, tags
 
 
 
@@ -62,9 +64,18 @@ async def chat(query_request: QueryRequest):
     query = query_request.query
     character = query_request.character
     
-    answer = get_answer_with_url(query, character)
-    
-    # TODO : user query의 tag쏴줄거 지정하기
-    tag = None
+    answer, tags = get_answer_with_url(query, character)
 
-    return {'answer': answer, 'tag': tag}
+    freq_tag = set()
+    filename = "freq_tag.json"
+    if os.path.exists(filename):
+        with open(filename, 'r', encoding='utf-8') as file:
+            freq_tag = set(json.load(file))
+
+    final_tags = []
+
+    for tag in tags:
+        if tag in freq_tag:
+            final_tags.append(tag)
+
+    return {'answer': answer, 'tag': final_tags}
