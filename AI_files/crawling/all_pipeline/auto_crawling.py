@@ -24,7 +24,7 @@ subprocess.run(['python', 'crawling/convert_to_text/max_tag.py'], check=True)
 subprocess.run(['python', 'crawling/convert_to_text/combin_website_csv.py'], check=True)
 subprocess.run(['python', 'crawling/convert_to_text/combin_data_csv.py'], check=True)
 
-subprocess.run(['python', 'crawling/convert_to_text/del_errorcode.py'], check=True)
+subprocess.run(['python', 'crawling/delet/del_errorcode.py'], check=True)
 
 # 여러 파일 경로 설정
 file_paths = [

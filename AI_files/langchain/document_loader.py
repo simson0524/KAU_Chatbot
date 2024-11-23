@@ -1,5 +1,8 @@
 from langchain.schema import Document
 import pandas as pd
+import ast
+import os
+import json
 """
 [RAG using LangChain - 1] CSV파일에서 데이터 로드하기
 
@@ -42,18 +45,40 @@ def document_loader(csv_file_path):
     data = pd.read_csv(csv_file_path)
 
     documents = []
+
+    freq_tags_dict = dict()
+
     for index, row in data.iterrows():
-            documents.append(
-            Document(
-                page_content=str(row[TEXT] if pd.notna(row[TEXT]) else ''),  # 문자열로 변환하여 사용
-                metadata={
-                    FILE_DOWNLOAD_URL: row[FILE_DOWNLOAD_URL] if pd.notna(row[FILE_DOWNLOAD_URL]) else "",
-                    ORIGIN_URL:        row[ORIGIN_URL] if pd.notna(row[ORIGIN_URL]) else "",
-                    TITLE:             row[TITLE] if pd.notna(row[TITLE]) else "",
-                    PUBLISHED_DATE:    row[PUBLISHED_DATE] if pd.notna(row[PUBLISHED_DATE]) else "",
-                    DEADLINE_DATE:     row[DEADLINE_DATE] if pd.notna(row[DEADLINE_DATE]) else ""
-                }
+        documents.append(
+        Document(
+            page_content=str(row[TEXT] if pd.notna(row[TEXT]) else ''),  # 문자열로 변환하여 사용
+            metadata={
+                FILE_DOWNLOAD_URL: row[FILE_DOWNLOAD_URL] if pd.notna(row[FILE_DOWNLOAD_URL]) else "",
+                ORIGIN_URL:        row[ORIGIN_URL] if pd.notna(row[ORIGIN_URL]) else "",
+                TITLE:             row[TITLE] if pd.notna(row[TITLE]) else "",
+                PUBLISHED_DATE:    row[PUBLISHED_DATE] if pd.notna(row[PUBLISHED_DATE]) else "",
+                DEADLINE_DATE:     row[DEADLINE_DATE] if pd.notna(row[DEADLINE_DATE]) else "",
+                'tags':            row['tag'] if pd.notna(row['tag']) else ""
+            }
             )
         )
+
+        # 빈출 tag정보 추출하기
+        curr_tags = ast.literal_eval(row['tag'])
+        for tag in curr_tags:
+            if tag in freq_tags_dict:
+                freq_tags_dict[tag] += 1
+            else:
+                freq_tags_dict[tag] = 1
+
+    # 출현 횟수가 5번 이상인 것들
+    freq_tags = [key for key, value in freq_tags_dict.items() if value >= 5]
+
+    # 빈출 tag정보 저장하기
+    filename = "freq_tag.json"
+    if os.path.exists(filename):
+        os.remove(filename)
+    with open(filename, 'w', encoding='utf-8') as file:
+        json.dump(freq_tags, file, ensure_ascii=False)
 
     return documents
