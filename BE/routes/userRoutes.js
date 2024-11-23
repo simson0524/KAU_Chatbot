@@ -22,10 +22,7 @@ router.get('/', userService.loginRequired, userController.getUserData);
 router.put('/', userService.loginRequired, userController.updateUser);
 
 // 사용자 비밀번호 수정
-router.put('/password', userService.loginRequired, userController.updatePassword);
-
-// 사용자 비밀번호 찾기 -> 새 비밀번호를 생성해서 전달해줌
-router.get('/password', userController.getNewPassword);
+router.put('/password', userController.updatePassword);
 
 // 사용자 탈퇴
 router.delete('/', userService.loginRequired, userController.deleteUser);
