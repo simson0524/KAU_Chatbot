@@ -98,12 +98,11 @@ exports.getMajorBoardUpdate = async (req, res) => {
         }
 
         const board = await boardModel.getDetailBoard(board_id);
-        const comments = await boardModel.getComments(board_id);
-        res.status(200).json({'message': '게시판 상세 조회에 성공하였습니다.', board, comments});
+        res.status(200).json({'message': '학과 게시판 수정 페이지 조회에 성공하였습니다.', board});
 
     } catch (error) {
-        console.error('게시판 상세 조회 중 오류: ', error);
-        res.status(500).json('게시판 상세 조회 중 오류가 발생했습니다.');
+        console.error('학과 게시판 수정 페이지 조회 중 오류: ', error);
+        res.status(500).json('학과 게시판 수정 페이지 조회 중 오류가 발생했습니다.');
     }
 }
 
@@ -203,12 +202,11 @@ exports.getStudentBoardUpdate = async (req, res) => {
         }
 
         const board = await boardModel.getDetailBoard(board_id);
-        const comments = await boardModel.getComments(board_id);
-        res.status(200).json({'message': '게시판 상세 조회에 성공하였습니다.', board, comments});
+        res.status(200).json({'message': '학번 게시판 수정 페이지 조회에 성공하였습니다.', board});
 
     } catch (error) {
-        console.error('게시판 상세 조회 중 오류: ', error);
-        res.status(500).json('게시판 상세 조회 중 오류가 발생했습니다.');
+        console.error('학번 게시판 수정 페이지 조회 중 오류: ', error);
+        res.status(500).json('학번 게시판 수정 페이지 조회 중 오류가 발생했습니다.');
     }
 }
 
