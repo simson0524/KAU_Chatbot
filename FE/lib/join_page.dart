@@ -657,7 +657,7 @@ class _JoinInputState extends State<JoinInput> {
   }
 }
 
-class go_login extends StatelessWidget {
+/*class go_login extends StatelessWidget {
   const go_login({super.key});
 
   @override
@@ -725,9 +725,10 @@ class go_login extends StatelessWidget {
       ),
     );
   }
-}
+}*/
 
 //회원가입 완료 버튼
+
 class Joinfinish extends StatelessWidget {
   const Joinfinish({super.key});
 
@@ -739,69 +740,62 @@ class Joinfinish extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 10, right: 120, left: 120),
       child: OutlinedButton(
-        // 회원가입 버튼의 onPressed에 이메일 인증 상태 확인 추가
-        onPressed: isEmailVerified
-            ? () async {
-                if (inputState == null) {
-                  return;
-                }
+        onPressed: () async {
+          if (inputState == null) {
+            textmessageDialog(context, '입력 상태를 가져오지 못했습니다.');
+            return;
+          }
 
-                if (inputState.nullcheck()) {
-                  textmessageDialog(context, '입력되지 않은 값이 존재합니다');
-                  return;
-                }
+          if (inputState.nullcheck()) {
+            textmessageDialog(context, '입력되지 않은 값이 존재합니다.');
+            return;
+          }
 
-                if (!inputState.samePWcheck()) {
-                  textmessageDialog(context, '비밀번호와 비밀번호 확인이 일치하지 않습니다');
-                  return;
-                }
+          if (!inputState.samePWcheck()) {
+            textmessageDialog(context, '비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+            return;
+          }
 
-                // 학번과 학년을 정수형으로 변환
-                final studentId =
-                    int.tryParse(inputState.join_numberController.text);
-                final email = inputState.join_emailController.text;
-                final password = inputState.join_pwController.text;
-                final name = inputState.join_nameController.text;
-                final major = inputState.join_majorController.text;
-                final grade = int.tryParse(inputState.join_Grade ?? '');
-                final gender = inputState.join_Gender ?? '';
-                final residence = inputState.join_homeController.text;
+          final studentId = int.tryParse(inputState.join_numberController.text);
+          final email = inputState.join_emailController.text;
+          final password = inputState.join_pwController.text;
+          final name = inputState.join_nameController.text;
+          final major = inputState.join_majorController.text;
+          final grade = int.tryParse(inputState.join_Grade ?? '');
+          final gender = inputState.join_Gender ?? '';
+          final residence = inputState.join_homeController.text;
 
-                if (studentId == null || grade == null) {
-                  textmessageDialog(context, '학번과 학년은 숫자로 입력해주세요.');
-                  return;
-                }
+          if (studentId == null || grade == null) {
+            textmessageDialog(context, '학번과 학년은 숫자로 입력해주세요.');
+            return;
+          }
 
-                try {
-                  final response = await AuthApi.register(
-                    studentId,
-                    email,
-                    password,
-                    name,
-                    major,
-                    grade,
-                    gender,
-                    residence,
-                  );
+          try {
+            final response = await AuthApi.register(
+              studentId,
+              email,
+              password,
+              name,
+              major,
+              grade,
+              gender,
+              residence,
+            );
 
-                  if (response.statusCode == 200) {
-                    finishJoinDialog(context);
-                  } else {
-                    final responseBody = json.decode(response.body);
-                    textmessageDialog(
-                        context, responseBody['error'] ?? '회원가입 실패');
-                  }
-                } catch (error) {
-                  textmessageDialog(context, '회원가입 중 오류가 발생했습니다');
-                  print('Registration error: $error');
-                }
-              }
-            : null,
+            if (response.statusCode == 200) {
+              finishJoinDialog(context);
+            } else {
+              final responseBody = json.decode(response.body);
+              textmessageDialog(context, responseBody['message'] ?? '회원가입 실패');
+            }
+          } catch (error) {
+            textmessageDialog(context, '회원가입 중 오류가 발생했습니다.');
+            print('Registration error: $error');
+          }
+        },
         style: OutlinedButton.styleFrom(
           backgroundColor: Colors.white,
-          side: const BorderSide(
-            width: 1.25,
-          ),
+          side: const BorderSide(width: 1.25),
         ),
         child: const Text(
           '회원가입',

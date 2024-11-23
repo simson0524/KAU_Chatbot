@@ -1,6 +1,9 @@
 import 'package:FE/chatting_page.dart';
 import 'package:FE/main.dart';
 import 'package:flutter/material.dart';
+import 'package:FE/api/auth_api.dart'; // API 추가
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MemberInfo extends StatefulWidget {
   const MemberInfo({super.key});
@@ -18,18 +21,164 @@ class _MemberInfoState extends State<MemberInfo> {
 
   String? gender;
   String? grade;
-
+  late String accessToken;
   @override
   void initState() {
     super.initState();
-    // 초기 값 설정 (사용자의 기존 정보를 불러올 때 사용)
-    numberController.text = "20201234"; // 예시 학번
-    nameController.text = "홍길동"; // 예시 이름
-    emailController.text = "user@kau.kr"; // 예시 이메일
-    homeController.text = "서울"; // 예시 거주지
-    majorController.text = "컴퓨터공학"; // 예시 전공
-    gender = "남"; // 예시 성별
-    grade = "3"; // 예시 학년
+    _fetchUserInfo(); // Fetch user info on init
+  }
+
+  Future<void> _fetchUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    accessToken = prefs.getString("accessToken") ?? ''; // Token 가져오기
+
+    if (accessToken.isEmpty) {
+      _showErrorDialog('로그인 정보가 없습니다. 다시 로그인해주세요.');
+      return;
+    }
+
+    try {
+      final userInfo = await AuthApi.getUserInfo(accessToken); // API 호출
+
+      setState(() {
+        numberController.text = userInfo['student_id'].toString();
+        nameController.text = userInfo['name'];
+        emailController.text = userInfo['email'];
+        homeController.text = userInfo['residence'];
+        majorController.text = userInfo['major'];
+        gender = userInfo['gender'];
+        grade = userInfo['grade'].toString();
+        // chat_character 처리 필요 시 추가
+      });
+    } catch (error) {
+      print('Error fetching user info: $error');
+      _showErrorDialog('사용자 정보를 불러오는 중 오류가 발생했습니다.');
+    }
+  }
+
+  Future<void> _updateUserInfo() async {
+    if (accessToken.isEmpty) {
+      _showErrorDialog('로그인 정보가 없습니다. 다시 로그인해주세요.');
+      return;
+    }
+
+    try {
+      final response = await AuthApi.updateUserInfo(
+        name: nameController.text.trim(),
+        major: majorController.text.trim(),
+        grade: int.parse(grade ?? '0'),
+        residence: homeController.text.trim(),
+        chatCharacter: 'default_character', // 필요 시 사용자 선택 값으로 대체
+        accessToken: accessToken,
+      );
+
+      if (response.statusCode == 200) {
+        _showSuccessDialog('개인정보 수정이 완료되었습니다.');
+      } else {
+        _showErrorDialog('개인정보 수정에 실패했습니다. 다시 시도해주세요.');
+      }
+    } catch (error) {
+      print('Error updating user info: $error');
+      _showErrorDialog('개인정보 수정 중 오류가 발생했습니다.');
+    }
+  }
+
+  Future<void> deleteUser() async {
+    if (accessToken.isEmpty) {
+      _showErrorDialog('로그인 정보가 없습니다. 다시 로그인해주세요.');
+      return;
+    }
+
+    try {
+      final response = await AuthApi.deleteUser(accessToken);
+
+      if (response.statusCode == 200) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove("accessToken"); // Remove token on success
+        _showSuccessDialog('회원 탈퇴가 완료되었습니다.');
+        Navigator.pushReplacementNamed(context, '/login'); // Navigate to login
+      } else {
+        _showErrorDialog('회원 탈퇴 실패: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error deleting user: $error');
+      _showErrorDialog('회원 탈퇴 중 오류가 발생했습니다.');
+    }
+  }
+
+  void finish_member_info_Dialog(String dialogMessage) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        Future.delayed(const Duration(seconds: 5), () {
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop(); // Close the dialog
+          }
+        });
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+            side: const BorderSide(color: Colors.black, width: 1.5),
+          ),
+          child: SizedBox(
+            width: 150,
+            height: 70,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 3.0, top: 5.0),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      dialogMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('오류'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('성공'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -202,9 +351,10 @@ class _MemberInfoState extends State<MemberInfo> {
                         ),
                         const SizedBox(height: 20),
                         OutlinedButton(
-                          onPressed: () {
-                            finish_member_info_Dialog(
-                                context, '개인정보 수정이 완료되었습니다.');
+                          onPressed: () async {
+                            await _updateUserInfo(); // Update user info via API
+                            //finish_member_info_Dialog(
+                            //    '개인정보 수정이 완료되었습니다.'); // Show the dialog
                           },
                           child: const Text(
                             '수정 완료',
@@ -224,7 +374,8 @@ class _MemberInfoState extends State<MemberInfo> {
             right: 15.0,
             child: TextButton(
               onPressed: () {
-                show_withdrawal_Dialog(context);
+                show_withdrawal_Dialog(
+                    context, deleteUser); // Pass the deleteUser function
               },
               style: TextButton.styleFrom(
                 visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
@@ -259,57 +410,8 @@ class member_info_Image extends StatelessWidget {
   }
 }
 
-// 개인정보 수정 완료 다이얼로그
-void finish_member_info_Dialog(BuildContext context, String dialogmessage) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      Future.delayed(const Duration(seconds: 5), () {
-        if (Navigator.canPop(context)) {
-          /*
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const ChattingPage()),
-          );
-          */
-        }
-      });
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          side: const BorderSide(color: Colors.black, width: 1.5),
-        ),
-        child: SizedBox(
-          width: 150,
-          height: 70,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 3.0, top: 5.0),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    dialogmessage,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-// 회원탈퇴 다이얼로그
-void show_withdrawal_Dialog(BuildContext context) {
+void show_withdrawal_Dialog(
+    BuildContext context, Future<void> Function() onDeleteUser) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -343,12 +445,9 @@ void show_withdrawal_Dialog(BuildContext context) {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       OutlinedButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoginPage()),
-                          );
+                        onPressed: () async {
+                          Navigator.of(context).pop(); // Close dialog
+                          await onDeleteUser(); // Call the delete function
                         },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(width: 1.2),
@@ -364,7 +463,7 @@ void show_withdrawal_Dialog(BuildContext context) {
                       const SizedBox(width: 10),
                       OutlinedButton(
                         onPressed: () {
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(); // Close dialog
                         },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(width: 1.2),
