@@ -424,17 +424,20 @@ class ChatBubble extends StatelessWidget {
                   height: 50,
                 ),
                 const SizedBox(width: 8.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style:
-                          const TextStyle(fontSize: 12.0, color: Colors.black),
-                    ),
-                    const SizedBox(height: 4.0),
-                    Flexible(
-                      child: Container(
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                            fontSize: 12.0, color: Colors.black),
+                      ),
+                      const SizedBox(height: 4.0),
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.7,
+                        ),
                         padding: const EdgeInsets.all(12.0),
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -443,21 +446,20 @@ class ChatBubble extends StatelessWidget {
                         ),
                         child: Text(
                           message,
-                          style: TextStyle(fontSize: 14.0),
                           softWrap: true,
-                          overflow: TextOverflow.visible,
+                          overflow: TextOverflow.clip,
                         ),
                       ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        time,
-                        style:
-                            const TextStyle(color: Colors.grey, fontSize: 10.0),
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Text(
+                          time,
+                          style: const TextStyle(
+                              color: Colors.grey, fontSize: 10.0),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
