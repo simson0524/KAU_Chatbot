@@ -2,6 +2,10 @@ import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:FE/api/auth_api.dart';
+import 'package:FE/api/board_api.dart';
+import 'dart:convert';
 
 void main() {
   runApp(MaterialApp(
@@ -15,33 +19,105 @@ class Board19Page extends StatefulWidget {
   _Board19PageState createState() => _Board19PageState();
 }
 
+const int fixStudentId = 2019; // 고정된 학번
+
 class _Board19PageState extends State<Board19Page> {
   List<Map<String, String>> posts = [];
   List<Map<String, String>> filteredPosts = [];
   TextEditingController searchController = TextEditingController();
+  TextEditingController commentController = TextEditingController();
+  // 제목과 내용 입력 필드 컨트롤러
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController contentController = TextEditingController();
+  List<Map<String, String>> comments = []; // 댓글 데이터를 저장할 리스트
+  String? accessToken; // 토큰을 저장할 변수
+  String? userName; // 사용자 이름 저장
 
   @override
   void initState() {
     super.initState();
+    loadAccessToken(); // 토큰 로드
     filteredPosts = posts;
+    //fetchComments(); // 댓글 데이터 로드
   }
 
-  void addPost(String title, String content, String name) {
-    setState(() {
-      posts.add({
-        'title': title,
-        'content': content,
-        'date': DateTime.now().toString().split(' ')[0],
-        'name': name,
+  Future<void> loadAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    accessToken = prefs.getString('accessToken'); // 저장된 토큰 가져오기
+
+    if (accessToken == null || accessToken!.isEmpty) {
+      textmessageDialog(context, '로그인이 필요합니다.');
+      Navigator.pushReplacementNamed(context, '/login');
+      return;
+    }
+
+    try {
+      // 사용자 정보 가져오기
+      final userInfo = await AuthApi.getUserInfo(accessToken!);
+      setState(() {
+        userName = userInfo['name']; // 사용자 이름 설정
       });
-      filteredPosts = posts;
-    });
+
+      fetchPosts(); // 게시글 로드
+    } catch (error) {
+      textmessageDialog(context, '사용자 정보를 불러오는데 실패했습니다.');
+      print('Error loading user info: $error');
+    }
+  }
+
+  Future<void> fetchPosts() async {
+    try {
+      final response =
+          await BoardApi.getStudentBoardList(fixStudentId, accessToken!);
+
+      print('Response Status: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = json.decode(response.body);
+        setState(() {
+          posts = responseData.map<Map<String, String>>((post) {
+            return {
+              'title': post['title'],
+              'content': post['content'],
+              'date': post['created_at'],
+              'name': post['author'].toString(),
+            };
+          }).toList();
+          filteredPosts = posts;
+        });
+      } else {
+        textmessageDialog(context, '게시글 데이터를 불러오는데 실패했습니다.');
+      }
+    } catch (error) {
+      textmessageDialog(context, '네트워크 오류가 발생했습니다.');
+      print('Error fetching posts: $error');
+    }
+  }
+
+  Future<void> addPost(String title, String content, String name) async {
+    try {
+      final response =
+          await BoardApi.createStudentBoard(2024, accessToken!, title, content);
+
+      if (response.statusCode == 200) {
+        textmessageDialog(context, '게시글이 성공적으로 등록되었습니다.');
+        fetchPosts(); // 게시글 갱신
+      } else {
+        textmessageDialog(context, '게시글 등록에 실패했습니다.');
+      }
+    } catch (error) {
+      textmessageDialog(context, '네트워크 오류가 발생했습니다.');
+      print('Error adding post: $error');
+    }
   }
 
   void filterPosts(String keyword) {
     setState(() {
-      filteredPosts =
-          posts.where((post) => post['title']!.contains(keyword)).toList();
+      filteredPosts = posts
+          .where((post) =>
+              post['title']!.toLowerCase().contains(keyword.toLowerCase()))
+          .toList();
     });
   }
 
@@ -71,10 +147,7 @@ class _Board19PageState extends State<Board19Page> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -261,10 +334,7 @@ class New19PostPage extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },
@@ -454,10 +524,7 @@ class _Post19DetailPageState extends State<Post19DetailPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ChattingPage(
-                    characterName:
-                        Provider.of<CharacterProvider>(context).character,
-                  ),
+                  builder: (context) => ChattingPage(),
                 ),
               );
             },

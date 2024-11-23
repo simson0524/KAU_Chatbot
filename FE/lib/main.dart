@@ -47,45 +47,40 @@ class LoginPage extends StatelessWidget {
     final TextEditingController pwController = TextEditingController();
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Container(
-              color: Colors.white,
-            ),
+      resizeToAvoidBottomInset: true, // 키보드로 인해 화면 크기 변경 방지
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/grid_background.png'),
+            fit: BoxFit.cover,
           ),
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/grid_background.png'),
-                  fit: BoxFit.cover,
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      const LoginImage(),
+                      // 컨트롤러를 전달하며 LoginInputFields를 호출
+                      LoginInputFields(
+                        idController: idController,
+                        pwController: pwController,
+                      ),
+                      // LoginButtons에 컨트롤러 전달
+                      LoginButtons(
+                        idController: idController,
+                        pwController: pwController,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  const LoginImage(),
-                  // 컨트롤러를 전달하며 LoginInputFields를 호출
-                  LoginInputFields(
-                    idController: idController,
-                    pwController: pwController,
-                  ),
-                  // LoginButtons에 컨트롤러 전달
-                  LoginButtons(
-                    idController: idController,
-                    pwController: pwController,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

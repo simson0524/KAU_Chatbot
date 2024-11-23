@@ -30,6 +30,8 @@ class _ChattingPageState extends State<ChattingPage> {
   late String token;
   int chatId = 0;
   List<Map<String, dynamic>> messages = [];
+// Initialize token and chatId
+  late String chatCharacter = '마하'; // 기본값 설정
 
   //상단바 관련
   bool right_isDrawerOpen = false;
@@ -51,9 +53,6 @@ class _ChattingPageState extends State<ChattingPage> {
     });
   }
 
-// Initialize token and chatId
-  late String chatCharacter = '기본 캐릭터'; // 기본값 설정
-
   Future<bool> _initializeChat() async {
     final prefs = await SharedPreferences.getInstance();
     token = prefs.getString("accessToken") ?? ''; // Token 가져오기
@@ -67,8 +66,7 @@ class _ChattingPageState extends State<ChattingPage> {
       // 서버에서 회원 정보 가져오기
       final userInfo = await AuthApi.getUserInfo(token);
       setState(() {
-        chatCharacter =
-            userInfo['chat_character'] ?? '기본 캐릭터'; // chat_character 설정
+        chatCharacter = userInfo['chat_character'] ?? '마하'; // chat_character 설정
       });
       return true; // 성공적으로 초기화
     } catch (error) {

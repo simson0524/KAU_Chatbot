@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class AuthApi {
+  static const String baseUrl = 'http://3.37.153.10:3000';
   // 회원가입 API 호출 함수
   static Future<http.Response> register(
     int studentId,
@@ -178,6 +179,70 @@ class AuthApi {
     } catch (error) {
       print('Error occurred while fetching user info: $error');
       throw Exception('회원 정보 가져오는 중 오류가 발생했습니다.');
+    }
+  }
+
+  // 회원 정보 수정 API 호출 함수
+  static Future<http.Response> updateUserInfo({
+    required String name,
+    required String major,
+    required int grade,
+    required String residence,
+    required String chatCharacter,
+    required String accessToken,
+  }) async {
+    final url = Uri.parse('$baseUrl/user');
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: json.encode({
+          'name': name,
+          'major': major,
+          'grade': grade,
+          'residence': residence,
+          'chat_character': chatCharacter,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return response; // Return successful response
+      } else {
+        throw Exception(
+            'Failed to update user info: ${response.statusCode} ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Error updating user info: $error');
+      throw Exception('회원 정보를 수정하는 중 오류가 발생했습니다.');
+    }
+  }
+
+  // 회원 탈퇴 API 호출 함수
+  static Future<http.Response> deleteUser(String accessToken) async {
+    final url = Uri.parse('$baseUrl/user');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return response; // Return successful response
+      } else {
+        throw Exception(
+            'Failed to delete user: ${response.statusCode} ${response.reasonPhrase}');
+      }
+    } catch (error) {
+      print('Error deleting user: $error');
+      throw Exception('회원 탈퇴 중 오류가 발생했습니다.');
     }
   }
 }
