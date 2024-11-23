@@ -14,7 +14,7 @@ class AuthApi {
     String gender,
     String residence,
   ) async {
-    final url = Uri.parse('http://3.37.153.10:3000/ user/register');
+    final url = Uri.parse('http://3.37.153.10:3000/user/register');
 
     try {
       final response = await http.post(

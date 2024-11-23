@@ -883,32 +883,27 @@ void textmessageDialog(BuildContext context, String dialogmessage) {
   );
 }
 
-//회원가입 성공 알림창
 void finishJoinDialog(BuildContext context) {
   final _JoinInputState? inputState = joinPWInputKey.currentState;
-  if (inputState == null) return; // inputState가 null일 경우 처리
+  if (inputState == null) return;
 
-  final email = inputState.join_emailController.text; // 이메일 가져오기
+  final email = inputState.join_emailController.text;
 
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0), // 테두리 모서리 둥글게
+          borderRadius: BorderRadius.circular(20.0),
           side: const BorderSide(color: Colors.black, width: 1.5),
         ),
         child: SizedBox(
-          // dialog 사이즈
           width: 220,
           height: 100,
           child: Padding(
-            padding:
-                const EdgeInsets.only(bottom: 3.0, top: 5.0), // dialog의 내부 여백
+            padding: const EdgeInsets.all(10.0),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text(
                   '회원가입 정보가 저장되었습니다. \n 마지막 설정인 캐릭터 선택을 해주세요.',
@@ -919,15 +914,14 @@ void finishJoinDialog(BuildContext context) {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 10), // 텍스트와 버튼 사이 간격
-                // 캐릭터선택 버튼
+                const SizedBox(height: 10),
                 OutlinedButton(
                   onPressed: () {
+                    Navigator.pop(context); // Close the dialog first
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            CharacterPage(email: email), // 이메일 전달
+                        builder: (context) => CharacterPage(email: email),
                       ),
                     );
                   },
@@ -935,7 +929,6 @@ void finishJoinDialog(BuildContext context) {
                     side: const BorderSide(width: 1.2),
                     padding:
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
-                    visualDensity: VisualDensity.compact,
                   ),
                   child: const Text(
                     '캐릭터 선택',
