@@ -31,7 +31,6 @@ class AuthApi {
           'residence': residence,
         }),
       );
-
       return response; // statusCode와 응답 본문을 포함하여 반환
     } catch (error) {
       print('Error occurred during registration: $error');

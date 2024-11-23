@@ -917,13 +917,16 @@ void finishJoinDialog(BuildContext context) {
                 const SizedBox(height: 10),
                 OutlinedButton(
                   onPressed: () {
-                    Navigator.pop(context); // Close the dialog first
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CharacterPage(email: email),
-                      ),
-                    );
+                    Navigator.pop(context); // Dialog 닫기
+                    Future.delayed(Duration(milliseconds: 200), () {
+                      // Dialog가 닫힌 후 페이지 이동
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CharacterPage(email: email),
+                        ),
+                      );
+                    });
                   },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(width: 1.2),

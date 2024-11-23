@@ -433,21 +433,14 @@ class ChatBubble extends StatelessWidget {
                           const TextStyle(fontSize: 12.0, color: Colors.black),
                     ),
                     const SizedBox(height: 4.0),
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        child: Text(
-                          message,
-                          style: TextStyle(fontSize: 14.0),
-                          softWrap: true,
-                          overflow: TextOverflow.visible,
-                        ),
+                    Container(
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.black),
+                        borderRadius: BorderRadius.circular(15.0),
                       ),
+                      child: Text(message),
                     ),
                     Align(
                       alignment: Alignment.bottomLeft,
