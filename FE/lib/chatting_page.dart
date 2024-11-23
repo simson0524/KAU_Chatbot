@@ -424,33 +424,42 @@ class ChatBubble extends StatelessWidget {
                   height: 50,
                 ),
                 const SizedBox(width: 8.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style:
-                          const TextStyle(fontSize: 12.0, color: Colors.black),
-                    ),
-                    const SizedBox(height: 4.0),
-                    Container(
-                      padding: const EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(15.0),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                            fontSize: 12.0, color: Colors.black),
                       ),
-                      child: Text(message),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        time,
-                        style:
-                            const TextStyle(color: Colors.grey, fontSize: 10.0),
+                      const SizedBox(height: 4.0),
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        child: Text(
+                          message,
+                          softWrap: true,
+                          overflow: TextOverflow.clip,
+                        ),
                       ),
-                    ),
-                  ],
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Text(
+                          time,
+                          style: const TextStyle(
+                              color: Colors.grey, fontSize: 10.0),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
