@@ -31,7 +31,7 @@ class _ChattingPageState extends State<ChattingPage> {
   int chatId = 0;
   List<Map<String, dynamic>> messages = [];
 // Initialize token and chatId
-  late String chatCharacter = '마하'; // 기본값 설정
+  late String chatCharacter = 'maha'; // 기본값 설정
 
   //상단바 관련
   bool right_isDrawerOpen = false;
@@ -66,7 +66,8 @@ class _ChattingPageState extends State<ChattingPage> {
       // 서버에서 회원 정보 가져오기
       final userInfo = await AuthApi.getUserInfo(token);
       setState(() {
-        chatCharacter = userInfo['chat_character'] ?? '마하'; // chat_character 설정
+        chatCharacter =
+            userInfo['chat_character'] ?? 'maha'; // chat_character 설정
       });
       return true; // 성공적으로 초기화
     } catch (error) {
@@ -171,14 +172,14 @@ class _ChattingPageState extends State<ChattingPage> {
 
   // Helper method to choose the correct character image
   String _chatCharacterImage() {
-    if (chatCharacter == '마일') {
+    if (chatCharacter == 'mile') {
       return 'assets/images/chat_mile.png';
-    } else if (chatCharacter == '마하') {
+    } else if (chatCharacter == 'maha') {
       return 'assets/images/chat_maha.png';
-    } else if (chatCharacter == '피트') {
+    } else if (chatCharacter == 'feet') {
       return 'assets/images/chat_feet.png';
     } else {
-      return 'assets/images/chat_basic.png'; // Default image
+      return 'assets/images/chat_maha.png'; // Default image
     }
   }
 
