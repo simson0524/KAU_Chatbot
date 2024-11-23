@@ -781,9 +781,11 @@ class Joinfinish extends StatelessWidget {
               gender,
               residence,
             );
+            print('Response status: ${response.statusCode}');
+            print('Response body: ${response.body}');
 
-            if (response.statusCode == 200) {
-              finishJoinDialog(context);
+            if (response.statusCode == 201) {
+              finishJoinDialog(context); // 성공 메시지
             } else {
               final responseBody = json.decode(response.body);
               textmessageDialog(context, responseBody['message'] ?? '회원가입 실패');
@@ -917,16 +919,13 @@ void finishJoinDialog(BuildContext context) {
                 const SizedBox(height: 10),
                 OutlinedButton(
                   onPressed: () {
-                    Navigator.pop(context); // Dialog 닫기
-                    Future.delayed(Duration(milliseconds: 200), () {
-                      // Dialog가 닫힌 후 페이지 이동
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CharacterPage(email: email),
-                        ),
-                      );
-                    });
+                    Navigator.pop(context); // Close the dialog first
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CharacterPage(email: email),
+                      ),
+                    );
                   },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(width: 1.2),
