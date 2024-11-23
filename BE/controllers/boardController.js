@@ -224,8 +224,9 @@ exports.deleteBoard = async (req, res) => {
             return res.status(400).json({error: '해당 아이디의 사용자가 존재하지 않습니다.'});
         }
 
-        await boardModel.deleteBoard(board_id);
-        res.status(204).json({'message': '게시판 삭제가 성공하였습니다.'});
+        const result = await boardModel.deleteBoard(board_id);
+        console.log(result);
+        return res.status(200).json({'message': '게시판 삭제가 성공하였습니다.'});
 
     } catch (error) {
         console.error('게시판 삭제 중 오류: ', error);
