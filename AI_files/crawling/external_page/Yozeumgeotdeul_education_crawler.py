@@ -122,7 +122,7 @@ for i, link in enumerate( tqdm(target_links, desc='Current Process : 요즘것�
     # URL에서 idx 값 추출
     idx_match = re.search(r'/posts/(\d+)', url)  # 정규식을 사용하여 idx 값을 추출
     idx_value = idx_match.group(1)  # 매칭된 idx 값 (예: '7732')
-    idx = f"요즘것들_대외활동_{idx_value}"  # 고유 인덱스로 저장
+    idx = f"요즘것들_국비교육_{idx_value}"  # 고유 인덱스로 저장
 
     # 접수마감일자 추출하기
     deadline_date_elements = driver.find_elements(By.XPATH, '//div[contains(@class, "flex items-center space-x-4")]//p')
