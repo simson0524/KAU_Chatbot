@@ -48,7 +48,33 @@ exports.userLogin = async (req, res) => {
         res.status(200).json({accessToken, refreshToken, "message": "로그인이 성공하였습니다."});
 
     } catch (error) {
-        console.error(error);
+        console.error('로그인 중 오류: ', error);
+        res.status(500).json('로그인 중 오류가 발생했습니다.');
+    }
+}
+
+exports.checkUser = async (req, res) => {
+
+    try {
+        const { email, password } = req.body;
+
+        // 이메일로 사용자 찾기
+        const user = await userModel.findUserByEmail(email); // db에 입력한 정보의 사용자가 있는지 검색하기
+        if (!user) {
+            return res.status(400).json({error: '이메일을 잘못 입력하셨습니다'});
+        }
+
+        // 비밀번호 확인
+        const isPasswordValid = await bcrypt.compare(password, user.password); // 입력한 비밀번호와 암호화되어 저장된 비밀번호가 맞는지 확인
+        if (!isPasswordValid) {
+            return res.status(400).json({error: '비밀번호를 잘못 입력하셨습니다'});
+        }
+
+        res.status(200).json({accessToken, refreshToken, "message": "사용자 확인에 성공하였습니다."});
+
+    } catch (error) {
+        console.error('사용자 확인 중 오류: ', error);
+        res.status(500).json('사용자 확인 중 오류가 발생했습니다.');
     }
 }
 
@@ -60,6 +86,11 @@ exports.userSignUp = async (req, res) => {
         if (emailExists) {
             return res.status(400).json({error: '이미 존재하는 이메일입니다.'});
         }
+
+        const studentIdExists = await userModel.findUserByStudentId(student_id); // 이미 동일한 학번이 있는지 확인
+        if (studentIdExists) {
+            return res.status(400).json({error: '이미 존재하는 학번입니다.'});
+        }
         
         // 비밀번호 해싱
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -68,7 +99,8 @@ exports.userSignUp = async (req, res) => {
         res.status(201).json({'message': '회원가입이 성공하였습니다.'});
     }
     catch (error) {
-        console.error(error);
+        console.error('회원가입 중 오류: ', error);
+        res.status(500).json('회원가입 중 오류가 발생했습니다.');
     }
 }
 
@@ -207,32 +239,6 @@ exports.updatePassword = async (req, res) => {
     }
 }
 
-// 비밀번호 찾기 -> 새 비밀번호 생성해서 전달
-exports.getNewPassword = async (req, res) => {
-    try {
-        const email = req.body.email;
-
-        // 해당 이메일의 학생이 있는지 확인
-        const user = await userModel.findUserByEmail(email);
-        if (!user) {
-            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
-        }
-
-        const tempPassword = userService.generateTempPassword();
-
-        // 임시 비밀번호 해싱
-        const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
-        
-        // 임시 비밀번호 저장
-        await userModel.updateUserPassword(user.student_id, hashedTempPassword);
-        res.status(200).json({'message': '임시 비밀번호 전달을 성공하였습니다.', "임시 비밀번호": tempPassword});
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json('사용자 비밀번호 찾기 중 오류가 발생했습니다.');
-    }
-}
-
 // 사용자 탈퇴
 exports.deleteUser = async (req, res) => {
 
@@ -244,6 +250,9 @@ exports.deleteUser = async (req, res) => {
         if (!user) {
             return res.status(400).json({error: '해당 학번의 사용자가 존재하지 않습니다.'});
         }
+
+        // 사용자 삭제할 때 관련된 데이터도 삭제
+        await userModel.deleteUserRelatedData(student_id);
 
         // User 테이블에서 사용자 삭제
         await userModel.deleteUser(student_id);

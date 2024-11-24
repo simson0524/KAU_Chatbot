@@ -17,7 +17,13 @@ router.get('/major/:major_identifier/:board_id', userService.loginRequired, boar
 router.post('/major/:major_identifier/:board_id/comments', userService.loginRequired, boardController.createMajorComments);
 
 // 학과 게시판 삭제
-router.delete('/major/:major_identifier/:board_id', userService.loginRequired, boardController.deleteBoard);
+router.delete('/major/:major_identifier/:board_id', userService.loginRequired, boardService.isBoardAuthor, boardController.deleteBoard);
+
+// 학과 게시판 수정 페이지
+router.get('/major/:major_identifier/:board_id/update', userService.loginRequired, boardService.isBoardAuthor, boardController.getMajorBoardUpdate);
+
+// 학과 게시판 수정
+router.put('/major/:major_identifier/:board_id/update', userService.loginRequired, boardService.isBoardAuthor, boardController.updateBoard);
 
 // 학번 게시판 조회
 router.get('/studentId/:student_identifier', userService.loginRequired, boardController.getStudentBoard);
@@ -32,7 +38,13 @@ router.get('/studentId/:student_identifier/:board_id', userService.loginRequired
 router.post('/studentId/:student_identifier/:board_id/comments', userService.loginRequired, boardController.createStudentComments);
 
 // 학번 게시판 삭제
-router.delete('/studentId/:student_identifier/:board_id', userService.loginRequired, boardController.deleteBoard);
+router.delete('/studentId/:student_identifier/:board_id', userService.loginRequired, boardService.isBoardAuthor, boardController.deleteBoard);
+
+// 학번 게시판 수정 페이지
+router.get('/studentId/:student_identifier/:board_id/update', userService.loginRequired, boardService.isBoardAuthor, boardController.getStudentBoardUpdate);
+
+// 학번 게시판 수정
+router.put('/studentId/:student_identifier/:board_id/update', userService.loginRequired, boardService.isBoardAuthor, boardController.updateBoard);
 
 
 module.exports = router;
