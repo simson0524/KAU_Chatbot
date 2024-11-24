@@ -9,6 +9,8 @@ import 'package:FE/left_board/major_community/major_board.dart';
 import 'package:FE/main.dart';
 import 'package:FE/pw_member_info.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:FE/db/chat_dao.dart'; // ChatDao import for SQLite
 import 'package:FE/api/chat_api.dart'; // ChatApi import for server interaction
@@ -30,6 +32,8 @@ class _ChattingPageState extends State<ChattingPage> {
   late String token;
   int chatId = 0;
   List<Map<String, dynamic>> messages = [];
+  late ScrollController _scrollController; //스크롤컨트롤러 추가
+  final FocusNode _focusNode = FocusNode(); //포커스노드 추가
 // Initialize token and chatId
   late String chatCharacter = 'maha'; // 기본값 설정
 
@@ -42,15 +46,28 @@ class _ChattingPageState extends State<ChattingPage> {
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController(); //스크롤 초기화
+    _focusNode.addListener(_onFocusChange); //포커스 변화 감지 리스너 추가
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       bool isInitialized = await _initializeChat();
       if (isInitialized) {
         await _loadMessagesFromLocal();
+        _scrollToBottom(); //채팅 불러온 후 자동 스크롤
       } else {
         // Navigate to login or show an error message if needed
         print("Initialization failed. Token is missing.");
       }
     });
+  }
+
+  //스크롤 관련
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose(); // 스크롤컨트롤러 해제
+    _focusNode.dispose();
+    super.dispose();
   }
 
   Future<bool> _initializeChat() async {
@@ -111,6 +128,8 @@ class _ChattingPageState extends State<ChattingPage> {
       });
       _controller.clear();
 
+      _scrollToBottom(); //새로운 메시지 추가 시 스크롤
+
       // Get a new chatId for the response
       chatId = await _chatDao.getNewChatId();
 
@@ -151,6 +170,8 @@ class _ChattingPageState extends State<ChattingPage> {
         'character': chatCharacter,
       });
     });
+
+    _scrollToBottom(); //새로운 메시지 추가 후 스크롤
 
     // Store the bot's response in SQLite
     await _chatDao.insertMessage(
@@ -200,8 +221,35 @@ class _ChattingPageState extends State<ChattingPage> {
 
   void left_closeDrawer() => setState(() => left_isDrawerOpen = false);
 
+  void _onFocusChange() {
+    if (_focusNode.hasFocus) {
+      // 포커스가 활성화될 때 스크롤 이동
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _scrollToBottom();
+      });
+    }
+  }
+
+  //스크롤 관련
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    double keyboardHeight =
+        MediaQuery.of(context).viewInsets.bottom; //키보드 높이 감지
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.white));
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -220,12 +268,14 @@ class _ChattingPageState extends State<ChattingPage> {
             onPressed: right_openDrawer,
           ),
         ],
-        elevation: 0,
+        elevation: 1.0,
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1.0),
           child: Divider(color: Colors.black),
         ),
       ),
+      resizeToAvoidBottomInset: false, // 키보드에 의한 화면 조정
+      extendBodyBehindAppBar: false,
       body: Stack(
         children: [
           Container(
@@ -260,6 +310,7 @@ class _ChattingPageState extends State<ChattingPage> {
               // Chat messages
               Expanded(
                 child: ListView.builder(
+                  controller: _scrollController, //스크롤컨트롤러 연결
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     bool isMine =
@@ -278,8 +329,12 @@ class _ChattingPageState extends State<ChattingPage> {
 
               // Message input field and send button
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                padding: EdgeInsets.only(
+                  bottom: keyboardHeight + 8.0, // 키보드 높이에 따라 패딩 조정
+                  left: 8.0,
+                  right: 8.0,
+                  top: 4.0,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -291,6 +346,7 @@ class _ChattingPageState extends State<ChattingPage> {
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
                         child: TextField(
+                          focusNode: _focusNode,
                           controller: _controller,
                           decoration: const InputDecoration(
                             border: InputBorder.none,
@@ -478,13 +534,14 @@ class ChatBubble extends StatelessWidget {
                 ),
               ],
             ),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Text(
-              time,
-              style: const TextStyle(color: Colors.grey, fontSize: 10.0),
+          if (isMine)
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Text(
+                time,
+                style: const TextStyle(color: Colors.grey, fontSize: 10.0),
+              ),
             ),
-          ),
         ],
       ),
     );
