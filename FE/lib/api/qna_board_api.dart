@@ -19,7 +19,7 @@ class QnaBoardApi {
 
   // 문의 작성
   static Future<http.Response> createInquiry(String title, String content,
-      String departmentId, String accessToken) async {
+      int departmentId, String accessToken) async {
     final url = Uri.parse('$baseUrl/board/inquiries');
     return await http.post(
       url,
