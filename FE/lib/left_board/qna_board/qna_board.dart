@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:FE/api/qna_board_api.dart'; // QnaBoardApi 임포트
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:FE/api/auth_api.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -53,10 +54,14 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           posts = data.map<Map<String, String>>((item) {
+            // 날짜 포맷팅
+            final dateTime = DateTime.parse(item['created_at']);
+            final formattedDate =
+                "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
             return {
               'title': item['title'],
               'content': item['content'],
-              'date': item['created_at'],
+              'date': formattedDate, // 포맷된 날짜만 저장
               'department': item['department_name'],
             };
           }).toList();
@@ -305,14 +310,16 @@ class NewQnaPostPage extends StatelessWidget {
 
   NewQnaPostPage({required this.onAddPost});
 
-  Future<void> submitPost(BuildContext context) async {
-    String? accessToken;
+  Future<String?> _getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();
-    accessToken = prefs.getString('accessToken');
+    return prefs.getString('accessToken');
+  }
 
+  Future<void> submitPost(BuildContext context) async {
+    final accessToken = await _getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
+      print('AccessToken 없음');
       textmessageDialog(context, '로그인이 필요합니다.');
-      Navigator.pushReplacementNamed(context, '/login');
       return;
     }
 
@@ -324,29 +331,43 @@ class NewQnaPostPage extends StatelessWidget {
     }
 
     try {
+      // JSON에서 사용자명 추출
+
+      final departmentMapping = {
+        '교무처': 1,
+        '학생처': 2,
+        '기획처': 3,
+        '연구협력처': 4,
+        '국제교류처': 5,
+        '사무처': 6
+      };
+      final departmentId = departmentMapping[selectedDepartment!];
+
+      print('API 호출 시작');
       final response = await QnaBoardApi.createInquiry(
         titleController.text,
         contentController.text,
-        selectedDepartment!,
+        departmentId!,
         accessToken,
       );
 
       if (response.statusCode == 201) {
         textmessageDialog(context, '문의가 성공적으로 등록되었습니다.');
-        onAddPost(
-          titleController.text,
-          contentController.text,
-          '홍길동', // Replace with dynamic name if needed
-          selectedDepartment!,
-        );
-        Navigator.pop(context); // Close the page
+
+        // QnaBoardPage로 이동
+        Future.delayed(Duration(seconds: 1), () {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => QnaBoardPage()),
+            (route) => false,
+          );
+        });
       } else {
-        textmessageDialog(context, '문의 등록에 실패했습니다.');
-        print('Response: ${response.body}');
+        textmessageDialog(
+            context, '문의 등록에 실패했습니다. 상태 코드: ${response.statusCode}');
       }
     } catch (error) {
       textmessageDialog(context, '네트워크 오류가 발생했습니다.');
-      print('Error creating inquiry: $error');
     }
   }
 
@@ -506,35 +527,62 @@ class NewQnaPostPage extends StatelessWidget {
                           Positioned(
                             right: 0,
                             bottom: 0,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 4.0, vertical: 2.0),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Text(
-                                '작성자: 홍길동', //DB에서 이름 불러오기
-                                style: TextStyle(
-                                  fontSize: 12.0,
-                                  color: Colors.black54,
-                                ),
-                              ),
+                            child: FutureBuilder<Map<String, dynamic>>(
+                              future: _getAccessToken().then((token) =>
+                                  AuthApi.getUserInfo(token!)), // 사용자 정보 API 호출
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Text(
+                                    '작성자: 로딩 중...',
+                                    style: TextStyle(
+                                      fontSize: 12.0,
+                                      color: Colors.black54,
+                                    ),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                    '작성자: 오류 발생',
+                                    style: TextStyle(
+                                      fontSize: 12.0,
+                                      color: Colors.red,
+                                    ),
+                                  );
+                                } else if (snapshot.hasData) {
+                                  final userName =
+                                      snapshot.data!['name'] ?? '알 수 없음';
+                                  return Text(
+                                    '작성자: $userName',
+                                    style: TextStyle(
+                                      fontSize: 12.0,
+                                      color: Colors.black54,
+                                    ),
+                                  );
+                                } else {
+                                  return Text(
+                                    '작성자: 정보 없음',
+                                    style: TextStyle(
+                                      fontSize: 12.0,
+                                      color: Colors.black54,
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
+
                   SizedBox(height: 20),
                   // 등록 버튼
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       GestureDetector(
-                        onTap: () {
-                          String dbname = '홍길동'; //db연결 전 임시 이름
-                          //제목 또는 내용 또는 부서의 입력값이 없는 경우
+                        onTap: () async {
                           if (titleController.text.isEmpty ||
                               contentController.text.isEmpty ||
                               selectedDepartment == null) {
@@ -543,14 +591,7 @@ class NewQnaPostPage extends StatelessWidget {
                             return;
                           }
 
-                          //글 등록
-                          onAddPost(
-                            titleController.text,
-                            contentController.text,
-                            dbname,
-                            selectedDepartment!,
-                          );
-                          Navigator.pop(context);
+                          await submitPost(context); // 서버로 데이터 전송 및 처리
                         },
                         child: Container(
                           decoration: BoxDecoration(
