@@ -14,7 +14,7 @@ class AuthApi {
     String gender,
     String residence,
   ) async {
-    final url = Uri.parse('http://3.37.153.10:3000/ user/register');
+    final url = Uri.parse('http://3.37.153.10:3000/user/register');
 
     try {
       final response = await http.post(
@@ -31,7 +31,6 @@ class AuthApi {
           'residence': residence,
         }),
       );
-
       return response; // statusCode와 응답 본문을 포함하여 반환
     } catch (error) {
       print('Error occurred during registration: $error');

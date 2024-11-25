@@ -44,7 +44,7 @@ const db = require('../config/dbConfig');
 // 챗봇에게 질문을 처리하는 컨트롤러 (대화 ID 포함)
 exports.askQuestion = async (req, res) => {
     try {
-        const { question, chat_character = "마하"} = req.body;
+        const { question, chat_character = "maha"} = req.body;
         const student_id = req.user.student_id;
 
         // 디버깅 로그
