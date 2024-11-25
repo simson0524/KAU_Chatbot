@@ -46,19 +46,26 @@ class _ChattingPageState extends State<ChattingPage> {
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController(); //스크롤 초기화
     _focusNode.addListener(_onFocusChange); //포커스 변화 감지 리스너 추가
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       bool isInitialized = await _initializeChat();
       if (isInitialized) {
         await _loadMessagesFromLocal();
-        _scrollToBottom(); //채팅 불러온 후 자동 스크롤
       } else {
         // Navigate to login or show an error message if needed
         print("Initialization failed. Token is missing.");
       }
     });
+  }
+
+  //스크롤 관련
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(
+        _scrollController.position.maxScrollExtent,
+      );
+    }
   }
 
   //스크롤 관련
@@ -128,7 +135,10 @@ class _ChattingPageState extends State<ChattingPage> {
       });
       _controller.clear();
 
-      _scrollToBottom(); //새로운 메시지 추가 시 스크롤
+      // 메시지 추가 후 스크롤 이동
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom();
+      });
 
       // Get a new chatId for the response
       chatId = await _chatDao.getNewChatId();
@@ -230,24 +240,16 @@ class _ChattingPageState extends State<ChattingPage> {
     }
   }
 
-  //스크롤 관련
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    _scrollController = ScrollController(); //스크롤 초기화
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
     double keyboardHeight =
         MediaQuery.of(context).viewInsets.bottom; //키보드 높이 감지
-    SystemChrome.setSystemUIOverlayStyle(
+
+    SystemChrome.setSystemUIOverlayStyle(//앱바 배경관련
         SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.white));
 
     return Scaffold(
@@ -274,7 +276,7 @@ class _ChattingPageState extends State<ChattingPage> {
           child: Divider(color: Colors.black),
         ),
       ),
-      resizeToAvoidBottomInset: false, // 키보드에 의한 화면 조정
+      resizeToAvoidBottomInset: true, // 키보드에 의한 화면 조정
       extendBodyBehindAppBar: false,
       body: Stack(
         children: [
@@ -291,6 +293,8 @@ class _ChattingPageState extends State<ChattingPage> {
           ),
           Column(
             children: [
+              //날짜 수정 예정
+
               // Date display
               Center(
                 child: Container(
@@ -309,21 +313,28 @@ class _ChattingPageState extends State<ChattingPage> {
               ),
               // Chat messages
               Expanded(
-                child: ListView.builder(
-                  controller: _scrollController, //스크롤컨트롤러 연결
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    bool isMine =
-                        messages[index]['isMine'] ?? false; // 기본값 false 추가
-
-                    return ChatBubble(
-                      profileImage: isMine ? '' : _chatCharacterImage(),
-                      name: isMine ? '' : chatCharacter,
-                      message: messages[index]['message'],
-                      time: messages[index]['time'],
-                      isMine: isMine,
-                    );
+                child: GestureDetector(
+                  onTap: () {
+                    // 빈 화면을 터치하면 키보드 닫힘
+                    FocusScope.of(context).unfocus();
                   },
+                  child: ListView.builder(
+                    controller: _scrollController, //스크롤컨트롤러 연결
+                    physics: const BouncingScrollPhysics(), // 부드러운 스크롤 효과
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      bool isMine =
+                          messages[index]['isMine'] ?? false; // 기본값 false 추가
+
+                      return ChatBubble(
+                        profileImage: isMine ? '' : _chatCharacterImage(),
+                        name: isMine ? '' : chatCharacter,
+                        message: messages[index]['message'],
+                        time: messages[index]['time'],
+                        isMine: isMine,
+                      );
+                    },
+                  ),
                 ),
               ),
 
@@ -352,7 +363,11 @@ class _ChattingPageState extends State<ChattingPage> {
                             border: InputBorder.none,
                             hintText: '메세지를 입력하세요...',
                           ),
-                          onSubmitted: (text) => _sendMessage(),
+                          onSubmitted: (text) {
+                            if (text.trim().isNotEmpty) {
+                              _sendMessage(); // Enter 키 입력 시 메시지 전송
+                            }
+                          },
                         ),
                       ),
                     ),
@@ -500,15 +515,26 @@ class ChatBubble extends StatelessWidget {
                           border: Border.all(color: Colors.black),
                           borderRadius: BorderRadius.circular(15.0),
                         ),
-                        child: Text(
+                        child: SelectableText(
+                          message,
+                          style: const TextStyle(color: Colors.black),
+                          //softWrap: true,
+                          //overflow: TextOverflow.clip,
+                          textAlign: TextAlign.left,
+                          maxLines: null,
+                          onTap: () {
+                            // 포커스 다시 설정
+                            FocusScope.of(context).requestFocus(FocusNode());
+                          },
+                        ), /*Text(
                           message,
                           softWrap: true,
                           overflow: TextOverflow.clip,
-                        ),
+                        ),*/
                       ),
                       Align(
                         alignment: Alignment.bottomLeft,
-                        child: Text(
+                        child: SelectableText(
                           time,
                           style: const TextStyle(
                               color: Colors.grey, fontSize: 10.0),
@@ -530,7 +556,10 @@ class ChatBubble extends StatelessWidget {
                     border: Border.all(color: Colors.black),
                     borderRadius: BorderRadius.circular(15.0),
                   ),
-                  child: Text(message),
+                  child: SelectableText(
+                    message,
+                    style: const TextStyle(color: Colors.black),
+                  ),
                 ),
               ],
             ),
