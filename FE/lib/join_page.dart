@@ -657,7 +657,7 @@ class _JoinInputState extends State<JoinInput> {
   }
 }
 
-/*class go_login extends StatelessWidget {
+class go_login extends StatelessWidget {
   const go_login({super.key});
 
   @override
@@ -686,11 +686,13 @@ class _JoinInputState extends State<JoinInput> {
             //비밀번호 찾기 페이지로 버튼은  추후 삭제 예정
             TextButton(
                 onPressed: () {
+                  finishJoinDialog(context);
+                  /*
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const FindPasswordPage()),
-                  );
+                  );*/
                 },
                 style: TextButton.styleFrom(
                   padding:
@@ -725,7 +727,7 @@ class _JoinInputState extends State<JoinInput> {
       ),
     );
   }
-}*/
+}
 
 //회원가입 완료 버튼
 
@@ -854,10 +856,12 @@ void textmessageDialog(BuildContext context, String dialogmessage) {
           borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
           side: const BorderSide(color: Colors.black, width: 1.5),
         ),
-        child: SizedBox(
-          //dialog 사이즈
-          width: 150,
-          height: 70,
+        //dialog 사이즈
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.6,
+            maxHeight: 70,
+          ),
           child: Padding(
             padding:
                 const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
@@ -899,9 +903,12 @@ void finishJoinDialog(BuildContext context) {
           borderRadius: BorderRadius.circular(20.0),
           side: const BorderSide(color: Colors.black, width: 1.5),
         ),
-        child: SizedBox(
-          width: 220,
-          height: 100,
+        // dialog 사이즈
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.6,
+            maxHeight: 120,
+          ),
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Column(
