@@ -69,7 +69,7 @@ exports.getFilteredChatHistory = async (student_id, date, content) => {
 
 
 // AI 서버에서 받아온 태그 값 업데이트
-exports.saveOrUpdateTags = async (student_id, newTag) => { 
+exports.saveOrUpdateTags = async (student_id, newTags) => {
     try {
         // 기존 tags 조회
         const [existingTagsResult] = await db.query(
@@ -77,7 +77,7 @@ exports.saveOrUpdateTags = async (student_id, newTag) => {
             [student_id]
         );
 
-        let updatedTags;
+        let updatedTags = [];
         if (existingTagsResult.length > 0) {
             let existingTags = existingTagsResult[0].tags;
 
@@ -91,22 +91,35 @@ exports.saveOrUpdateTags = async (student_id, newTag) => {
                 }
             }
 
-            // 새로운 태그가 기존 태그에 없다면 추가
-            if (!existingTags.includes(newTag)) {
-                existingTags.push(newTag);
+            // 기존 태그가 배열로 존재하는 경우 업데이트
+            if (Array.isArray(existingTags)) {
+                updatedTags = existingTags;
             }
-            updatedTags = JSON.stringify(existingTags);
-        } else {
-            // 기존 태그가 없으면 새로운 태그 배열로 초기화
-            updatedTags = JSON.stringify([newTag]);
         }
+
+        // newTags가 배열인지 확인하고 개별 태그 추가
+        if (Array.isArray(newTags)) {
+            newTags.forEach(tag => {
+                if (!updatedTags.includes(tag)) {
+                    updatedTags.push(tag); // 중복되지 않으면 추가
+                }
+            });
+        } else {
+            // newTags가 배열이 아니라면 단일 태그로 처리
+            if (!updatedTags.includes(newTags)) {
+                updatedTags.push(newTags);
+            }
+        }
+
+        // 태그를 JSON 문자열로 변환
+        const updatedTagsJSON = JSON.stringify(updatedTags);
 
         // tag_sequence 테이블 업데이트 또는 삽입
         const sql = `
             INSERT INTO tag_sequence (student_id, tags) VALUES (?, ?)
             ON DUPLICATE KEY UPDATE tags = ?
         `;
-        const values = [student_id, updatedTags, updatedTags];
+        const values = [student_id, updatedTagsJSON, updatedTagsJSON];
         await db.query(sql, values);
 
     } catch (error) {
