@@ -756,6 +756,12 @@ class Joinfinish extends StatelessWidget {
             return;
           }
 
+          // 이메일 인증 여부 확인
+          if (!isEmailVerified) {
+            textmessageDialog(context, '이메일 인증을 완료해주세요.');
+            return;
+          }
+
           final studentId = int.tryParse(inputState.join_numberController.text);
           final email = inputState.join_emailController.text;
           final password = inputState.join_pwController.text;

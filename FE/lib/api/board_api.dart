@@ -123,18 +123,16 @@ class BoardApi {
 
   // 댓글 작성
   static Future<http.Response> addComment(
-      int studentId, int postId, String accessToken, String content) async {
-    final url =
-        Uri.parse('$baseUrl/board/studentId/$studentId/$postId/comment');
+      int studentId, int postId, String accessToken, String comment) async {
+    final url = Uri.parse(
+        '$baseUrl/board/studentId/$studentId/$postId/comments'); // 올바른 경로로 수정
     return await http.post(
       url,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
       },
-      body: json.encode({
-        'content': content,
-      }),
+      body: json.encode({'content': comment}), // 요청 본문에 댓글 내용 포함
     );
   }
 

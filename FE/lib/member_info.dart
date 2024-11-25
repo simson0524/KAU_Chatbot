@@ -92,7 +92,7 @@ class _MemberInfoState extends State<MemberInfo> {
     try {
       final response = await AuthApi.deleteUser(accessToken);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove("accessToken"); // Remove token on success
         _showSuccessDialog('회원 탈퇴가 완료되었습니다.');
