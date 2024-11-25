@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const dataController = require('../controllers/dataController');
+const userService = require('../services/userService');
 
 const multer = require('multer');
 const upload = multer({
@@ -9,5 +10,11 @@ const upload = multer({
 });
 
 router.post('/upload', upload.single('file'), dataController.uploadData);
+
+// 학교 공지 목록 조회
+router.get('/school', userService.loginRequired, dataController.getSchoolNotices);
+
+// 학교 공지 상세 조회
+router.get('/school/:idx', userService.loginRequired, dataController.getSchoolNoticeDetail);
 
 module.exports = router;

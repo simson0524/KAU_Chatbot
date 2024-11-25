@@ -70,7 +70,7 @@ exports.checkUser = async (req, res) => {
             return res.status(400).json({error: '비밀번호를 잘못 입력하셨습니다'});
         }
 
-        res.status(200).json({accessToken, refreshToken, "message": "사용자 확인에 성공하였습니다."});
+        res.status(200).json({"message": "사용자 확인에 성공하였습니다."});
 
     } catch (error) {
         console.error('사용자 확인 중 오류: ', error);
