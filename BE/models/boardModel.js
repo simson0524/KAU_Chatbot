@@ -9,7 +9,7 @@ exports.findBoardById = async (board_id) => {
 
 // 학과 게시판 조회
 exports.getMajorBoard = async (major_identifier) => {
-    const [boards] = await db.query("SELECT id, author, title, created_at FROM boards where board_type = '학과' and identifier = ?", [major_identifier]);
+    const [boards] = await db.query("SELECT id, author, (select name from users where student_id = author) 'author_name', title, created_at FROM boards where board_type = '학과' and identifier = ?", [major_identifier]);
     return boards;
 }
 
@@ -24,7 +24,7 @@ exports.createMajorBoard = async (major_identifier, student_id, title, content) 
 
 // 학번 게시판 조회
 exports.getStudentBoard = async (student_identifier) => {
-    const [boards] = await db.query("SELECT id, author, title, created_at FROM boards where board_type = '학번' and identifier = ?", [student_identifier]);
+    const [boards] = await db.query("SELECT id, author, (select name from users where student_id = author) 'author_name', title, created_at FROM boards where board_type = '학번' and identifier = ?", [student_identifier]);
     return boards;
 }
 
@@ -39,13 +39,13 @@ exports.createStudentBoard = async (student_identifier, student_id, title, conte
 
 // 게시판 상세 조회
 exports.getDetailBoard = async (board_id) => {
-    const [board] = await db.query("SELECT id, author, title, content, created_at, updated_at FROM boards where id = ?", [board_id]);
+    const [board] = await db.query("SELECT id, author, (select name from users where student_id = author) 'author_name', title, content, created_at, updated_at FROM boards where id = ?", [board_id]);
     return board[0];
 }
 
 // 게시판 댓글 가져오기
 exports.getComments = async (board_id) => {
-    const [board] = await db.query("SELECT id, author, content, created_at, updated_at FROM comments where board_id = ?", [board_id]);
+    const [board] = await db.query("SELECT id, author, (select name from users where student_id = author) 'author_name', content, created_at, updated_at FROM comments where board_id = ?", [board_id]);
     return board;
 }
 
