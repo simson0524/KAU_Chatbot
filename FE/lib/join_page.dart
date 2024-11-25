@@ -852,10 +852,12 @@ void textmessageDialog(BuildContext context, String dialogmessage) {
           borderRadius: BorderRadius.circular(20.0), //테두리 모서리 둥글게
           side: const BorderSide(color: Colors.black, width: 1.5),
         ),
-        child: SizedBox(
-          //dialog 사이즈
-          width: 150,
-          height: 70,
+        //dialog 사이즈
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.6,
+            maxHeight: 70,
+          ),
           child: Padding(
             padding:
                 const EdgeInsets.only(bottom: 3.0, top: 5.0), //dialog의 내부 여백
@@ -898,10 +900,12 @@ void finishJoinDialog(BuildContext context) {
           borderRadius: BorderRadius.circular(20.0), // 테두리 모서리 둥글게
           side: const BorderSide(color: Colors.black, width: 1.5),
         ),
-        child: SizedBox(
-          // dialog 사이즈
-          width: 220,
-          height: 100,
+        // dialog 사이즈
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.6,
+            maxHeight: 100,
+          ),
           child: Padding(
             padding:
                 const EdgeInsets.only(bottom: 3.0, top: 5.0), // dialog의 내부 여백
