@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 클립보드 권한 추가 -->
+    <uses-permission android:name="android.permission.READ_CLIPBOARD" />
+    <uses-permission android:name="android.permission.WRITE_CLIPBOARD" />
+    
     <application
-        android:label="fe_view"
+        android:label="KAU Chatbot"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
