@@ -14,7 +14,7 @@ exports.getAllInquiries = async (student_id) => {
 };
 
 // 특정 문의 조회
-exports.getInquiryById = async (inquiry_id, student_id) => {
+exports.getInquiryById = async (inquiry_id) => {
   const [rows] = await db.query(`
     SELECT 
       i.inquiry_id, i.student_id, u.name AS author_name, 
@@ -22,8 +22,8 @@ exports.getInquiryById = async (inquiry_id, student_id) => {
     FROM inquiry_board i
     LEFT JOIN department d ON i.department_id = d.department_id
     LEFT JOIN users u ON i.student_id = u.student_id
-    WHERE i.inquiry_id = ? AND i.student_id = ?
-  `, [inquiry_id, student_id]);
+    WHERE i.inquiry_id = ?
+  `, [inquiry_id]);
   return rows[0];
 };
 
