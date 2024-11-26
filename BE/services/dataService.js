@@ -1,4 +1,5 @@
 const db = require('../config/dbConfig');
+const dataModel = require('../models/dataModel');
 
 exports.saveData = async (data) => {
     const truncateExternalQuery = `
@@ -73,4 +74,20 @@ exports.saveData = async (data) => {
     } finally {
         connection.release();
     }
+};
+
+exports.getSchoolNotices = async () => {
+    return await dataModel.getSchoolNotices(); // dataModel에서 제공하는 함수 호출
+};
+
+exports.getSchoolNoticeDetail = async (idx) => {
+    return await dataModel.getSchoolNoticeDetail(idx); // dataModel에서 제공하는 함수 호출
+};
+
+exports.getExternalNotices = async () => {
+    return await dataModel.getExternalNotices(); // dataModel에서 제공하는 함수 호출
+};
+
+exports.getExternalNoticeDetail = async (idx) => {
+    return await dataModel.getExternalNoticeDetail(idx); // dataModel에서 제공하는 함수 호출
 };
