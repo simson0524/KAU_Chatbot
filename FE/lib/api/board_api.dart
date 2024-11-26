@@ -78,6 +78,21 @@ class BoardApi {
     );
   }
 
+  // 학과별댓글 작성
+  static Future<http.Response> addCommentMajor(
+      String majorId, int postId, String accessToken, String comment) async {
+    final url = Uri.parse(
+        '$baseUrl/board/major/$majorId/$postId/comments'); // 올바른 경로로 수정
+    return await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: json.encode({'content': comment}), // 요청 본문에 댓글 내용 포함
+    );
+  }
+
   // 학번별 게시글 목록 조회
   static Future<http.Response> getStudentBoardList(
       int studentId, String accessToken) async {

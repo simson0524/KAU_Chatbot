@@ -110,7 +110,7 @@ class _Board19PageState extends State<Board19Page> {
   Future<void> addPost(String title, String content, String name) async {
     try {
       final response =
-          await BoardApi.createStudentBoard(2024, accessToken!, title, content);
+          await BoardApi.createStudentBoard(2019, accessToken!, title, content);
 
       if (response.statusCode == 201) {
         textmessageDialog(context, '게시글이 성공적으로 등록되었습니다.');

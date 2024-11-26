@@ -244,4 +244,28 @@ class AuthApi {
       throw Exception('회원 탈퇴 중 오류가 발생했습니다.');
     }
   }
+
+  // 본인 확인 API
+  static Future<Map<String, dynamic>> checkUser({
+    required String email,
+    required String password,
+  }) async {
+    final url = Uri.parse('$baseUrl/user/check');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to verify user');
+    }
+  }
 }
