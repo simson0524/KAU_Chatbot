@@ -27,7 +27,6 @@ exports.getInquiryById = async (inquiry_id) => {
   return rows[0];
 };
 
-
 // 문의 생성
 exports.createInquiry = async (student_id, title, content, department_id) => {
   const [result] = await db.query(`
