@@ -253,6 +253,7 @@ class _ChattingPageState extends State<ChattingPage> {
         SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.white));
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text(
@@ -276,7 +277,7 @@ class _ChattingPageState extends State<ChattingPage> {
           child: Divider(color: Colors.black),
         ),
       ),
-      resizeToAvoidBottomInset: true, // 키보드에 의한 화면 조정
+      //resizeToAvoidBottomInset: true, // 키보드에 의한 화면 조정
       extendBodyBehindAppBar: false,
       body: Stack(
         children: [
@@ -341,7 +342,7 @@ class _ChattingPageState extends State<ChattingPage> {
               // Message input field and send button
               Padding(
                 padding: EdgeInsets.only(
-                  bottom: keyboardHeight + 8.0, // 키보드 높이에 따라 패딩 조정
+                  bottom: 4.0,
                   left: 8.0,
                   right: 8.0,
                   top: 4.0,
