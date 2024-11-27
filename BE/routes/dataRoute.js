@@ -12,15 +12,15 @@ const upload = multer({
 router.post('/upload', upload.single('file'), dataController.uploadData);
 
 // 학교 공지 목록 조회
-router.get('/school',  dataController.getSchoolNotices);
+router.get('/school', userService.loginRequired, dataController.getSchoolNotices);
 
 // 학교 공지 상세 조회
-router.get('/school/:idx', dataController.getSchoolNoticeDetail);
+router.get('/school/:idx', userService.loginRequired, dataController.getSchoolNoticeDetail);
 
 // 외부 공지 목록 조회
-router.get('/external', dataController.getExternalNotices);
+router.get('/external', userService.loginRequired, dataController.getExternalNotices);
 
 // 외부 공지 상세 조회
-router.get('/external/:idx', dataController.getExternalNoticeDetail);
+router.get('/external/:idx', userService.loginRequired, dataController.getExternalNoticeDetail);
 
 module.exports = router;
