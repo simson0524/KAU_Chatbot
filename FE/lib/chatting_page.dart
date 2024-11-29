@@ -136,12 +136,16 @@ class _ChattingPageState extends State<ChattingPage> {
   Future<void> _sendMessage() async {
     String messageText = _controller.text.trim();
     if (messageText.isNotEmpty && token.isNotEmpty) {
-      String currentTime = DateFormat('HH:mm').format(DateTime.now());
+      // Full timestamp with date and time
+      String fullTimestamp =
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+      // Extract time for UI display
+      String displayTime = DateFormat('HH:mm').format(DateTime.now());
 
       setState(() {
         messages.add({
           'message': messageText,
-          'time': currentTime,
+          'time': displayTime, // UI에 표시할 시간만 추가
           'isMine': true,
           'character': chatCharacter,
         });
@@ -159,7 +163,7 @@ class _ChattingPageState extends State<ChattingPage> {
       await _chatDao.insertMessage(
         messageText,
         "user",
-        currentTime,
+        fullTimestamp, // SQLite에 전체 timestamp 저장
         chatId,
         chatCharacter,
       );
@@ -180,7 +184,11 @@ class _ChattingPageState extends State<ChattingPage> {
 
 // Display bot's response and store it in SQLite
   void _receiveMessage(String messageText) async {
-    String currentTime = DateFormat('HH:mm').format(DateTime.now());
+    // Full timestamp with date and time
+    String fullTimestamp =
+        DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+    // Extract time for UI display
+    String displayTime = DateFormat('HH:mm').format(DateTime.now());
 
     // Get a new chatId for the response
     chatId = await _chatDao.getNewChatId();
@@ -188,31 +196,31 @@ class _ChattingPageState extends State<ChattingPage> {
     setState(() {
       messages.add({
         'message': messageText,
-        'time': currentTime,
+        'time': displayTime, // UI에 표시할 시간만 추가
         'isMine': false,
         'character': chatCharacter,
       });
     });
 
-    _scrollToBottom(); //새로운 메시지 추가 후 스크롤
+    _scrollToBottom(); // 새로운 메시지 추가 후 스크롤
 
     // Store the bot's response in SQLite
     await _chatDao.insertMessage(
       messageText,
       "bot",
-      currentTime,
+      fullTimestamp, // SQLite에 전체 timestamp 저장
       chatId,
       chatCharacter,
     );
   }
 
-  // UI and other methods remain unchanged...
-
-  // Helper to get current date
+// Helper to get current date
   String _getCurrentDate() {
     DateTime now = DateTime.now();
     return DateFormat('yyyy.MM.dd').format(now);
   }
+
+  // UI and other methods remain unchanged...
 
   // Helper method to choose the correct character image
   String _chatCharacterImage() {

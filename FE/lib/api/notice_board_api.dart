@@ -3,12 +3,13 @@ import 'package:http/http.dart' as http;
 
 class NoticeBoardApi {
   static const String baseUrl = 'http://3.37.153.10:3000'; // 서버의 기본 URL
+  static const String localUrl = 'http://10.0.2.2:3000';
 
   // 학교 게시판 목록 조회
   // NoticeBoardApi.dart 내부
   static Future<List<Map<String, dynamic>>> getSchoolNotices(
       String accessToken) async {
-    final url = Uri.parse('$baseUrl/data/school');
+    final url = Uri.parse('$localUrl/data/school');
     try {
       print("[DEBUG] Making GET request to: $url");
       print("[DEBUG] With access token: $accessToken");
