@@ -84,25 +84,26 @@ class _MemberInfoState extends State<MemberInfo> {
   }
 
   Future<void> deleteUser() async {
-    if (accessToken.isEmpty) {
-      _showErrorDialog('로그인 정보가 없습니다. 다시 로그인해주세요.');
-      return;
-    }
-
     try {
       final response = await AuthApi.deleteUser(accessToken);
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove("accessToken"); // Remove token on success
         _showSuccessDialog('회원 탈퇴가 완료되었습니다.');
-        Navigator.pushReplacementNamed(context, '/login'); // Navigate to login
+
+        // 로그인 페이지로 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => LoginPage()), // LoginPage로 직접 이동
+        );
       } else {
         _showErrorDialog('회원 탈퇴 실패: ${response.statusCode}');
       }
     } catch (error) {
       print('Error deleting user: $error');
-      _showErrorDialog('회원 탈퇴 중 오류가 발생했습니다.');
+      _showErrorDialog('다시 시도해주세요.');
     }
   }
 

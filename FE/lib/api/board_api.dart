@@ -8,7 +8,7 @@ class BoardApi {
   // 학과별 게시판 목록 조회
   static Future<http.Response> getMajorBoardList(
       String major, String accessToken) async {
-    final url = Uri.parse('$baseUrl/boards/major/$major');
+    final url = Uri.parse('$baseUrl/board/major/$major');
     return await http.get(
       url,
       headers: {
@@ -21,7 +21,7 @@ class BoardApi {
   // 학과별 게시판 상세 조회
   static Future<http.Response> getMajorBoardDetail(
       String major, int boardId, String accessToken) async {
-    final url = Uri.parse('$baseUrl/boards/major/$major/$boardId');
+    final url = Uri.parse('$baseUrl/board/major/$major/$boardId');
     return await http.get(
       url,
       headers: {
@@ -34,7 +34,7 @@ class BoardApi {
   // 학과별 게시판 생성
   static Future<http.Response> createMajorBoard(
       String major, String accessToken, String title, String content) async {
-    final url = Uri.parse('$baseUrl/boards/major/$major');
+    final url = Uri.parse('$baseUrl/board/major/$major');
     return await http.post(
       url,
       headers: {
@@ -51,7 +51,7 @@ class BoardApi {
   // 학과별 게시판 수정
   static Future<http.Response> updateMajorBoard(String major, int boardId,
       String accessToken, String title, String content) async {
-    final url = Uri.parse('$baseUrl/boards/major/$major/$boardId');
+    final url = Uri.parse('$baseUrl/board/major/$major/$boardId');
     return await http.put(
       url,
       headers: {
@@ -75,6 +75,21 @@ class BoardApi {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',
       },
+    );
+  }
+
+  // 학과별댓글 작성
+  static Future<http.Response> addCommentMajor(
+      String majorId, int postId, String accessToken, String comment) async {
+    final url = Uri.parse(
+        '$baseUrl/board/major/$majorId/$postId/comments'); // 올바른 경로로 수정
+    return await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: json.encode({'content': comment}), // 요청 본문에 댓글 내용 포함
     );
   }
 

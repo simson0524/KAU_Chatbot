@@ -52,25 +52,30 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
       final response = await QnaBoardApi.getInquiries(accessToken!);
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
+        print('Fetched inquiries: $data'); // 서버 응답 로그
         setState(() {
           posts = data.map<Map<String, String>>((item) {
-            // 날짜 포맷팅
+            print('Processing item: $item'); // 각 항목 로그
             final dateTime = DateTime.parse(item['created_at']);
             final formattedDate =
                 "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
+
             return {
+              'id': item['inquiry_id'].toString(),
               'title': item['title'],
               'content': item['content'],
-              'date': formattedDate, // 포맷된 날짜만 저장
+              'date': formattedDate,
               'department': item['department_name'],
             };
           }).toList();
+          print('Processed posts: $posts'); // 매핑된 데이터 로그
           filteredPosts = posts;
         });
       } else {
         textmessageDialog(context, '문의 게시판 데이터를 불러오는데 실패했습니다.');
       }
     } catch (e) {
+      print('Error in fetchInquiries: $e');
       textmessageDialog(context, '네트워크 오류가 발생했습니다.');
     }
   }
@@ -636,15 +641,188 @@ class PostQnaDetailPage extends StatefulWidget {
 class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
   List<Map<String, String>> comments = [];
   TextEditingController commentController = TextEditingController();
+  bool canComment = false; // 댓글 작성 권한 여부
+  String? userStudentId; // 사용자 학번
+  String boardAuthor = '익명'; // 게시글 작성자 초기값
+  String boardContent = '내용 없음'; // 게시글 내용 초기값
 
-  void addComment(String comment) {
-    setState(() {
-      comments.add({
-        'comment': comment,
-        'date': DateTime.now().toString().split(' ')[0],
-      });
+  // 관리자로 설정된 학번 리스트
+  final List<String> adminStudentIds = [
+    '11111111',
+    '2222222222',
+    '3333333333',
+    '4444444444',
+    '5555555555',
+    '6666666666'
+  ];
+  @override
+  void initState() {
+    super.initState();
+    print('PostQnaDetailPage initState called.');
+
+    print('Calling _fetchInquiryDetails...');
+    _fetchInquiryDetails().then((_) {
+      print('_fetchInquiryDetails completed.');
+    }).catchError((error) {
+      print('_fetchInquiryDetails error: $error');
     });
-    commentController.clear();
+
+    print('Calling _checkUserPermission...');
+    _checkUserPermission().then((_) {
+      print('_checkUserPermission completed.');
+    }).catchError((error) {
+      print('_checkUserPermission error: $error');
+    });
+  }
+
+  Future<void> _checkUserPermission() async {
+    print('_checkUserPermission called.');
+
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    print('AccessToken from SharedPreferences: $accessToken');
+
+    if (accessToken == null || accessToken.isEmpty) {
+      print('_checkUserPermission: AccessToken is null or empty.');
+      _showDialog('로그인이 필요합니다.');
+      Navigator.pop(context);
+      return;
+    }
+
+    try {
+      final userInfo = await AuthApi.getUserInfo(accessToken);
+      print('User Info: $userInfo');
+
+      userStudentId = userInfo['student_id']?.toString();
+      print('User Student ID: $userStudentId');
+
+      setState(() {
+        canComment = adminStudentIds.contains(userStudentId);
+        print('Can Comment: $canComment');
+      });
+    } catch (error) {
+      print('Error in _checkUserPermission: $error');
+      _showDialog('사용자 정보를 불러오는데 실패했습니다.');
+    }
+  }
+
+  Future<void> _fetchInquiryDetails() async {
+    print('_fetchInquiryDetails called.');
+
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+    print('AccessToken from SharedPreferences: $accessToken');
+
+    if (accessToken == null || accessToken.isEmpty) {
+      print('_fetchInquiryDetails: AccessToken is null or empty.');
+      _showDialog('로그인이 필요합니다.');
+      Navigator.pop(context);
+      return;
+    }
+
+    final inquiryId = widget.post['id'];
+    print('Inquiry ID: $inquiryId');
+
+    if (inquiryId == null || inquiryId.isEmpty) {
+      print('_fetchInquiryDetails: Inquiry ID is null or empty.');
+      _showDialog('문의 ID가 유효하지 않습니다.');
+      Navigator.pop(context);
+      return;
+    }
+
+    try {
+      print('Making API call to fetch inquiry details...');
+      final response =
+          await QnaBoardApi.getInquiryDetails(inquiryId, accessToken);
+
+      print('API Response Status: ${response.statusCode}');
+      print('API Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Decoded Response Data: $responseData');
+
+        setState(() {
+          boardAuthor = responseData['author_name'] ?? '익명';
+          boardContent = responseData['content'] ?? '내용 없음';
+
+          final commentsData = responseData['comments'] as List<dynamic>?;
+          if (commentsData != null) {
+            comments = commentsData.map<Map<String, String>>((comment) {
+              print('Comment: $comment');
+              return {
+                'author_name': comment['author_name'] ?? '익명',
+                'content': comment['content'] ?? '내용 없음',
+                'created_at': comment['created_at']?.split('T')[0] ?? '날짜 없음',
+              };
+            }).toList();
+          } else {
+            print('No comments found in response.');
+            comments = [];
+          }
+        });
+      } else {
+        print(
+            '_fetchInquiryDetails: Failed with status ${response.statusCode}');
+        _showDialog('문의 상세 데이터를 불러오는데 실패했습니다. (${response.statusCode})');
+      }
+    } catch (error) {
+      print('_fetchInquiryDetails error: $error');
+      _showDialog('네트워크 오류가 발생했습니다.');
+    }
+  }
+
+  Future<void> addComment() async {
+    if (!canComment) {
+      _showDialog('관리자가 아닙니다.');
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken');
+
+    if (accessToken == null || accessToken.isEmpty) {
+      _showDialog('로그인이 필요합니다.');
+      return;
+    }
+
+    if (commentController.text.isEmpty) {
+      _showDialog('댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    try {
+      final response = await QnaBoardApi.addComment(
+          widget.post['id']!, commentController.text, accessToken);
+
+      if (response.statusCode == 201) {
+        _showDialog('댓글이 성공적으로 등록되었습니다.');
+        _fetchInquiryDetails(); // 댓글 등록 후 갱신
+        commentController.clear();
+      } else {
+        _showDialog('댓글 등록에 실패했습니다.');
+      }
+    } catch (error) {
+      print('Error adding comment: $error');
+      _showDialog('네트워크 오류가 발생했습니다.');
+    }
+  }
+
+  void _showDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -702,89 +880,72 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //제목 표시
+                  // 제목 및 부서 표시
                   SizedBox(
                     width: double.infinity,
                     child: Container(
-                      constraints: BoxConstraints(
-                        minHeight: 35.0,
-                      ),
+                      constraints: BoxConstraints(minHeight: 35.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Stack(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             widget.post['title']!,
                             style: TextStyle(
                                 fontSize: 18.0, fontWeight: FontWeight.bold),
                           ),
-                          // 부서 표시 코드 추가
-                          Positioned(
-                            right: 0,
-                            top: 4,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 4.0, vertical: 2.0),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Text(
-                                ' ${widget.post['department']}', // 부서 표시
-                                style: TextStyle(
-                                    fontSize: 12.0, color: Colors.black54),
+                          if (widget.post['department'] != null)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Container(
+                                margin: EdgeInsets.only(top: 4.0),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 6.0, vertical: 2.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                child: Text(
+                                  widget.post['department']!,
+                                  style: TextStyle(
+                                      fontSize: 12.0, color: Colors.black54),
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
                   ),
                   SizedBox(height: 16),
 
-                  // 내용 표시
+                  // 내용 및 작성자 표시
                   SizedBox(
                     width: double.infinity,
                     child: Container(
-                      constraints: BoxConstraints(
-                        minHeight: 50.0,
-                      ),
+                      constraints: BoxConstraints(minHeight: 50.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.black),
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.all(12.0),
-                      child: Stack(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SingleChildScrollView(
-                            child: Text(
-                              widget.post['content']!,
-                              style: TextStyle(fontSize: 16.0),
-                            ),
+                          Text(
+                            '작성자: $boardAuthor', // 동적으로 로드된 작성자 표시
+                            style: TextStyle(
+                                fontSize: 14.0, fontWeight: FontWeight.bold),
                           ),
-                          Positioned(
-                            right: 0,
-                            bottom: 0,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 4.0, vertical: 2.0),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Text(
-                                '작성자: ${widget.post['name']}', // 임시로 표시할 작성자 이름
-                                style: TextStyle(
-                                  fontSize: 12.0,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ),
+                          SizedBox(height: 8),
+                          Text(
+                            boardContent, // 동적으로 로드된 게시글 내용 표시
+                            style: TextStyle(fontSize: 16.0),
                           ),
                         ],
                       ),
@@ -793,90 +954,85 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                   SizedBox(height: 20),
 
                   // 댓글 표시
-                  Text('답글',
-                      style: TextStyle(
-                          fontSize: 15.0, fontWeight: FontWeight.bold)),
+                  Text(
+                    '답글',
+                    style:
+                        TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                  ),
                   Expanded(
                     child: ListView.builder(
-                      padding: const EdgeInsets.only(
-                          top: 10.0, left: 15.0, right: 85.0),
+                      padding: const EdgeInsets.only(top: 10.0),
                       itemCount: comments.length,
                       itemBuilder: (context, index) {
+                        final comment = comments[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(10.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        comments[index]['comment']!,
-                                        style: TextStyle(fontSize: 14.0),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Positioned(
-                                right: -65.0,
-                                bottom: 0.0,
-                                child: Text(
-                                  comments[index]['date']!,
+                          child: Container(
+                            padding: const EdgeInsets.all(10.0),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '작성자: ${comment['author_name']}',
                                   style: TextStyle(
-                                    fontSize: 12.0,
-                                    color: Colors.black54,
+                                      fontSize: 14.0,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  comment['content']!,
+                                  style: TextStyle(fontSize: 14.0),
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    comment['created_at']!,
+                                    style: TextStyle(
+                                        fontSize: 12.0, color: Colors.black54),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
-                  //댓글 달기 권한 부여 필요
-                  //댓글 달기
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+
+                  // 댓글 입력
+                  if (canComment)
+                    Row(
+                      children: [
+                        Expanded(
                           child: TextField(
                             controller: commentController,
-                            //여기에 권한 여부에따라 활성화 비활성화 코드 작성
-                            //ex, 권한 체크 변수를 bool canComment라고 하면 enabled: canComment, 코드 추가 ( ture일때만 작성가능하게)
                             decoration: InputDecoration(
-                              border: InputBorder.none,
                               hintText: '답글을 입력하세요',
-                              suffixIcon: IconButton(
-                                icon: Icon(Icons.subdirectory_arrow_left),
-                                onPressed:
-                                    //위처럼 권한 체크시 이 부분에 canComment ? 추가
-                                    () {
-                                  addComment(commentController.text);
-                                },
-                                //위처럼 권한 체크 시 이 부분에 : null , 추가하여 권한 없을 시 동작하지 않게
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.0),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                        SizedBox(width: 8.0),
+                        ElevatedButton(
+                          onPressed: () {
+                            addComment();
+                          },
+                          child: Text('등록'),
+                        ),
+                      ],
+                    ),
+                  if (!canComment)
+                    Text(
+                      '댓글 작성 권한이 없습니다.',
+                      style: TextStyle(color: Colors.red, fontSize: 14.0),
+                    ),
                 ],
               ),
             ),

@@ -106,7 +106,7 @@ class CollegeNum extends StatelessWidget {
                                   case '19학번':
                                     return Board19Page();
                                   case '18학번 이전':
-                                    return BoardEtcPage();
+                                    return Board18Page();
                                   default:
                                     return Scaffold(
                                       body: Center(
