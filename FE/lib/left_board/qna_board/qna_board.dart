@@ -52,25 +52,30 @@ class _QnaBoardPageState extends State<QnaBoardPage> {
       final response = await QnaBoardApi.getInquiries(accessToken!);
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
+        print('Fetched inquiries: $data'); // 서버 응답 로그
         setState(() {
           posts = data.map<Map<String, String>>((item) {
-            // 날짜 포맷팅
+            print('Processing item: $item'); // 각 항목 로그
             final dateTime = DateTime.parse(item['created_at']);
             final formattedDate =
                 "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
+
             return {
+              'id': item['inquiry_id'].toString(),
               'title': item['title'],
               'content': item['content'],
-              'date': formattedDate, // 포맷된 날짜만 저장
+              'date': formattedDate,
               'department': item['department_name'],
             };
           }).toList();
+          print('Processed posts: $posts'); // 매핑된 데이터 로그
           filteredPosts = posts;
         });
       } else {
         textmessageDialog(context, '문의 게시판 데이터를 불러오는데 실패했습니다.');
       }
     } catch (e) {
+      print('Error in fetchInquiries: $e');
       textmessageDialog(context, '네트워크 오류가 발생했습니다.');
     }
   }
@@ -638,10 +643,12 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
   TextEditingController commentController = TextEditingController();
   bool canComment = false; // 댓글 작성 권한 여부
   String? userStudentId; // 사용자 학번
+  String boardAuthor = '익명'; // 게시글 작성자 초기값
+  String boardContent = '내용 없음'; // 게시글 내용 초기값
 
   // 관리자로 설정된 학번 리스트
   final List<String> adminStudentIds = [
-    '1111111111',
+    '11111111',
     '2222222222',
     '3333333333',
     '4444444444',
@@ -651,15 +658,32 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
   @override
   void initState() {
     super.initState();
-    _checkUserPermission(); // 사용자 권한 확인
-    _fetchInquiryDetails(); // 문의 상세 조회
+    print('PostQnaDetailPage initState called.');
+
+    print('Calling _fetchInquiryDetails...');
+    _fetchInquiryDetails().then((_) {
+      print('_fetchInquiryDetails completed.');
+    }).catchError((error) {
+      print('_fetchInquiryDetails error: $error');
+    });
+
+    print('Calling _checkUserPermission...');
+    _checkUserPermission().then((_) {
+      print('_checkUserPermission completed.');
+    }).catchError((error) {
+      print('_checkUserPermission error: $error');
+    });
   }
 
   Future<void> _checkUserPermission() async {
+    print('_checkUserPermission called.');
+
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
+    print('AccessToken from SharedPreferences: $accessToken');
 
     if (accessToken == null || accessToken.isEmpty) {
+      print('_checkUserPermission: AccessToken is null or empty.');
       _showDialog('로그인이 필요합니다.');
       Navigator.pop(context);
       return;
@@ -667,48 +691,83 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
 
     try {
       final userInfo = await AuthApi.getUserInfo(accessToken);
+      print('User Info: $userInfo');
+
       userStudentId = userInfo['student_id']?.toString();
+      print('User Student ID: $userStudentId');
+
       setState(() {
         canComment = adminStudentIds.contains(userStudentId);
+        print('Can Comment: $canComment');
       });
     } catch (error) {
-      print('Error checking user permission: $error');
+      print('Error in _checkUserPermission: $error');
       _showDialog('사용자 정보를 불러오는데 실패했습니다.');
     }
   }
 
   Future<void> _fetchInquiryDetails() async {
+    print('_fetchInquiryDetails called.');
+
     final prefs = await SharedPreferences.getInstance();
     final accessToken = prefs.getString('accessToken');
+    print('AccessToken from SharedPreferences: $accessToken');
 
     if (accessToken == null || accessToken.isEmpty) {
+      print('_fetchInquiryDetails: AccessToken is null or empty.');
       _showDialog('로그인이 필요합니다.');
       Navigator.pop(context);
       return;
     }
 
+    final inquiryId = widget.post['id'];
+    print('Inquiry ID: $inquiryId');
+
+    if (inquiryId == null || inquiryId.isEmpty) {
+      print('_fetchInquiryDetails: Inquiry ID is null or empty.');
+      _showDialog('문의 ID가 유효하지 않습니다.');
+      Navigator.pop(context);
+      return;
+    }
+
     try {
+      print('Making API call to fetch inquiry details...');
       final response =
-          await QnaBoardApi.getInquiryDetails(widget.post['id']!, accessToken);
+          await QnaBoardApi.getInquiryDetails(inquiryId, accessToken);
+
+      print('API Response Status: ${response.statusCode}');
+      print('API Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
+        print('Decoded Response Data: $responseData');
+
         setState(() {
-          comments = responseData['comments']
-                  ?.map<Map<String, String>>((comment) => {
-                        'author_name': comment['author_name'] ?? '익명',
-                        'content': comment['content'] ?? '내용 없음',
-                        'created_at':
-                            comment['created_at']?.split('T')[0] ?? '날짜 없음',
-                      })
-                  .toList() ??
-              [];
+          boardAuthor = responseData['author_name'] ?? '익명';
+          boardContent = responseData['content'] ?? '내용 없음';
+
+          final commentsData = responseData['comments'] as List<dynamic>?;
+          if (commentsData != null) {
+            comments = commentsData.map<Map<String, String>>((comment) {
+              print('Comment: $comment');
+              return {
+                'author_name': comment['author_name'] ?? '익명',
+                'content': comment['content'] ?? '내용 없음',
+                'created_at': comment['created_at']?.split('T')[0] ?? '날짜 없음',
+              };
+            }).toList();
+          } else {
+            print('No comments found in response.');
+            comments = [];
+          }
         });
       } else {
-        _showDialog('문의 상세 데이터를 불러오는데 실패했습니다.');
+        print(
+            '_fetchInquiryDetails: Failed with status ${response.statusCode}');
+        _showDialog('문의 상세 데이터를 불러오는데 실패했습니다. (${response.statusCode})');
       }
     } catch (error) {
-      print('Error fetching inquiry details: $error');
+      print('_fetchInquiryDetails error: $error');
       _showDialog('네트워크 오류가 발생했습니다.');
     }
   }
@@ -879,13 +938,13 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '작성자: ${widget.post['name']}',
+                            '작성자: $boardAuthor', // 동적으로 로드된 작성자 표시
                             style: TextStyle(
                                 fontSize: 14.0, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 8),
                           Text(
-                            widget.post['content']!,
+                            boardContent, // 동적으로 로드된 게시글 내용 표시
                             style: TextStyle(fontSize: 16.0),
                           ),
                         ],

@@ -10,11 +10,23 @@ class QnaBoardApi {
     return await http.get(url, headers: _headers(accessToken));
   }
 
-  // 문의 상세 조회
   static Future<http.Response> getInquiryDetails(
       String inquiryId, String accessToken) async {
     final url = Uri.parse('$baseUrl/board/inquiries/$inquiryId');
-    return await http.get(url, headers: _headers(accessToken));
+    print('API URL: $url');
+    print('AccessToken: $accessToken');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    print('Response from API: ${response.statusCode}');
+    print('Response Body: ${response.body}');
+    return response;
   }
 
   // 문의 작성

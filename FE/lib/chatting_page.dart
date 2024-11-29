@@ -104,7 +104,20 @@ class _ChattingPageState extends State<ChattingPage> {
   Future<void> _loadMessagesFromLocal() async {
     final localMessages = await _chatDao.fetchAllMessages(); // 모든 메시지를 불러오기
     if (localMessages.isEmpty) {
-      _receiveMessage("안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요!");
+      // 캐릭터별 첫 안내 메시지 설정
+      if (chatCharacter == 'maha') {
+        _receiveMessage(
+            "안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요!");
+      } else if (chatCharacter == 'mile') {
+        _receiveMessage(
+            "Hello. \n I'm KAU CHATBOT. \n What do you want to know? \n Ask me!");
+      } else if (chatCharacter == 'feet') {
+        _receiveMessage("你好。 \n 这里是KAU CHATBOT  \n 你想知道什么？ \n 问我吧");
+      } else {
+        // 기본 안내 메시지 설정 (예: 캐릭터가 없을 경우)
+        _receiveMessage(
+            "안녕하세요. \n KAU CHATBOT입니다. \n 무엇이 궁금하시나요? \n 저에게 물어보세요!");
+      }
     } else {
       setState(() {
         messages = localMessages.map((msg) {
