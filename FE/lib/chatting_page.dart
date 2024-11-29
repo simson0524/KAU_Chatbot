@@ -249,8 +249,8 @@ class _ChattingPageState extends State<ChattingPage> {
     double keyboardHeight =
         MediaQuery.of(context).viewInsets.bottom; //키보드 높이 감지
 
-    SystemChrome.setSystemUIOverlayStyle(//앱바 배경관련
-        SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.white));
+    //SystemChrome.setSystemUIOverlayStyle(//앱바 배경관련
+    //  SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.white));
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -296,7 +296,7 @@ class _ChattingPageState extends State<ChattingPage> {
             children: [
               //날짜 수정 예정
 
-              // Date display
+              /* Date display
               Center(
                 child: Container(
                   margin: const EdgeInsets.only(top: 8.0),
@@ -312,6 +312,7 @@ class _ChattingPageState extends State<ChattingPage> {
                   ),
                 ),
               ),
+              */
               // Chat messages
               Expanded(
                 child: GestureDetector(

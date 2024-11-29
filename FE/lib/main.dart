@@ -26,6 +26,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         fontFamily: 'PoorStory',
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white, // 기본 AppBar 배경색
+        ),
       ),
       title: 'login page',
       home: Scaffold(
@@ -50,6 +53,7 @@ class LoginPage extends StatelessWidget {
       resizeToAvoidBottomInset: true, // 키보드로 인해 화면 크기 변경 방지
       body: Container(
         decoration: const BoxDecoration(
+          color: Colors.white,
           image: DecorationImage(
             image: AssetImage('assets/images/grid_background.png'),
             fit: BoxFit.cover,
