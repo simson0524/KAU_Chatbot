@@ -27,3 +27,7 @@ exports.isBoardAuthor = async (req, res, next) => {
         res.status(500).json({'message': '작성자 확인 중 오류가 발생하였습니다.'});
     }
 }
+
+exports.getNotificationMessage = (author, content) => {
+    return `${author}의 게시글의 댓글을 남겼습니다: "${content}"`;
+}
