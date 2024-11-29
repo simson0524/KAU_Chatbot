@@ -9,7 +9,7 @@ import 'package:FE/left_board/major_community/business_board.dart';
 import 'package:FE/left_board/major_community/computer_board.dart';
 import 'package:FE/left_board/major_community/electronic_board.dart';
 import 'package:FE/left_board/major_community/engineering_board.dart';
-import 'package:FE/left_board/major_community/international_board';
+import 'package:FE/left_board/major_community/international_board.dart';
 import 'package:FE/left_board/major_community/material_board.dart';
 import 'package:FE/left_board/major_community/smartdrone_board.dart';
 import 'package:FE/left_board/major_community/software_board.dart';
