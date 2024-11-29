@@ -100,15 +100,10 @@ exports.saveOrUpdateTags = async (student_id, newTags) => {
         // newTags가 배열인지 확인하고 개별 태그 추가
         if (Array.isArray(newTags)) {
             newTags.forEach(tag => {
-                if (!updatedTags.includes(tag)) {
-                    updatedTags.push(tag); // 중복되지 않으면 추가
-                }
+                updatedTags.push(tag); // 중복되지 않으면 추가
             });
         } else {
-            // newTags가 배열이 아니라면 단일 태그로 처리
-            if (!updatedTags.includes(newTags)) {
-                updatedTags.push(newTags);
-            }
+            updatedTags.push(newTags);
         }
 
         // 태그를 JSON 문자열로 변환
