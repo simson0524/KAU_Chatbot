@@ -211,26 +211,24 @@ exports.updateUser = async (req, res) => {
 exports.updatePassword = async (req, res) => {
 
     try {
-        const student_id = req.user.student_id;
-        const { password, new_password } = req.body;
+        const { email, new_password, check_new_password } = req.body;
 
-        // 해당 학번의 사용자가 있는지 확인
-        const user = await userModel.findUserByStudentId(student_id);
+        // 해당 이메일의 사용자가 있는지 확인
+        const user = await userModel.findUserByEmail(email);
         if (!user) {
-            return res.status(400).json({error: '해당 학번의 사용자가 존재하지 않습니다.'});
+            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
         }
         
-        // 입력한 비밀번호가 맞는지 확인
-        const isPasswordValid = await bcrypt.compare(password, user.password); // 입력한 비밀번호와 암호화되어 저장된 비밀번호가 맞는지 확인
-        if (!isPasswordValid) {
-            return res.status(400).json({error: '입력하신 비밀번호가 맞지 않습니다.'});
+        // 새 비밀번호와 새 비밀번호 확인이 일치하는지 체크
+        if (new_password !== check_new_password) {
+            return res.status(400).json({error: '새 비밀번호가 일치하지 않습니다.'});
         }
 
         // 비밀번호 해싱
         const hashedPassword = await bcrypt.hash(new_password, 10);
         
         // 비밀번호 수정
-        await userModel.updateUserPassword(student_id, hashedPassword);
+        await userModel.updateUserPassword(email, hashedPassword);
         res.status(200).json({'message': '비밀번호 수정이 성공하였습니다.'});
     }
     catch (error) {
