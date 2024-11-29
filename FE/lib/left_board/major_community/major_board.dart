@@ -14,6 +14,7 @@ import 'package:FE/left_board/major_community/material_board.dart';
 import 'package:FE/left_board/major_community/smartdrone_board.dart';
 import 'package:FE/left_board/major_community/software_board.dart';
 import 'package:FE/left_board/major_community/space_board.dart';
+import 'package:FE/left_board/major_community/spaceengineering_board.dart';
 import 'package:FE/left_board/major_community/undeclared_board.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,8 +26,8 @@ class MajorBoard extends StatelessWidget {
     '항공교통물류학부', //atc_board
     '항공경영학과', //airbusiness_board
     '경영학과', //business_board
-    '항공우주공학과' //space_board
-        '기계항공공학과', //engineering_board
+    '항공우주공학과', //space_board
+    '기계항공공학과', //engineering_board
     '신소재공학과', //material_board
     '항공우주기계공학과', //spaceengineering_board
     '항공전자정보공학부', //airelectronic_board
@@ -127,7 +128,7 @@ class MajorBoard extends StatelessWidget {
                                   case '신소재공학과':
                                     return MaterialBoardPage();
                                   case '항공우주기계공학과':
-                                    return SpaceBoardPage();
+                                    return SpaceengineeringBoardPage();
                                   case '항공전자정보공학부':
                                     return AirelectronicBoardPage();
                                   case '스마트드론공학과':

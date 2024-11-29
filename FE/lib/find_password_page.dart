@@ -14,6 +14,7 @@ class FindPasswordPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+          // Background Containers and Decorations
           Positioned.fill(
             child: Container(
               color: Colors.white,
@@ -38,7 +39,7 @@ class FindPasswordPage extends StatelessWidget {
                     child: Column(
                       children: [
                         const FindPWImage(),
-                        const SizedBox(height: 10), // 입력칸 시작 높이
+                        const SizedBox(height: 10),
                         Stack(
                           children: [
                             FindPWInput(key: findPWInputKey),
@@ -61,7 +62,7 @@ class FindPasswordPage extends StatelessWidget {
   }
 }
 
-// 이미지 위젯
+// Image Widget
 class FindPWImage extends StatelessWidget {
   const FindPWImage({super.key});
 
@@ -77,7 +78,7 @@ class FindPWImage extends StatelessWidget {
   }
 }
 
-// 입력 - 이메일, 비밀번호, 비밀번호 확인
+// Input Fields for Email and Password
 class FindPWInput extends StatefulWidget {
   const FindPWInput({super.key});
 
@@ -105,23 +106,13 @@ class _FindPWInputState extends State<FindPWInput> {
 
   void _showPW() {
     setState(() {
-      _isobscured = false;
-    });
-    Timer(const Duration(seconds: 3), () {
-      setState(() {
-        _isobscured = true;
-      });
+      _isobscured = !_isobscured;
     });
   }
 
   void _showcheckPW() {
     setState(() {
-      _ischeckobscured = false;
-    });
-    Timer(const Duration(seconds: 3), () {
-      setState(() {
-        _ischeckobscured = true;
-      });
+      _ischeckobscured = !_ischeckobscured;
     });
   }
 
@@ -171,9 +162,10 @@ class _FindPWInputState extends State<FindPWInput> {
 
   @override
   void dispose() {
-    find_emailController.clear();
-    find_pwController.clear();
-    find_checkpwController.clear();
+    find_emailController.dispose();
+    find_pwController.dispose();
+    find_checkpwController.dispose();
+    find_emailcodeController.dispose();
     super.dispose();
   }
 
@@ -182,6 +174,7 @@ class _FindPWInputState extends State<FindPWInput> {
     return Form(
       child: Column(
         children: [
+          // Email Input and Send Verification Code Button
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -209,16 +202,16 @@ class _FindPWInputState extends State<FindPWInput> {
               ),
               TextButton(
                 onPressed: () async {
-                  String emailinput = find_emailController.text.trim();
-                  if (emailinput == '@kau.kr' || emailinput.isEmpty) {
+                  String emailInput = find_emailController.text.trim();
+                  if (emailInput == '@kau.kr' || emailInput.isEmpty) {
                     textmessageDialog(context, '이메일을 입력해주세요.');
                   } else {
                     try {
                       final response =
-                          await AuthApi.sendEmailVerification(emailinput);
+                          await AuthApi.sendEmailVerification(emailInput);
                       if (response.statusCode == 200) {
                         textmessageDialog(
-                            context, '이메일 인증번호 메일을 보냈습니다. \n 이메일을 확인해주세요.');
+                            context, '이메일 인증번호 메일을 보냈습니다.\n이메일을 확인해주세요.');
                       } else {
                         textmessageDialog(
                             context, '이메일 전송에 실패했습니다. 다시 시도해주세요.');
@@ -237,11 +230,17 @@ class _FindPWInputState extends State<FindPWInput> {
                   style: TextStyle(fontSize: 10, color: Colors.black),
                 ),
               ),
-              const SizedBox(width: 10.0),
+            ],
+          ),
+          const SizedBox(height: 5),
+          // Verification Code Input and Confirm Button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
               Flexible(
-                flex: 3,
+                flex: 7,
                 child: Container(
-                  margin: const EdgeInsets.only(left: 0.0, right: 0.0),
+                  margin: const EdgeInsets.only(left: 50.0, right: 0.0),
                   child: Stack(
                     children: [
                       Positioned.fill(
@@ -257,52 +256,45 @@ class _FindPWInputState extends State<FindPWInput> {
                           border: InputBorder.none,
                           labelStyle: TextStyle(fontSize: 12),
                         ),
-                        onChanged: (value) {},
                       ),
                     ],
                   ),
                 ),
               ),
-              Positioned(
-                right: 0,
-                left: 75,
-                top: 10,
-                bottom: 10,
-                child: TextButton(
-                  onPressed: () async {
-                    try {
-                      final response = await AuthApi.verifyEmailCode(
-                        find_emailController.text.trim(),
-                        int.parse(find_emailcodeController.text.trim()),
-                      );
-                      if (response.statusCode == 200) {
-                        textmessageDialog(context, '이메일 인증이 확인되었습니다.');
-                      } else {
-                        textmessageDialog(
-                            context, '인증번호가 맞지 않습니다. \n 이메일과 인증번호를 다시 확인해주세요.');
-                      }
-                    } catch (error) {
-                      textmessageDialog(context, '오류가 발생했습니다: $error');
+              TextButton(
+                onPressed: () async {
+                  try {
+                    final response = await AuthApi.verifyEmailCode(
+                      find_emailController.text.trim(),
+                      int.parse(find_emailcodeController.text.trim()),
+                    );
+                    if (response.statusCode == 200) {
+                      textmessageDialog(context, '이메일 인증이 확인되었습니다.');
+                    } else {
+                      textmessageDialog(
+                          context, '인증번호가 맞지 않습니다.\n이메일과 인증번호를 다시 확인해주세요.');
                     }
-                  },
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 4.0, vertical: 2.0),
-                    visualDensity:
-                        VisualDensity(horizontal: 1.0, vertical: 1.0),
-                    side: const BorderSide(color: Colors.black),
-                    minimumSize: Size(0, 0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    '확인',
-                    style: TextStyle(fontSize: 10, color: Colors.black),
-                  ),
+                  } catch (error) {
+                    textmessageDialog(context, '오류가 발생했습니다: $error');
+                  }
+                },
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 4.0, vertical: 2.0),
+                  visualDensity: VisualDensity(horizontal: 1.0, vertical: 1.0),
+                  side: const BorderSide(color: Colors.black),
+                  minimumSize: Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  '확인',
+                  style: TextStyle(fontSize: 10, color: Colors.black),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 5),
+          // New Password Input
           Container(
             margin: const EdgeInsets.only(left: 50.0, right: 50.0),
             child: Stack(
@@ -331,6 +323,7 @@ class _FindPWInputState extends State<FindPWInput> {
             ),
           ),
           const SizedBox(height: 5),
+          // Confirm New Password Input
           Container(
             margin: const EdgeInsets.only(left: 50.0, right: 50.0),
             child: Stack(
@@ -364,7 +357,7 @@ class _FindPWInputState extends State<FindPWInput> {
   }
 }
 
-// 로그인 페이지로 이동
+// Navigate to Login Page
 class go_login extends StatelessWidget {
   const go_login({super.key});
 
@@ -393,7 +386,7 @@ class go_login extends StatelessWidget {
   }
 }
 
-// 비밀번호 변경 버튼
+// Change Password Button
 class FindPWfinish extends StatelessWidget {
   const FindPWfinish({super.key});
 
@@ -407,28 +400,45 @@ class FindPWfinish extends StatelessWidget {
       child: OutlinedButton(
         onPressed: () async {
           if (inputState == null) {
+            print('[DEBUG] InputState is null. Returning early.');
             return;
           }
           if (inputState.nullcheck()) {
+            print('[DEBUG] Null check failed. Some inputs are missing.');
             textmessageDialog(context, '입력되지 않은 값이 존재합니다');
             return;
           }
-          if (inputState.samePWcheck()) {
-            try {
-              final response = await AuthApi.changePassword(
-                inputState.find_pwController.text.trim(),
-                inputState.find_checkpwController.text.trim(),
-              );
-              if (response.statusCode == 200) {
-                finishFindpwDialog(context);
-              } else {
-                textmessageDialog(context, '비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
-              }
-            } catch (error) {
-              textmessageDialog(context, '오류가 발생했습니다: $error');
-            }
-          } else {
+          if (!inputState.samePWcheck()) {
+            print('[DEBUG] Password and confirmation do not match.');
             textmessageDialog(context, '비밀번호와 비밀번호 확인이 일치하지 않습니다');
+            return;
+          }
+          try {
+            print('[DEBUG] Attempting to change password...');
+            print(
+                '[DEBUG] Email: ${inputState.find_emailController.text.trim()}');
+            print(
+                '[DEBUG] New Password: ${inputState.find_pwController.text.trim()}');
+            print(
+                '[DEBUG] Confirm Password: ${inputState.find_checkpwController.text.trim()}');
+
+            final response = await AuthApi.changePassword(
+              email: inputState.find_emailController.text.trim(),
+              newPassword: inputState.find_pwController.text.trim(),
+              checkNewPassword: inputState.find_checkpwController.text.trim(),
+            );
+
+            if (response.containsKey('message')) {
+              print(
+                  '[DEBUG] Password changed successfully. Message: ${response['message']}');
+              finishFindpwDialog(context);
+            } else {
+              print('[DEBUG] Password change failed. Response: $response');
+              textmessageDialog(context, '비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+            }
+          } catch (error) {
+            print('[ERROR] Exception occurred during password change: $error');
+            textmessageDialog(context, '오류가 발생했습니다: $error');
           }
         },
         style: OutlinedButton.styleFrom(
@@ -445,7 +455,7 @@ class FindPWfinish extends StatelessWidget {
   }
 }
 
-// 점선 표현
+// Dotted Line Painter
 class DottedLineHorizontalPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -474,7 +484,7 @@ class DottedLineHorizontalPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-// 텍스트 알림
+// Text Message Dialog
 void textmessageDialog(BuildContext context, String dialogmessage) {
   showDialog(
     context: context,
@@ -495,20 +505,13 @@ void textmessageDialog(BuildContext context, String dialogmessage) {
           child: Padding(
             padding: const EdgeInsets.only(bottom: 3.0, top: 5.0),
             child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    dialogmessage,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
+              child: Text(
+                dialogmessage,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.black,
+                ),
               ),
             ),
           ),
@@ -518,7 +521,7 @@ void textmessageDialog(BuildContext context, String dialogmessage) {
   );
 }
 
-// 비밀번호 변경 성공 알림창
+// Password Change Success Dialog
 void finishFindpwDialog(BuildContext context) {
   showDialog(
     context: context,
@@ -539,12 +542,10 @@ void finishFindpwDialog(BuildContext context) {
           child: Padding(
             padding: const EdgeInsets.only(bottom: 3.0, top: 5.0),
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text(
-                  '비밀번호 변경이 완료되었습니다. \n 다시 로그인 해주세요.',
+                  '비밀번호 변경이 완료되었습니다.\n다시 로그인 해주세요.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,

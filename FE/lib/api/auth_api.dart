@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:FE/api/auth_api.dart'; // Import the API functions
 
 class AuthApi {
   static const String baseUrl = 'http://3.37.153.10:3000';
@@ -114,24 +115,38 @@ class AuthApi {
   }
 
   // 비밀번호 변경 API 호출 함수
-  static Future<http.Response> changePassword(
-      String currentPassword, String newPassword) async {
+  static Future<Map<String, dynamic>> changePassword({
+    required String email,
+    required String newPassword,
+    required String checkNewPassword,
+  }) async {
     final url = Uri.parse('http://3.37.153.10:3000/user/password');
-
     try {
+      print('[DEBUG] Making PUT request to: $url');
+      print(
+          '[DEBUG] Request body: {email: $email, new_passward: $newPassword, check_new_password: $checkNewPassword}');
+
       final response = await http.put(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'passward': currentPassword,
+        body: jsonEncode({
+          'email': email,
           'new_passward': newPassword,
+          'check_new_password': checkNewPassword,
         }),
       );
 
-      return response; // statusCode와 응답 본문을 포함하여 반환
-    } catch (error) {
-      print('Error occurred during password change: $error');
-      throw Exception('비밀번호 변경 중 오류가 발생했습니다.');
+      print('[DEBUG] Response status: ${response.statusCode}');
+      print('[DEBUG] Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body); // Success message
+      } else {
+        throw Exception('Failed to change password: ${response.body}');
+      }
+    } catch (e) {
+      print('[ERROR] Exception in changePassword: $e');
+      throw Exception('Error in changePassword: $e');
     }
   }
 
