@@ -53,10 +53,10 @@ exports.updateUserInfo = async (student_id, name, major, grade, residence, chat_
 }
 
 // 사용자 비밀번호 수정
-exports.updateUserPassword = async (student_id, newPassword) => {
+exports.updateUserPassword = async (email, newPassword) => {
     const result = await db.query(
-        'UPDATE users SET password = ? WHERE student_id = ?',
-        [newPassword, student_id]
+        'UPDATE users SET password = ? WHERE email = ?',
+        [newPassword, email]
     );
     return result;
 }
