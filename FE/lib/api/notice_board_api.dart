@@ -7,86 +7,134 @@ class NoticeBoardApi {
 
   // 학교 게시판 목록 조회
   // NoticeBoardApi.dart 내부
-  static Future<List<Map<String, dynamic>>> getSchoolNotices(
+  static Future<List<Map<String, String>>> getSchoolNotices(
       String accessToken) async {
-    final url = Uri.parse('$localUrl/data/school');
+    final url = Uri.parse('http://3.37.153.10:3000/data/school');
+
     try {
-      print("[DEBUG] Making GET request to: $url");
-      print("[DEBUG] With access token: $accessToken");
+      print('[DEBUG] Making GET request to: $url');
+      print('[DEBUG] With access token: $accessToken');
 
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer $accessToken',
-      });
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
 
-      print("[DEBUG] Response status: ${response.statusCode}");
-      print("[DEBUG] Response body: ${response.body}");
+      print('[DEBUG] Response status: ${response.statusCode}');
+      print('[DEBUG] Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body) as List;
-        return data.map((item) => Map<String, dynamic>.from(item)).toList();
+        final decodedBody = json.decode(response.body);
+
+        if (decodedBody['notices'] is List) {
+          final List<dynamic> notices = decodedBody['notices'];
+
+          // Map<String, dynamic> -> Map<String, String> 변환
+          return notices.map((notice) {
+            return {
+              'idx': notice['idx']?.toString() ?? '',
+              'title': notice['title']?.toString() ?? '',
+              'published_date': notice['published_date']?.toString() ?? '',
+            };
+          }).toList();
+        } else {
+          throw Exception(
+              '[ERROR] Expected "notices" to be a List but got ${decodedBody['notices'].runtimeType}');
+        }
       } else {
         throw Exception(
-            "Failed to fetch school notices. Status code: ${response.statusCode}");
+            'Failed to fetch school notices. Status code: ${response.statusCode}');
       }
-    } catch (e) {
-      print("[ERROR] Exception in getSchoolNotices: $e");
-      throw e;
+    } catch (error) {
+      print('[ERROR] Exception in getSchoolNotices: $error');
+      throw Exception('Failed to fetch school notices. Error: $error');
     }
   }
 
   // 학교 게시판 상세 조회
   static Future<Map<String, dynamic>> getSchoolNoticeDetail(
       String idx, String accessToken) async {
-    final url = Uri.parse('$baseUrl/data/school/$idx');
+    final url = Uri.parse('http://3.37.153.10:3000/data/school/$idx');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
+    try {
+      print("[DEBUG] Request URL: $url");
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> noticeDetail = json.decode(response.body);
-      return {
-        'idx': noticeDetail['idx'],
-        'text': noticeDetail['text'],
-        'title': noticeDetail['title'],
-        'published_date': noticeDetail['published_date'],
-        'url': noticeDetail['url'],
-      };
-    } else {
-      throw Exception(
-          'Failed to fetch school notice detail. Status code: ${response.statusCode}');
+      print("[DEBUG] Response status: ${response.statusCode}");
+      print("[DEBUG] Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final decodedBody = json.decode(response.body);
+        final notice = decodedBody['notice'];
+
+        if (notice != null) {
+          return {
+            'idx': notice['idx'] ?? '',
+            'title': notice['title'] ?? '',
+            'text': notice['text'] ?? '',
+            'published_date': notice['published_date'] ?? '',
+            'url': notice['url'] ?? '',
+          };
+        } else {
+          throw Exception("Notice data is missing in response");
+        }
+      } else {
+        throw Exception(
+            "Failed to fetch notice detail. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("[ERROR] Exception in getSchoolNoticeDetail: $e");
+      throw Exception("Failed to fetch school notice detail. Error: $e");
     }
   }
 
   // 외부 게시판 목록 조회
-  static Future<List<Map<String, dynamic>>> getExternalNotices(
+  static Future<List<Map<String, String>>> getExternalNotices(
       String accessToken) async {
     final url = Uri.parse('$baseUrl/data/external');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
+    try {
+      print('[DEBUG] Making GET request to: $url');
+      print('[DEBUG] With access token: $accessToken');
 
-    if (response.statusCode == 200) {
-      final List<dynamic> notices = json.decode(response.body);
-      return notices.map((notice) {
-        return {
-          'idx': notice['idx'],
-          'title': notice['title'],
-          'dDAY': notice['dDAY'],
-        };
-      }).toList();
-    } else {
-      throw Exception(
-          'Failed to fetch external notices. Status code: ${response.statusCode}');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      print('[DEBUG] Response status: ${response.statusCode}');
+      print('[DEBUG] Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decodedBody = json.decode(response.body);
+
+        if (decodedBody['notices'] is List) {
+          final List<dynamic> notices = decodedBody['notices'];
+
+          return notices.map((notice) {
+            return {
+              'idx': notice['idx']?.toString() ?? '',
+              'title': notice['title']?.toString() ?? '',
+              'dDAY': notice['dDAY']?.toString() ?? '',
+            };
+          }).toList();
+        } else {
+          throw Exception(
+              '[ERROR] Expected "notices" to be a List but got ${decodedBody['notices'].runtimeType}');
+        }
+      } else {
+        throw Exception(
+            'Failed to fetch external notices. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('[ERROR] Exception in getExternalNotices: $error');
+      throw Exception('Failed to fetch external notices. Error: $error');
     }
   }
 
@@ -95,25 +143,41 @@ class NoticeBoardApi {
       String idx, String accessToken) async {
     final url = Uri.parse('$baseUrl/data/external/$idx');
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'application/json',
-      },
-    );
+    try {
+      print("[DEBUG] Request URL: $url");
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> noticeDetail = json.decode(response.body);
-      return {
-        'idx': noticeDetail['idx'],
-        'text': noticeDetail['text'],
-        'title': noticeDetail['title'],
-        'dDAY': noticeDetail['dDAY'],
-      };
-    } else {
-      throw Exception(
-          'Failed to fetch external notice detail. Status code: ${response.statusCode}');
+      print("[DEBUG] Response status: ${response.statusCode}");
+      print("[DEBUG] Response body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final decodedBody = json.decode(response.body);
+        final notice = decodedBody['notice'];
+
+        if (notice != null) {
+          return {
+            'idx': notice['idx'] ?? '',
+            'title': notice['title'] ?? '',
+            'text': notice['text'] ?? '',
+            'dDAY': notice['dDAY'] ?? '',
+            'url': notice['url'] ?? '',
+          };
+        } else {
+          throw Exception("Notice data is missing in response");
+        }
+      } else {
+        throw Exception(
+            "Failed to fetch external notice detail. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("[ERROR] Exception in getExternalNoticeDetail: $e");
+      throw Exception("Failed to fetch external notice detail. Error: $e");
     }
   }
 }

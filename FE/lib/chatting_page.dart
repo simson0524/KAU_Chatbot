@@ -710,7 +710,7 @@ class LeftDrawerWidget extends StatelessWidget {
                     ),
                     // 외부사이트 게시판
                     boardNavigation(
-                        context, '외부 사이트 게시판', ExternalSitePage(), onClose),
+                        context, '외부 사이트 게시판', ExternalBoardPage(), onClose),
                     Divider(
                       color: Colors.grey,
                       thickness: 1.0,
