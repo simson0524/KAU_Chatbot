@@ -3,7 +3,7 @@ const db = require('../config/dbConfig');
 // 학교 공지 목록 조회
 exports.getSchoolNotices = async () => {
     const [notices] = await db.query(`
-        SELECT idx, title, published_date 
+        SELECT idx, title, published_date, url
         FROM school_notice 
         ORDER BY published_date DESC
         LIMIT 50
@@ -14,7 +14,7 @@ exports.getSchoolNotices = async () => {
 // 학교 공지 상세 조회
 exports.getSchoolNoticeDetail = async (idx) => {
     const [notice] = await db.query(`
-        SELECT idx, title, text, published_date 
+        SELECT idx, title, text, published_date, url
         FROM school_notice 
         WHERE idx = ?
     `, [idx]);
@@ -24,7 +24,7 @@ exports.getSchoolNoticeDetail = async (idx) => {
 // 외부 공지 목록 조회
 exports.getExternalNotices = async () => {
     const [notices] = await db.query(`
-        SELECT idx, title, deadline_date 
+        SELECT idx, title, deadline_date, url
         FROM external_notice 
         ORDER BY deadline_date ASC
         LIMIT 50
@@ -35,7 +35,7 @@ exports.getExternalNotices = async () => {
 // 외부 공지 상세 조회
 exports.getExternalNoticeDetail = async (idx) => {
     const [notice] = await db.query(`
-        SELECT idx, title, text, deadline_date 
+        SELECT idx, title, text, deadline_date, url
         FROM external_notice 
         WHERE idx = ?
     `, [idx]);
