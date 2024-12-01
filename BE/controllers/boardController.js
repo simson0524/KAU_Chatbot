@@ -66,21 +66,6 @@ exports.createMajorComments = async (req, res) => {
 
         // 댓글 생성
         await boardModel.createComment(board_id, student_id, content);
-        
-        // 해당 게시글의 작성자에게 알림 보내기
-        const board = await boardModel.findBoardById(board_id);
-        console.log(board.author, board.author_name);
-        if (board.author !== student_id) { // 본인 댓글은 제외
-            const io = getSocketIo();
-            const notificationMessage = boardService.getNotificationMessage(board.author_name, content) // 알림 메시지 가져오기
-            console.log(notificationMessage);
-
-            io.to(board.author).emit('receiveNotification', {
-                message: notificationMessage,
-                board_id,
-                content
-            });
-        }
 
         res.status(201).json({'message': '학과 게시판 댓글 생성이 성공하였습니다.'});
     }
@@ -168,19 +153,6 @@ exports.createStudentComments = async (req, res) => {
 
         // 댓글 생성
         await boardModel.createComment(board_id, student_id, content);
-        
-        // 해당 게시글의 작성자에게 알림 보내기
-        const board = await boardModel.findBoardById(board_id);
-        if (board.author !== student_id) { // 본인 댓글은 제외
-            const io = getSocketIo();
-            const notificationMessage = boardService.getNotificationMessage(board.author_name, content) // 알림 메시지 가져오기
-
-            io.to(board.author).emit('receiveNotification', {
-                message: notificationMessage,
-                board_id,
-                content
-            });
-        }
 
         res.status(201).json({'message': '학번 게시판 댓글 생성이 성공하였습니다.'});
     }
