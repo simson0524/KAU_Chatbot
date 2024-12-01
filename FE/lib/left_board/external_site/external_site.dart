@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:FE/api/notice_board_api.dart'; // API 호출을 위한 파일
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -51,23 +52,12 @@ class _ExternalBoardPageState extends State<ExternalBoardPage> {
         posts = notices.map((notice) {
           try {
             // 날짜만 추출
-            String publishedDate =
-                notice['published_date']?.toString() ?? 'N/A';
-            String formattedDate;
-            try {
-              DateTime parsedDate = DateTime.parse(publishedDate);
-              formattedDate =
-                  DateFormat('yyyy-MM-dd').format(parsedDate); // 날짜 형식 변환
-            } catch (dateError) {
-              print(
-                  "[ERROR] Failed to parse date: $publishedDate, Error: $dateError");
-              formattedDate = 'Invalid Date';
-            }
+            String dDay = notice['dDay']?.toString() ?? 'N/A';
 
             return {
               'idx': notice['idx'].toString(),
               'title': notice['title'].toString(),
-              'date': formattedDate, // 변환된 날짜 사용
+              'date': dDay, // 변환된 날짜 사용
             };
           } catch (e) {
             print("[ERROR] Error while parsing notice: $notice, Error: $e");
@@ -123,7 +113,7 @@ class _ExternalBoardPageState extends State<ExternalBoardPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('우리학교 공지사항', style: TextStyle(color: Colors.black)),
+        title: Text('외부공지 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -313,7 +303,7 @@ class _ExternalPostDetailPageState extends State<ExternalPostDetailPage> {
           postDetail = {
             'title': detail['title'] ?? '제목 없음',
             'text': detail['text'] ?? '내용 없음',
-            'date': detail['published_date'] ?? '날짜 없음',
+            'date': detail['dDay'] ?? '날짜 없음',
             'url': detail['url'] ?? '', // URL 추가
           };
         });
@@ -345,10 +335,20 @@ class _ExternalPostDetailPageState extends State<ExternalPostDetailPage> {
 
   Future<void> _launchUrl(String url) async {
     final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      _showDialog('URL을 열 수 없습니다.');
+
+    print("[DEBUG] Attempting to launch URL: $url");
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        print("[DEBUG] URL can be launched: $url");
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        print("[ERROR] Cannot launch URL: $url");
+        _showDialog('URL을 열 수 없습니다: $url');
+      }
+    } catch (e) {
+      print("[ERROR] Exception while launching URL: $e");
+      _showDialog('URL을 여는 중 오류가 발생했습니다: $url');
     }
   }
 

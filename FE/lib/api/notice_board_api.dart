@@ -79,7 +79,7 @@ class NoticeBoardApi {
             'title': notice['title'] ?? '',
             'text': notice['text'] ?? '',
             'published_date': notice['published_date'] ?? '',
-            'url': notice['url'] ?? '',
+            'url': notice['url']?.toString() ?? '',
           };
         } else {
           throw Exception("Notice data is missing in response");
@@ -105,23 +105,30 @@ class NoticeBoardApi {
 
       final response = await http.get(
         url,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
       );
 
       print('[DEBUG] Response status: ${response.statusCode}');
       print('[DEBUG] Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final decodedBody = json.decode(response.body);
+        final Map<String, dynamic> decodedBody = json.decode(response.body);
 
+        // "notices"가 List인지 확인 후 처리
         if (decodedBody['notices'] is List) {
           final List<dynamic> notices = decodedBody['notices'];
 
           return notices.map((notice) {
+            // 각 공지를 Map<String, String>으로 변환
             return {
               'idx': notice['idx']?.toString() ?? '',
               'title': notice['title']?.toString() ?? '',
-              'dDAY': notice['dDAY']?.toString() ?? '',
+              'deadline_date': notice['deadline_date']?.toString() ?? '',
+              'url': notice['url']?.toString() ?? '',
+              'dDay': notice['dDay']?.toString() ?? 'N/A',
             };
           }).toList();
         } else {
@@ -161,17 +168,27 @@ class NoticeBoardApi {
         final notice = decodedBody['notice'];
 
         if (notice != null) {
+          // 디버깅 코드 추가
+          print("[DEBUG] Notice idx: ${notice['idx']}");
+          print("[DEBUG] Notice title: ${notice['title']}");
+          print("[DEBUG] Notice text: ${notice['text']}");
+          print("[DEBUG] Notice dDAY: ${notice['dDAY']}");
+          print("[DEBUG] Notice url: ${notice['url']}");
+
           return {
             'idx': notice['idx'] ?? '',
             'title': notice['title'] ?? '',
             'text': notice['text'] ?? '',
             'dDAY': notice['dDAY'] ?? '',
-            'url': notice['url'] ?? '',
+            'url': notice['url']?.toString() ?? '',
           };
         } else {
+          print("[ERROR] 'notice' field is missing or null in response.");
           throw Exception("Notice data is missing in response");
         }
       } else {
+        print(
+            "[ERROR] Failed to fetch notice detail. Status code: ${response.statusCode}");
         throw Exception(
             "Failed to fetch external notice detail. Status code: ${response.statusCode}");
       }

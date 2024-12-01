@@ -309,11 +309,25 @@ class _NoticePostDetailPageState extends State<NoticePostDetailPage> {
       print("[DEBUG] Notice detail fetched successfully: $detail");
 
       if (detail.isNotEmpty) {
+        // Extract and format the date
+        String publishedDate = detail['published_date'] ?? '날짜 없음';
+        String formattedDate = '날짜 없음'; // Default value
+
+        try {
+          if (publishedDate != '날짜 없음') {
+            DateTime parsedDate = DateTime.parse(publishedDate);
+            formattedDate = DateFormat('yyyy-MM-dd').format(parsedDate);
+          }
+        } catch (e) {
+          print(
+              "[ERROR] Failed to format published_date: $publishedDate, Error: $e");
+        }
+
         setState(() {
           postDetail = {
             'title': detail['title'] ?? '제목 없음',
             'text': detail['text'] ?? '내용 없음',
-            'date': detail['published_date'] ?? '날짜 없음',
+            'date': formattedDate, // Use formatted date
             'url': detail['url'] ?? '', // URL 추가
           };
         });
@@ -344,11 +358,21 @@ class _NoticePostDetailPageState extends State<NoticePostDetailPage> {
   }
 
   Future<void> _launchUrl(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      _showDialog('URL을 열 수 없습니다.');
+    print("[DEBUG] Attempting to launch URL: $url");
+
+    try {
+      final Uri uri = Uri.parse(url);
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        print("[DEBUG] URL launched successfully: $url");
+      } else {
+        print("[ERROR] Cannot launch URL: $url");
+        _showDialog('URL을 열 수 없습니다. 올바른 URL인지 확인해주세요.');
+      }
+    } catch (e) {
+      print("[ERROR] Exception occurred while launching URL: $e");
+      _showDialog('URL을 여는 중 오류가 발생했습니다.');
     }
   }
 
