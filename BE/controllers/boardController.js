@@ -1,7 +1,6 @@
 const boardService = require('../services/boardService');
 const boardModel = require('../models/boardModel');
 const userModel = require('../models/userModel');
-const { getSocketIo } = require('../socket');
 
 
 // 학과 게시판 조회
@@ -63,9 +62,18 @@ exports.createMajorComments = async (req, res) => {
         const student_id = req.user.student_id;
         const major_identifier = req.params.major_identifier;
         const board_id = req.params.board_id;
+        
+        // 게시글 찾기
+        const board = await boardModel.findBoardById(board_id);
+        if (!board) {
+            return res.status(404).json({ 'message': '해당 아이디의 게시글을 찾을 수 없습니다.' });
+        }
 
         // 댓글 생성
         await boardModel.createComment(board_id, student_id, content);
+
+        // 작성자에게 알림 전송
+        await boardService.pushMessage(board.author, content);
 
         res.status(201).json({'message': '학과 게시판 댓글 생성이 성공하였습니다.'});
     }
@@ -150,9 +158,18 @@ exports.createStudentComments = async (req, res) => {
         const student_id = req.user.student_id;
         const student_identifier = req.params.student_identifier;
         const board_id = req.params.board_id;
+        
+        // 게시글 찾기
+        const board = await boardModel.findBoardById(board_id);
+        if (!board) {
+            return res.status(404).json({ 'message': '해당 아이디의 게시글을 찾을 수 없습니다.' });
+        }
 
         // 댓글 생성
         await boardModel.createComment(board_id, student_id, content);
+
+        // 작성자에게 알림 전송
+        await boardService.pushMessage(board.author, content);
 
         res.status(201).json({'message': '학번 게시판 댓글 생성이 성공하였습니다.'});
     }
