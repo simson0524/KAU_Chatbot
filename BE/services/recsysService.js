@@ -1,5 +1,5 @@
 const axios = require('axios');
-const recsysModel = require('./recsysModel');
+const recsysModel = require('../models/recsysModel');
 
 exports.fetchAllStudentData = async () => {
     const students = await recsysModel.getAllUsersWithTags();
@@ -20,4 +20,17 @@ exports.fetchAllStudentData = async () => {
     }
 
     return formattedData; // 클라이언트에도 반환
+};
+
+exports.processAndSaveStudentData = async (studentData) => {
+    // 1. 기존 데이터 삭제
+    await recsysModel.clearInterestNoticeTitles();
+
+    // 2. 새로운 데이터 저장
+    const students = studentData.data.map(student => ({
+        student_id: student.student_id,
+        interest_notice_titles: student.interest_notice_titles.slice(0, 50) // 최대 50개의 공지사항 제한
+    }));
+
+    await recsysModel.saveInterestNoticeTitles(students);
 };
