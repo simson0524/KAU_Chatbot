@@ -1,7 +1,6 @@
 const boardService = require('../services/boardService');
 const boardModel = require('../models/boardModel');
 const userModel = require('../models/userModel');
-const { getSocketIo } = require('../socket');
 
 
 // 학과 게시판 조회
@@ -63,24 +62,18 @@ exports.createMajorComments = async (req, res) => {
         const student_id = req.user.student_id;
         const major_identifier = req.params.major_identifier;
         const board_id = req.params.board_id;
+        
+        // 게시글 찾기
+        const board = await boardModel.findBoardById(board_id);
+        if (!board) {
+            return res.status(404).json({ 'message': '해당 아이디의 게시글을 찾을 수 없습니다.' });
+        }
 
         // 댓글 생성
         await boardModel.createComment(board_id, student_id, content);
-        
-        // 해당 게시글의 작성자에게 알림 보내기
-        const board = await boardModel.findBoardById(board_id);
-        console.log(board.author, board.author_name);
-        if (board.author !== student_id) { // 본인 댓글은 제외
-            const io = getSocketIo();
-            const notificationMessage = boardService.getNotificationMessage(board.author_name, content) // 알림 메시지 가져오기
-            console.log(notificationMessage);
 
-            io.to(board.author).emit('receiveNotification', {
-                message: notificationMessage,
-                board_id,
-                content
-            });
-        }
+        // 작성자에게 알림 전송
+        await boardService.pushMessage(board.author, content);
 
         res.status(201).json({'message': '학과 게시판 댓글 생성이 성공하였습니다.'});
     }
@@ -165,22 +158,18 @@ exports.createStudentComments = async (req, res) => {
         const student_id = req.user.student_id;
         const student_identifier = req.params.student_identifier;
         const board_id = req.params.board_id;
+        
+        // 게시글 찾기
+        const board = await boardModel.findBoardById(board_id);
+        if (!board) {
+            return res.status(404).json({ 'message': '해당 아이디의 게시글을 찾을 수 없습니다.' });
+        }
 
         // 댓글 생성
         await boardModel.createComment(board_id, student_id, content);
-        
-        // 해당 게시글의 작성자에게 알림 보내기
-        const board = await boardModel.findBoardById(board_id);
-        if (board.author !== student_id) { // 본인 댓글은 제외
-            const io = getSocketIo();
-            const notificationMessage = boardService.getNotificationMessage(board.author_name, content) // 알림 메시지 가져오기
 
-            io.to(board.author).emit('receiveNotification', {
-                message: notificationMessage,
-                board_id,
-                content
-            });
-        }
+        // 작성자에게 알림 전송
+        await boardService.pushMessage(board.author, content);
 
         res.status(201).json({'message': '학번 게시판 댓글 생성이 성공하였습니다.'});
     }
