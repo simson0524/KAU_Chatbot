@@ -1,7 +1,5 @@
-import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -314,7 +312,7 @@ class _ExternalSitePostDetailPageState
                       ),
                       padding: const EdgeInsets.all(12.0),
                       child: SingleChildScrollView(
-                        child: Text(
+                        child: SelectableText(
                           widget.post['content']!,
                           style: TextStyle(fontSize: 16.0),
                         ),

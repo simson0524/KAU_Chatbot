@@ -362,7 +362,7 @@ class _NoticePostDetailPageState extends State<NoticePostDetailPage> {
                   SizedBox(height: 16.0),
 
                   // 내용
-                  Text(
+                  SelectableText(
                     postDetail!['text']!,
                     style: TextStyle(fontSize: 16.0),
                   ),
