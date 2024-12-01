@@ -19,6 +19,11 @@ app.use(bodyParser.json()); // JSON 요청 본문 파싱
 app.use(bodyParser.urlencoded({ extended: true })); // URL 인코딩된 데이터 파싱
 app.use(express.json());
 
+// 로드밸런서 상태 확인 엔드포인트 추가
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 // 라우트 설정
 app.use('/chat', chatRoutes); // '/chat' 경로에 챗봇 관련 라우트 적용
 app.use('/user', userRoutes); // '/user' 경로에 사용자 관련 라우트 적용
