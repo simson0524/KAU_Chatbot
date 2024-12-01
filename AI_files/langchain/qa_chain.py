@@ -12,6 +12,17 @@ import ast
 """
 load_dotenv()
 
+def cn_trans(chinese_query):
+    """Translate Chinese query to Korean using OpenAI model."""
+    llm = ChatOpenAI(model='gpt-4o-mini')  # OpenAI LLM instance
+
+    # Translation prompt
+    prompt = f"Translate the following Chinese text to Korean. Provide only the translated text without any additional comments or explanations:\n\n{chinese_query}"
+
+    # Perform the translation
+    response = llm.predict(prompt)
+    return response.strip()
+
 def qa_chain(query, vector_store, character):
     """user query와 query history를 가지고 document를 retrieve하고 답변을 generate해주는 함수
 
@@ -41,12 +52,37 @@ def qa_chain(query, vector_store, character):
 
     # 새로운 프롬프트
     if character == 'maha':
-        prompt = "문서내용: {context}\n\n사용자가 질문한 내용과 연관 높은 문서들의 내용이야. 3개의 문서중에서 사용자의 질문과 가장 관련 높은 문서 내용을 기반으로 답변을 생성해줘. 답변 내용은 반드시 한국어로 생성해주고, 한국어가 아닌 다른언어로 답변하게 되면 너에게 패널티를 줄거야."
+        prompt = (
+            "사용자가 질문한 내용에 대해 답변을 생성해줘. 답변을 생성할 때는 다음의 조건을 반드시 따라야 해:\n"
+            "1. 질문과 가장 관련 있는 문서의 내용만 사용해.\n"
+            "2. 질문과 관련 없는 문서의 내용은 절대 사용하지 마.\n"
+            "3. 주어진 문서들에 없는 내용은 절대 생성하지 마.\n"
+            "4. 답변은 반드시 한국어로 작성해야 해.\n\n"
+            "문서내용: {context}"
+        )
     elif character == 'mile':
-        prompt = "문서내용: {context}\n\n사용자가 질문한 내용과 연관 높은 문서들의 내용이야. 3개의 문서중에서 사용자의 질문과 가장 관련 높은 문서 내용을 기반으로 답변을 생성해줘. 답변 내용은 반드시 영어로 생성해주고, 영어가 아닌 다른언어로 답변하게 되면 너에게 패널티를 줄거야."
+        prompt = (
+            "Generate an answer to the user's question. When generating the answer, strictly follow these rules:\n"
+            "1. Use only the content from the documents that is most relevant to the question.\n"
+            "2. Do not use any irrelevant document content.\n"
+            "3. Do not generate information that is not present in the documents.\n"
+            "4. The answer must be written in English.\n\n"
+            "Document content: {context}"
+        )
     elif character == 'feet':
-        prompt = "문서내용: {context}\n\n사용자가 질문한 내용과 연관 높은 문서들의 내용이야. 3개의 문서중에서 사용자의 질문과 가장 관련 높은 문서 내용을 기반으로 답변을 생성해줘. 답변 내용은 반드시 중국어로 생성해주고, 중국어가 아닌 다른언어로 답변하게 되면 너에게 패널티를 줄거야."
+        prompt = (
+            "请根据用户的问题生成答案。生成答案时，请严格遵循以下规则：\n"
+            "1. 仅使用与问题最相关的文档内容。\n"
+            "2. 不要使用与问题无关的文档内容。\n"
+            "3. 请勿生成文档中不存在的信息。\n"
+            "4. 答案必须用中文书写。\n\n"
+            "文档内容: {context}"
+        )
     
+    # 중국어 쿼리 번역 (feet의 경우만 적용)
+    if character == 'feet':
+        query = cn_trans(query)  # 중국어 -> 한국어 번역
+
     results = vector_store.similarity_search(query=query, k=3)
 
     context = [ result.page_content for result in results ]
