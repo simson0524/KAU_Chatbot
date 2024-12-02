@@ -26,6 +26,11 @@ class CollegeNum extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, // 배경색
+          ),
+        ),
         elevation: 0.0,
         title: Text('학과별 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,

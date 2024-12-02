@@ -787,8 +787,69 @@ class LeftDrawerWidget extends StatelessWidget {
                   ),
                 ],
               ),
+<<<<<<< HEAD
             ),
           ],
+=======
+              Expanded(
+                child: Column(
+                  children: [
+                    //학교 공지 게시판
+                    boardNavigation(
+                        context, '학교 공지 게시판', NoticeBoardPage(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    // 외부사이트 게시판
+                    boardNavigation(
+                        context, '외부 사이트 게시판', ExternalBoardPage(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    // 학과별 커뮤니티 게시판
+                    boardNavigation(
+                        context, '학과별 커뮤니티 게시판', MajorBoard(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    //학번별 커뮤니티 게시판
+                    boardNavigation(
+                        context, '학번별 커뮤니티 게시판', CollegeNum(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    //학교 문의 게시판
+                    boardNavigation(
+                        context, '학교 문의 게시판', QnaBoardPage(), onClose),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                      height: 5.0,
+                    ),
+                    // 이미지
+                    Spacer(),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 20),
+                      height: 120,
+                      child: Image.asset(
+                        'assets/images/character_friend.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+>>>>>>> a2b56ec121c0d3140fab94ba3efd48acc78b066a
         ),
       ),
     );

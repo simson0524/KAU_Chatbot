@@ -7,6 +7,7 @@ const inquiryRoutes = require('./routes/inquiryRoute'); // 문의 게시판 라�
 const boardRoutes = require('./routes/boardRoute');
 const dataRoutes = require('./routes/dataRoute'); // csv데이터 관련 라우트 가져오기
 const recsysRoutes = require('./routes/recsysRoute');
+const { notifyInterestedUsers } = require('./services/recsysService');
 // const errorMiddleware = require('./middlewares/errorMiddleware'); // 에러 처리 미들웨어
 
 const app = express(); // Express 애플리케이션 생성
@@ -31,5 +32,14 @@ app.use('/board/inquiries', inquiryRoutes); // 문의 게시판 라우트
 app.use('/board', boardRoutes); // 학과, 학번 게시판 라우트
 app.use('/data', dataRoutes); // '/upload' 경로에 csv데이터 관련 라우트 적용
 app.use('/recsys', recsysRoutes);
+
+/*
+// 매일 오전 9시에 알림 전송
+cron.schedule('0 9 * * *', async () => {
+    console.log('Running scheduled notification task...');
+    await notifyInterestedUsers();
+  });
+*/
+
 
 module.exports = app; // Express 앱을 모듈로 내보냄

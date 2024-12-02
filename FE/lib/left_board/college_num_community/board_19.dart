@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:FE/api/auth_api.dart';
 import 'package:FE/api/board_api.dart';
 import 'dart:convert';
+import 'package:FE/custom_notification.dart';
+import 'package:FE/api/notification_service.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -145,6 +147,11 @@ class _Board19PageState extends State<Board19Page> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, // 배경색
+          ),
+        ),
         elevation: 0.0,
         title: Text('19학번 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,

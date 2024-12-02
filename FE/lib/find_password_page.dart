@@ -86,6 +86,8 @@ class FindPWInput extends StatefulWidget {
   State<FindPWInput> createState() => _FindPWInputState();
 }
 
+bool isEmailVerified = false;
+
 class _FindPWInputState extends State<FindPWInput> {
   final TextEditingController find_emailController = TextEditingController();
   final TextEditingController find_pwController = TextEditingController();
@@ -269,7 +271,10 @@ class _FindPWInputState extends State<FindPWInput> {
                       int.parse(find_emailcodeController.text.trim()),
                     );
                     if (response.statusCode == 200) {
-                      textmessageDialog(context, '이메일 인증이 확인되었습니다.');
+                      setState(() {
+                        isEmailVerified = true;
+                      });
+                      textmessageDialog(context, '이메일 인증이 완료되었습니다.');
                     } else {
                       textmessageDialog(
                           context, '인증번호가 맞지 않습니다.\n이메일과 인증번호를 다시 확인해주세요.');
@@ -406,6 +411,10 @@ class FindPWfinish extends StatelessWidget {
           if (inputState.nullcheck()) {
             print('[DEBUG] Null check failed. Some inputs are missing.');
             textmessageDialog(context, '입력되지 않은 값이 존재합니다');
+            return;
+          }
+          if (!isEmailVerified) {
+            textmessageDialog(context, '이메일 인증을 완료해주세요.');
             return;
           }
           if (!inputState.samePWcheck()) {

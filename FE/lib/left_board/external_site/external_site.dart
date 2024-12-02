@@ -1,38 +1,80 @@
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:FE/api/notice_board_api.dart'; // API 호출을 위한 파일
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(MaterialApp(
-    home: ExternalSitePage(),
+    home: ExternalBoardPage(),
   ));
 }
 
 // 게시판 화면
-class ExternalSitePage extends StatefulWidget {
+class ExternalBoardPage extends StatefulWidget {
   @override
-  _ExternalSitePageState createState() => _ExternalSitePageState();
+  _ExternalBoardPageState createState() => _ExternalBoardPageState();
 }
 
-class _ExternalSitePageState extends State<ExternalSitePage> {
+class _ExternalBoardPageState extends State<ExternalBoardPage> {
   List<Map<String, String>> posts = [];
   List<Map<String, String>> filteredPosts = [];
   TextEditingController searchController = TextEditingController();
+  String? accessToken;
 
   @override
   void initState() {
     super.initState();
-    filteredPosts = posts;
+    _loadExternals();
   }
 
-  void addPost(String title, String content) {
-    setState(() {
-      posts.add({
-        'title': title,
-        'content': content,
-        'date': DateTime.now().toString().split(' ')[0]
+  Future<void> _loadExternals() async {
+    final prefs = await SharedPreferences.getInstance();
+    accessToken = prefs.getString('accessToken');
+
+    if (accessToken == null || accessToken!.isEmpty) {
+      print("[DEBUG] Access token is missing or empty.");
+      _showDialog('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      print("[DEBUG] Fetching school notices with access token: $accessToken");
+      final notices = await NoticeBoardApi.getExternalNotices(accessToken!);
+
+      print("[DEBUG] Externals fetched successfully: $notices");
+
+      setState(() {
+        posts = notices.map((notice) {
+          try {
+            // 날짜만 추출
+            String dDay = notice['dDay']?.toString() ?? 'N/A';
+
+            return {
+              'idx': notice['idx'].toString(),
+              'title': notice['title'].toString(),
+              'date': dDay, // 변환된 날짜 사용
+            };
+          } catch (e) {
+            print("[ERROR] Error while parsing notice: $notice, Error: $e");
+            return {
+              'idx': 'N/A',
+              'title': 'Invalid Data',
+              'date': 'N/A',
+            };
+          }
+        }).toList();
+
+        filteredPosts = posts;
+        print("[DEBUG] Posts updated successfully.");
       });
-      filteredPosts = posts;
-    });
+    } catch (e) {
+      print("[ERROR] Failed to fetch school notices. Error: $e");
+      _showDialog('공지사항을 불러오는 데 실패했습니다.');
+    }
   }
 
   void filterPosts(String keyword) {
@@ -49,13 +91,28 @@ class _ExternalSitePageState extends State<ExternalSitePage> {
     searchController.clear();
   }
 
+  void _showDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.0,
-        title: Text('외부사이트 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('외부공지 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -110,8 +167,8 @@ class _ExternalSitePageState extends State<ExternalSitePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ExternalSitePostDetailPage(
-                                post: filteredPosts[index], // 클릭된 게시물의 데이터 전달
+                              builder: (context) => ExternalPostDetailPage(
+                                idx: filteredPosts[index]['idx']!, // idx 전달
                               ),
                             ),
                           );
@@ -202,29 +259,96 @@ class _ExternalSitePageState extends State<ExternalSitePage> {
 }
 
 // 글 상세 페이지
-class ExternalSitePostDetailPage extends StatefulWidget {
-  final Map<String, String> post;
+class ExternalPostDetailPage extends StatefulWidget {
+  final String idx;
 
-  ExternalSitePostDetailPage({required this.post});
+  ExternalPostDetailPage({required this.idx});
 
   @override
-  _ExternalSitePostDetailPageState createState() =>
-      _ExternalSitePostDetailPageState();
+  _ExternalPostDetailPageState createState() => _ExternalPostDetailPageState();
 }
 
-class _ExternalSitePostDetailPageState
-    extends State<ExternalSitePostDetailPage> {
-  List<Map<String, String>> comments = [];
-  TextEditingController commentController = TextEditingController();
+class _ExternalPostDetailPageState extends State<ExternalPostDetailPage> {
+  Map<String, String>? postDetail;
+  String? accessToken;
 
-  void addComment(String comment) {
-    setState(() {
-      comments.add({
-        'comment': comment,
-        'date': DateTime.now().toString().split(' ')[0],
-      });
-    });
-    commentController.clear();
+  @override
+  void initState() {
+    super.initState();
+    _loadExternalDetail();
+  }
+
+  Future<void> _loadExternalDetail() async {
+    print("[DEBUG] Starting _loadExternalDetail");
+    final prefs = await SharedPreferences.getInstance();
+    accessToken = prefs.getString('accessToken');
+
+    if (accessToken == null || accessToken!.isEmpty) {
+      print("[DEBUG] Access token is missing or empty.");
+      _showDialog('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      print(
+          "[DEBUG] Fetching notice detail for idx: ${widget.idx} with access token: $accessToken");
+      final detail = await NoticeBoardApi.getExternalNoticeDetail(
+          widget.idx, accessToken!);
+
+      print("[DEBUG] External detail fetched successfully: $detail");
+
+      if (detail.isNotEmpty) {
+        setState(() {
+          postDetail = {
+            'title': detail['title'] ?? '제목 없음',
+            'text': detail['text'] ?? '내용 없음',
+            'date': detail['dDay'] ?? '날짜 없음',
+            'url': detail['url'] ?? '', // URL 추가
+          };
+        });
+        print("[DEBUG] Post detail updated successfully: $postDetail");
+      } else {
+        print("[ERROR] External detail is empty.");
+        _showDialog('공지사항을 불러오는 데 실패했습니다.');
+      }
+    } catch (e) {
+      print("[ERROR] Failed to fetch notice detail. Error: $e");
+      _showDialog('공지사항을 불러오는 데 실패했습니다.');
+    }
+  }
+
+  void _showDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+
+    print("[DEBUG] Attempting to launch URL: $url");
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        print("[DEBUG] URL can be launched: $url");
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        print("[ERROR] Cannot launch URL: $url");
+        _showDialog('URL을 열 수 없습니다: $url');
+      }
+    } catch (e) {
+      print("[ERROR] Exception while launching URL: $e");
+      _showDialog('URL을 여는 중 오류가 발생했습니다: $url');
+    }
   }
 
   @override
@@ -232,99 +356,61 @@ class _ExternalSitePostDetailPageState
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, // 배경색
+          ),
+        ),
         elevation: 0.0,
-        title: Text('외부사이트 게시판', style: TextStyle(color: Colors.black)),
+        title: Text('공지사항 상세', style: TextStyle(color: Colors.black)),
         centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.home_outlined, color: Colors.black),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChattingPage(),
-                ),
-              );
-            },
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.0),
-          child: Container(
-            color: Colors.black,
-            height: 1.0,
-          ),
-        ),
       ),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Stack(
-          children: [
-            Container(
-              color: Colors.white,
-            ),
-            Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/grid_background.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(30.0),
+      body: postDetail == null
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //제목 표시
-                  SizedBox(
-                    width: double.infinity,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  // 제목
+                  Text(postDetail!['title']!,
+                      style: TextStyle(
+                          fontSize: 18.0, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8.0),
+
+                  // 날짜
+                  Text(postDetail!['date']!,
+                      style: TextStyle(color: Colors.grey)),
+                  SizedBox(height: 16.0),
+
+                  // 내용
+                  Expanded(
+                    child: SingleChildScrollView(
                       child: Text(
-                        widget.post['title']!,
-                        style: TextStyle(
-                            fontSize: 18.0, fontWeight: FontWeight.bold),
+                        postDetail!['text']!,
+                        style: TextStyle(fontSize: 16.0),
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 16.0),
 
-                  // 내용 표시
-                  SizedBox(
-                    width: double.infinity,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      padding: const EdgeInsets.all(12.0),
-                      child: SingleChildScrollView(
-                        child: SelectableText(
-                          widget.post['content']!,
-                          style: TextStyle(fontSize: 16.0),
+                  // URL 버튼
+                  if (postDetail!['url'] != null &&
+                      postDetail!['url']!.isNotEmpty)
+                    GestureDetector(
+                      onTap: () => _launchUrl(postDetail!['url']!),
+                      child: Text(
+                        '관련 링크 보기',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

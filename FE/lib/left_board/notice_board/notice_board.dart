@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:FE/api/notice_board_api.dart'; // API 호출을 위한 파일
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -49,10 +50,24 @@ class _NoticeBoardPageState extends State<NoticeBoardPage> {
       setState(() {
         posts = notices.map((notice) {
           try {
+            // 날짜만 추출
+            String publishedDate =
+                notice['published_date']?.toString() ?? 'N/A';
+            String formattedDate;
+            try {
+              DateTime parsedDate = DateTime.parse(publishedDate);
+              formattedDate =
+                  DateFormat('yyyy-MM-dd').format(parsedDate); // 날짜 형식 변환
+            } catch (dateError) {
+              print(
+                  "[ERROR] Failed to parse date: $publishedDate, Error: $dateError");
+              formattedDate = 'Invalid Date';
+            }
+
             return {
               'idx': notice['idx'].toString(),
               'title': notice['title'].toString(),
-              'date': notice['published_date'].toString(),
+              'date': formattedDate, // 변환된 날짜 사용
             };
           } catch (e) {
             print("[ERROR] Error while parsing notice: $notice, Error: $e");
@@ -71,17 +86,6 @@ class _NoticeBoardPageState extends State<NoticeBoardPage> {
       print("[ERROR] Failed to fetch school notices. Error: $e");
       _showDialog('공지사항을 불러오는 데 실패했습니다.');
     }
-  }
-
-  void addPost(String title, String content) {
-    setState(() {
-      posts.add({
-        'title': title,
-        'content': content,
-        'date': DateTime.now().toString().split(' ')[0]
-      });
-      filteredPosts = posts;
-    });
   }
 
   void filterPosts(String keyword) {
@@ -118,6 +122,11 @@ class _NoticeBoardPageState extends State<NoticeBoardPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, // 배경색
+          ),
+        ),
         elevation: 0.0,
         title: Text('우리학교 공지사항', style: TextStyle(color: Colors.black)),
         centerTitle: true,
@@ -286,26 +295,54 @@ class _NoticePostDetailPageState extends State<NoticePostDetailPage> {
   }
 
   Future<void> _loadNoticeDetail() async {
+    print("[DEBUG] Starting _loadNoticeDetail");
     final prefs = await SharedPreferences.getInstance();
     accessToken = prefs.getString('accessToken');
 
     if (accessToken == null || accessToken!.isEmpty) {
+      print("[DEBUG] Access token is missing or empty.");
       _showDialog('로그인이 필요합니다.');
       return;
     }
 
     try {
+      print(
+          "[DEBUG] Fetching notice detail for idx: ${widget.idx} with access token: $accessToken");
       final detail =
           await NoticeBoardApi.getSchoolNoticeDetail(widget.idx, accessToken!);
-      setState(() {
-        postDetail = {
-          'title': detail['title'],
-          'text': detail['text'],
-          'date': detail['published_date'],
-          'url': detail['url'], // URL 추가
-        };
-      });
+
+      print("[DEBUG] Notice detail fetched successfully: $detail");
+
+      if (detail.isNotEmpty) {
+        // Extract and format the date
+        String publishedDate = detail['published_date'] ?? '날짜 없음';
+        String formattedDate = '날짜 없음'; // Default value
+
+        try {
+          if (publishedDate != '날짜 없음') {
+            DateTime parsedDate = DateTime.parse(publishedDate);
+            formattedDate = DateFormat('yyyy-MM-dd').format(parsedDate);
+          }
+        } catch (e) {
+          print(
+              "[ERROR] Failed to format published_date: $publishedDate, Error: $e");
+        }
+
+        setState(() {
+          postDetail = {
+            'title': detail['title'] ?? '제목 없음',
+            'text': detail['text'] ?? '내용 없음',
+            'date': formattedDate, // Use formatted date
+            'url': detail['url'] ?? '', // URL 추가
+          };
+        });
+        print("[DEBUG] Post detail updated successfully: $postDetail");
+      } else {
+        print("[ERROR] Notice detail is empty.");
+        _showDialog('공지사항을 불러오는 데 실패했습니다.');
+      }
     } catch (e) {
+      print("[ERROR] Failed to fetch notice detail. Error: $e");
       _showDialog('공지사항을 불러오는 데 실패했습니다.');
     }
   }
@@ -326,11 +363,21 @@ class _NoticePostDetailPageState extends State<NoticePostDetailPage> {
   }
 
   Future<void> _launchUrl(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      _showDialog('URL을 열 수 없습니다.');
+    print("[DEBUG] Attempting to launch URL: $url");
+
+    try {
+      final Uri uri = Uri.parse(url);
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        print("[DEBUG] URL launched successfully: $url");
+      } else {
+        print("[ERROR] Cannot launch URL: $url");
+        _showDialog('URL을 열 수 없습니다. 올바른 URL인지 확인해주세요.');
+      }
+    } catch (e) {
+      print("[ERROR] Exception occurred while launching URL: $e");
+      _showDialog('URL을 여는 중 오류가 발생했습니다.');
     }
   }
 
@@ -362,9 +409,13 @@ class _NoticePostDetailPageState extends State<NoticePostDetailPage> {
                   SizedBox(height: 16.0),
 
                   // 내용
-                  SelectableText(
-                    postDetail!['text']!,
-                    style: TextStyle(fontSize: 16.0),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        postDetail!['text']!,
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ),
                   ),
                   SizedBox(height: 16.0),
 

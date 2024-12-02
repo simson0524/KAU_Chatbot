@@ -294,3 +294,26 @@ exports.getToken = async (req, res) => {
     }
     
 }
+
+
+exports.saveFcmToken = async (req, res) => {
+
+    try {
+        const { email, fcm_token } = req.body;
+
+        // 해당 이메일의 사용자가 있는지 확인
+        const user = await userModel.findUserByEmail(email);
+        if (!user) {
+            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
+        }
+
+        // fcm 토큰 저장
+        await userModel.saveFcmToken(email, fcm_token);
+
+        res.status(200).json({'message': 'fcm 토큰 저장이 성공하였습니다.'});
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json('사용자 비밀번호 수정 중 오류가 발생했습니다.');
+    }
+}

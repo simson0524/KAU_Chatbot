@@ -145,6 +145,11 @@ class _ComputerBoardPageState extends State<ComputerBoardPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, // 배경색
+          ),
+        ),
         elevation: 0.0,
         title: Text('컴퓨터공학학과 게시판', style: TextStyle(color: Colors.black)),
         centerTitle: true,

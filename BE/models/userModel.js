@@ -107,3 +107,18 @@ exports.findUserByToken = async (refreshToken) => {
     const [users] = await db.query('SELECT * FROM users where refresh_token = ?', [refreshToken]);
     return users[0];
 }
+
+// 사용자의 FCM 토큰 가져오기
+exports.getUserFcmToken = async (student_id) => {
+    const [fcm_token] = await db.query('SELECT fcm_token FROM users where student_id = ?', [student_id]);
+    return fcm_token[0];
+}
+
+// fcm 토큰 저장하기
+exports.saveFcmToken = async (email, fcmToken) => {
+    const result = await db.query(
+        'UPDATE users SET fcm_token = ? WHERE email = ?',
+        [fcmToken, email]
+    );
+    return result;
+}
