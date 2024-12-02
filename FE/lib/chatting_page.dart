@@ -265,6 +265,13 @@ class _ChattingPageState extends State<ChattingPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.white, // 상태바 배경 흰색
+        statusBarIconBrightness: Brightness.dark, // 상태바 아이콘 어두운 색상
+      ),
+    );
+
     _scrollController = ScrollController(); //스크롤 초기화
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToBottom();
@@ -276,8 +283,14 @@ class _ChattingPageState extends State<ChattingPage> {
         SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.white));
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, // 배경색
+          ),
+        ),
         elevation: 0.0,
         title: Text(
           'KAU CHATBOT',
@@ -299,6 +312,7 @@ class _ChattingPageState extends State<ChattingPage> {
           child: Divider(color: Colors.black),
         ),
       ),
+      extendBodyBehindAppBar: false,
       body: Stack(
         children: [
           Container(
@@ -706,79 +720,75 @@ class LeftDrawerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      child: Material(
-        elevation: 5,
-        child: Container(
-          width: 250,
-          height: MediaQuery.of(context).size.height,
-          color: Colors.white,
-          child: Row(
-            children: [
-              Container(
-                width: 1.0,
-                color: Colors.black,
+    return Material(
+      elevation: 5,
+      child: Container(
+        width: 250,
+        height: MediaQuery.of(context).size.height,
+        color: Colors.white,
+        child: Row(
+          children: [
+            Container(
+              width: 1.0,
+              color: Colors.black,
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  //학교 공지 게시판
+                  boardNavigation(
+                      context, '학교 공지 게시판', NoticeBoardPage(), onClose),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1.0,
+                    height: 5.0,
+                  ),
+                  // 외부사이트 게시판
+                  boardNavigation(
+                      context, '외부 사이트 게시판', ExternalSitePage(), onClose),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1.0,
+                    height: 5.0,
+                  ),
+                  // 학과별 커뮤니티 게시판
+                  boardNavigation(
+                      context, '학과별 커뮤니티 게시판', MajorBoard(), onClose),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1.0,
+                    height: 5.0,
+                  ),
+                  //학번별 커뮤니티 게시판
+                  boardNavigation(
+                      context, '학번별 커뮤니티 게시판', CollegeNum(), onClose),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1.0,
+                    height: 5.0,
+                  ),
+                  //학교 문의 게시판
+                  boardNavigation(
+                      context, '학교 문의 게시판', QnaBoardPage(), onClose),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1.0,
+                    height: 5.0,
+                  ),
+                  // 이미지
+                  Spacer(),
+                  Container(
+                    margin: EdgeInsets.only(bottom: 20),
+                    height: 120,
+                    child: Image.asset(
+                      'assets/images/character_friend.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: Column(
-                  children: [
-                    //학교 공지 게시판
-                    boardNavigation(
-                        context, '학교 공지 게시판', NoticeBoardPage(), onClose),
-                    Divider(
-                      color: Colors.grey,
-                      thickness: 1.0,
-                      height: 5.0,
-                    ),
-                    // 외부사이트 게시판
-                    boardNavigation(
-                        context, '외부 사이트 게시판', ExternalSitePage(), onClose),
-                    Divider(
-                      color: Colors.grey,
-                      thickness: 1.0,
-                      height: 5.0,
-                    ),
-                    // 학과별 커뮤니티 게시판
-                    boardNavigation(
-                        context, '학과별 커뮤니티 게시판', MajorBoard(), onClose),
-                    Divider(
-                      color: Colors.grey,
-                      thickness: 1.0,
-                      height: 5.0,
-                    ),
-                    //학번별 커뮤니티 게시판
-                    boardNavigation(
-                        context, '학번별 커뮤니티 게시판', CollegeNum(), onClose),
-                    Divider(
-                      color: Colors.grey,
-                      thickness: 1.0,
-                      height: 5.0,
-                    ),
-                    //학교 문의 게시판
-                    boardNavigation(
-                        context, '학교 문의 게시판', QnaBoardPage(), onClose),
-                    Divider(
-                      color: Colors.grey,
-                      thickness: 1.0,
-                      height: 5.0,
-                    ),
-                    // 이미지
-                    Spacer(),
-                    Container(
-                      margin: EdgeInsets.only(bottom: 20),
-                      height: 120,
-                      child: Image.asset(
-                        'assets/images/character_friend.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
