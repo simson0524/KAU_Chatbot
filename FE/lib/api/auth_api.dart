@@ -124,14 +124,14 @@ class AuthApi {
     try {
       print('[DEBUG] Making PUT request to: $url');
       print(
-          '[DEBUG] Request body: {email: $email, new_passward: $newPassword, check_new_password: $checkNewPassword}');
+          '[DEBUG] Request body: {email: $email, new_password: $newPassword, check_new_password: $checkNewPassword}');
 
       final response = await http.put(
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': email,
-          'new_passward': newPassword,
+          'new_password': newPassword,
           'check_new_password': checkNewPassword,
         }),
       );

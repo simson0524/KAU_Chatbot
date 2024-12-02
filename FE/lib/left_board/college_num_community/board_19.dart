@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:FE/api/auth_api.dart';
 import 'package:FE/api/board_api.dart';
 import 'dart:convert';
+import 'package:FE/custom_notification.dart';
+import 'package:FE/api/notification_service.dart';
 
 void main() {
   runApp(MaterialApp(

@@ -1,14 +1,10 @@
 const http = require('http');
 const app = require('./app'); // app.js에서 설정한 Express 앱을 가져옴
 const db = require('./config/dbConfig'); // DB 연결 설정 가져오기
-const { initSocket } = require('./socket');
 
 const port = process.env.PORT || 3000; // 포트 번호 설정 (기본값: 3000)
 
 const server = http.createServer(app); // HTTP 서버 생성
-
-// Socket.io 초기화
-const io = initSocket(server);
 
 // 서버 시작 함수
 const startServer = async () => {
