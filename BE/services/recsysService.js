@@ -2,12 +2,6 @@ const admin = require('firebase-admin');
 const axios = require('axios');
 const recsysModel = require('../models/recsysModel');
 
-// Firebase 초기화
-const serviceAccount = require('../serviceAccountKey.json');
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-})
-
 exports.fetchAllStudentData = async () => {
     const students = await recsysModel.getAllUsersWithTags();
     const formattedData = students.map(student => ({
