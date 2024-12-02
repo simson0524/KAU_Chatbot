@@ -39,4 +39,7 @@ router.post('/verify-email', userController.verifyCode);
 // Access Token 재발급
 router.post('/token', userController.getToken);
 
+// FCM 토큰 저장
+router.post('/fcm-token', userController.saveFcmToken);
+
 module.exports = router;
