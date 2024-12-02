@@ -11,7 +11,7 @@ exports.fetchAllStudentData = async () => {
 
     // recsys 서버로 데이터 전송
     try {
-        const response = await axios.post('https://recsys-server-url.com/api/students', {
+        const response = await axios.post('http://3.38.42.182:80/csv', {
             student_id_cnt: formattedData.length,
             data: formattedData
         });
