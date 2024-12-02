@@ -61,4 +61,3 @@ exports.getUsersWithInterestNotices = async () => {
     const [rows] = await pool.query(query);
     return rows.map((row) => row.fcm_token).filter(Boolean);
   };
-
