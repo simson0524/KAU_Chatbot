@@ -49,3 +49,16 @@ exports.saveInterestNoticeTitles = async (students) => {
         connection.release(); // 연결 반환
     }
 };
+
+// 알림을 보낼 사용자 조회
+exports.getUsersWithInterestNotices = async () => {
+    const query = `
+      SELECT u.fcm_token
+      FROM users u
+      INNER JOIN tag_sequence ts ON u.student_id = ts.student_id
+      WHERE ts.interest_notice_titles IS NOT NULL
+    `;
+    const [rows] = await pool.query(query);
+    return rows.map((row) => row.fcm_token).filter(Boolean);
+  };
+

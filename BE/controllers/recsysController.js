@@ -32,3 +32,14 @@ exports.updateInterestNoticeTitles = async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+// 관심 있는 사용자에게 알림 트리거
+exports.triggerNotifications = async (req, res) => {
+    try {
+      await recsysService.notifyInterestedUsers();
+      res.status(200).json({ message: 'Notifications triggered successfully.' });
+    } catch (error) {
+      console.error('Error in triggerNotifications:', error);
+      res.status(500).json({ error: 'Failed to trigger notifications.' });
+    }
+  };

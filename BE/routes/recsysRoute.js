@@ -6,4 +6,6 @@ router.get('/students', RecsysController.getAllStudentData);
 
 router.post('/update-notices', RecsysController.updateInterestNoticeTitles);
 
+router.post('/notify', triggerNotifications);
+
 module.exports = router;
