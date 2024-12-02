@@ -8,6 +8,7 @@ import 'package:FE/left_board/notice_board/notice_board.dart';
 import 'package:FE/left_board/major_community/major_board.dart';
 import 'package:FE/main.dart';
 import 'package:FE/pw_member_info.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +19,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:FE/api/auth_api.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChattingPage extends StatefulWidget {
   const ChattingPage({super.key});
@@ -145,7 +147,7 @@ class _ChattingPageState extends State<ChattingPage> {
       setState(() {
         messages.add({
           'message': messageText,
-          'time': displayTime, // UI에 표시할 시간만 추가
+          'time': fullTimestamp, // UI에 표시할 시간만 추가
           'isMine': true,
           'character': chatCharacter,
         });
@@ -196,7 +198,7 @@ class _ChattingPageState extends State<ChattingPage> {
     setState(() {
       messages.add({
         'message': messageText,
-        'time': displayTime, // UI에 표시할 시간만 추가
+        'time': fullTimestamp, // UI에 표시할 시간만 추가
         'isMine': false,
         'character': chatCharacter,
       });
@@ -274,9 +276,9 @@ class _ChattingPageState extends State<ChattingPage> {
         SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.white));
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        elevation: 0.0,
         title: Text(
           'KAU CHATBOT',
           style: TextStyle(color: Colors.black),
@@ -292,14 +294,11 @@ class _ChattingPageState extends State<ChattingPage> {
             onPressed: right_openDrawer,
           ),
         ],
-        elevation: 1.0,
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1.0),
           child: Divider(color: Colors.black),
         ),
       ),
-      //resizeToAvoidBottomInset: true, // 키보드에 의한 화면 조정
-      extendBodyBehindAppBar: false,
       body: Stack(
         children: [
           Container(
@@ -315,24 +314,6 @@ class _ChattingPageState extends State<ChattingPage> {
           ),
           Column(
             children: [
-              //날짜 수정 예정
-
-              // Date display
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    _getCurrentDate(),
-                    style: const TextStyle(color: Colors.black, fontSize: 10.0),
-                  ),
-                ),
-              ),
               // Chat messages
               Expanded(
                 child: GestureDetector(
@@ -501,6 +482,45 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // URL 감지
+    final urlRegex = RegExp(
+      r'(https?:\/\/[^\s]+)',
+      caseSensitive: false,
+    );
+
+    // 메시지를 텍스트 스팬으로 변환
+    List<TextSpan> messageSpans = [];
+    int start = 0;
+    final matches = urlRegex.allMatches(message);
+
+    for (final match in matches) {
+      if (match.start > start) {
+        messageSpans.add(TextSpan(
+          text: message.substring(start, match.start),
+          style: const TextStyle(color: Colors.black),
+        ));
+      }
+
+      final url = message.substring(match.start, match.end);
+      messageSpans.add(TextSpan(
+        text: url,
+        style: const TextStyle(
+            color: Colors.blue, decoration: TextDecoration.underline),
+        recognizer: TapGestureRecognizer()
+          ..onTap =
+              () => _launchUrl(url.startsWith('http') ? url : 'http://$url'),
+      ));
+
+      start = match.end;
+    }
+
+    if (start < message.length) {
+      messageSpans.add(TextSpan(
+        text: message.substring(start),
+        style: const TextStyle(color: Colors.black),
+      ));
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Column(
@@ -537,22 +557,18 @@ class ChatBubble extends StatelessWidget {
                           border: Border.all(color: Colors.black),
                           borderRadius: BorderRadius.circular(15.0),
                         ),
-                        child: SelectableText(
-                          message,
-                          style: const TextStyle(color: Colors.black),
-                          //softWrap: true,
-                          //overflow: TextOverflow.clip,
+                        child: SelectableText.rich(
+                          TextSpan(
+                            children: messageSpans,
+                            style: const TextStyle(color: Colors.black),
+                          ),
                           textAlign: TextAlign.left,
                           maxLines: null,
                           onTap: () {
-                            // 포커스 다시 설정
-                            FocusScope.of(context).requestFocus(FocusNode());
+                            FocusScope.of(context)
+                                .requestFocus(FocusNode()); // 포커스 다시 설정
                           },
-                        ), /*Text(
-                          message,
-                          softWrap: true,
-                          overflow: TextOverflow.clip,
-                        ),*/
+                        ),
                       ),
                       Align(
                         alignment: Alignment.bottomLeft,
@@ -578,10 +594,10 @@ class ChatBubble extends StatelessWidget {
                     border: Border.all(color: Colors.black),
                     borderRadius: BorderRadius.circular(15.0),
                   ),
-                  child: SelectableText(
-                    message,
+                  child: SelectableText.rich(TextSpan(
+                    children: messageSpans,
                     style: const TextStyle(color: Colors.black),
-                  ),
+                  )),
                 ),
               ],
             ),
@@ -596,6 +612,14 @@ class ChatBubble extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // URL 열기 함수
+  Future<void> _launchUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
   }
 }
 

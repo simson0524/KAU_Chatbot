@@ -50,6 +50,7 @@ class LoginPage extends StatelessWidget {
       resizeToAvoidBottomInset: true, // 키보드로 인해 화면 크기 변경 방지
       body: Container(
         decoration: const BoxDecoration(
+          color: Colors.white,
           image: DecorationImage(
             image: AssetImage('assets/images/grid_background.png'),
             fit: BoxFit.cover,

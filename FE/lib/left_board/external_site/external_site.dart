@@ -1,4 +1,3 @@
-import 'package:FE/character_provider.dart';
 import 'package:FE/chatting_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

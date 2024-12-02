@@ -1,4 +1,6 @@
 const boardModel = require('../models/boardModel');
+const userModel = require('../models/userModel');
+const admin = require('../firebase');
 
 
 // 사용자가 게시판의 작성자인지 확인하는 미들웨어
@@ -28,6 +30,20 @@ exports.isBoardAuthor = async (req, res, next) => {
     }
 }
 
-exports.getNotificationMessage = (author, content) => {
-    return `${author}의 게시글의 댓글을 남겼습니다: "${content}"`;
+// 게시글 작성자에게 푸시 알림 보내기
+exports.pushMessage = async (author, content) => {
+    const fcmToken = await userModel.getUserFcmToken(author);
+    if (fcmToken) {
+        // FCM 메시지 작성
+        const message = {
+            token: fcmToken, // 이 토큰 값으로 알림이 갈 사용자를 구분
+            notification: {
+                title: `'${author}'님의 게시글에 댓글이 달렸습니다.`,
+                body: `${content}`
+            }
+        };
+
+        await admin.messaging().send(message);
+        console.log('FCM 알림이 성공적으로 전송되었습니다.');
+    }
 }
