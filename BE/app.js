@@ -33,10 +33,13 @@ app.use('/board', boardRoutes); // 학과, 학번 게시판 라우트
 app.use('/data', dataRoutes); // '/upload' 경로에 csv데이터 관련 라우트 적용
 app.use('/recsys', recsysRoutes);
 
+/*
 // 매일 오전 9시에 알림 전송
 cron.schedule('0 9 * * *', async () => {
     console.log('Running scheduled notification task...');
     await notifyInterestedUsers();
   });
+*/
+
 
 module.exports = app; // Express 앱을 모듈로 내보냄
