@@ -31,19 +31,27 @@ exports.isBoardAuthor = async (req, res, next) => {
 }
 
 // 게시글 작성자에게 푸시 알림 보내기
-exports.pushMessage = async (author, content) => {
-    const fcmToken = await userModel.getUserFcmToken(author);
+exports.pushMessage = async (author_id, content) => {
+    const author = await userModel.findUserByStudentId(author_id);
+    const fcmToken = author.fcm_token; // 작성자의 fcm token 가져오기
     if (fcmToken) {
         // FCM 메시지 작성
         const message = {
             token: fcmToken, // 이 토큰 값으로 알림이 갈 사용자를 구분
             notification: {
-                title: `'${author}'님의 게시글에 댓글이 달렸습니다.`,
+                title: `'${author.name}'님의 게시글에 댓글이 달렸습니다.`,
                 body: `${content}`
             }
         };
 
-        await admin.messaging().send(message);
-        console.log('FCM 알림이 성공적으로 전송되었습니다.');
+        console.log(message);
+
+        await admin.messaging().send(message)
+        .then(res => {
+            console.log('알림 메시지 전송 성공: ', res);
+        })
+        .catch(err => {
+            console.log('알림 메시지 전송 실패: ', err);
+        });
     }
 }
