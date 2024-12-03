@@ -19,9 +19,11 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
     }
 
     compileOptions {
@@ -37,5 +39,5 @@ android {
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:32.2.0')
     implementation 'com.google.firebase:firebase-messaging'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+    //implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
 }
