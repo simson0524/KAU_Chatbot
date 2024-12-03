@@ -32,7 +32,6 @@ exports.isBoardAuthor = async (req, res, next) => {
 
 // 게시글 작성자에게 푸시 알림 보내기
 exports.pushMessage = async (author, content) => {
-    /*
     const fcmToken = await userModel.getUserFcmToken(author);
     if (fcmToken) {
         // FCM 메시지 작성
@@ -47,5 +46,4 @@ exports.pushMessage = async (author, content) => {
         await admin.messaging().send(message);
         console.log('FCM 알림이 성공적으로 전송되었습니다.');
     }
-    */
 }
