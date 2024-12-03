@@ -14,7 +14,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Background notification received: ${message.messageId}');
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Firebase 초기화
   runApp(
     MultiProvider(
       providers: [
@@ -226,10 +228,19 @@ class LoginButtons extends StatelessWidget {
   Future<void> _handleLogin(
       BuildContext context, String email, String password) async {
     try {
-      // AuthApi의 login 함수 호출
-      final result = await AuthApi.login(email, password);
+      // FCM 토큰 가져오기
+      String? fcmToken;
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+        print("FCM Token: $fcmToken");
+      } catch (e) {
+        print("Failed to get FCM token: $e");
+        fcmToken = "default_token"; // 실패 시 기본값 설정
+      }
 
-      // 로그인 성공 여부 확인 (result에서 직접 확인)
+      // AuthApi의 login 함수 호출
+      final result = await AuthApi.login(email, password, fcmToken!);
+
       if (result.containsKey('accessToken') &&
           result.containsKey('refreshToken')) {
         print('로그인 성공: ${result['message']}');
@@ -240,22 +251,21 @@ class LoginButtons extends StatelessWidget {
         await prefs.setString('refreshToken', result['refreshToken'] ?? '');
 
         // 로그인 성공 시 페이지 이동
-
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const ChattingPage(), // 성공 시 이동할 페이지
+            builder: (context) => const ChattingPage(),
           ),
         );
       } else {
         print('로그인 실패: ${result['message'] ?? '알 수 없는 오류'}');
-        // 로그인 실패 시 알림창 표시
-        showloginfailDialog(context); // 로그인 실패 시 다이얼로그 호출
+        showloginfailDialog(context); // 실패 시 다이얼로그 호출
       }
     } catch (error) {
       print('로그인 중 오류 발생: $error');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

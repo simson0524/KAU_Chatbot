@@ -80,17 +80,10 @@ class AuthApi {
 
   // 로그인 API 호출 함수
   static Future<Map<String, dynamic>> login(
-      String email, String password) async {
+      String email, String password, String fcmToken) async {
     final url = Uri.parse('http://3.37.153.10:3000/user/login');
 
-    // FCM 토큰 가져오기
-    String? fcmToken;
-    try {
-      fcmToken = await FirebaseMessaging.instance.getToken();
-      print("FCM Token: $fcmToken");
-    } catch (e) {
-      print("Failed to get FCM token: $e");
-    }
+
 
     try {
       final response = await http.post(

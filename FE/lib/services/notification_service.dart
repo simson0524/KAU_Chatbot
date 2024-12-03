@@ -8,19 +8,20 @@ class NotificationService {
 
   static Future<void> initialize(BuildContext context) async {
     // Initialize local notifications
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
-    const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    const initializationSettings = InitializationSettings(
+      android: AndroidInitializationSettings('app_icon'),
+      iOS: DarwinInitializationSettings(), // iOSInitializationSettings -> DarwinInitializationSettings로 변경됨
+    );
 
-    await _localNotificationsPlugin.initialize(
+    await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onSelectNotification: (String? payload) async {
-        // Handle notification tap
-        if (payload != null) {
-          print('Notification payload: $payload');
-          Navigator.pushNamed(context, '/notificationPage'); // 페이지 이동 예시
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        if (response.payload != null) {
+          print('Notification payload: ${response.payload}');
+          // 알림 클릭 시 동작 처리
         }
       },
     );
