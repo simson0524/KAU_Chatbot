@@ -16,17 +16,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Firebase 초기화
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CharacterProvider()),
-      ],
-      child: MyApp(),
-    ),
-  );
+  await Firebase.initializeApp();
+  await NotificationService.initialize();
+  runApp(MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -228,29 +221,40 @@ class LoginButtons extends StatelessWidget {
   Future<void> _handleLogin(
       BuildContext context, String email, String password) async {
     try {
+      print("로그인 시도: 이메일=$email, 비밀번호=******"); // 비밀번호는 보안상 표시하지 않음
+
       // FCM 토큰 가져오기
+      print("FCM 토큰 가져오는 중...");
       String? fcmToken;
+
       try {
         fcmToken = await FirebaseMessaging.instance.getToken();
-        print("FCM Token: $fcmToken");
+
+
       } catch (e) {
-        print("Failed to get FCM token: $e");
+        print("FCM 토큰 가져오기 또는 서버 전송 중 오류 발생: $e");
         fcmToken = "default_token"; // 실패 시 기본값 설정
+        print("기본 FCM 토큰 사용: $fcmToken");
       }
 
       // AuthApi의 login 함수 호출
-      final result = await AuthApi.login(email, password, fcmToken!);
+      print("로그인 API 호출 중...");
+      final result = await AuthApi.login(email, password, fcmToken ?? 'default_token');
 
-      if (result.containsKey('accessToken') &&
-          result.containsKey('refreshToken')) {
+      if (result.containsKey('accessToken') && result.containsKey('refreshToken')) {
         print('로그인 성공: ${result['message']}');
+        print('AccessToken: ${result['accessToken']}');
+        print('RefreshToken: ${result['refreshToken']}');
 
         // 로그인 성공 시 accessToken과 refreshToken 저장
+        print("토큰 SharedPreferences에 저장 중...");
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', result['accessToken'] ?? '');
         await prefs.setString('refreshToken', result['refreshToken'] ?? '');
+        print("토큰 저장 완료.");
 
         // 로그인 성공 시 페이지 이동
+        print("채팅 페이지로 이동 중...");
         Navigator.push(
           context,
           MaterialPageRoute(

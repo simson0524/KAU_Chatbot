@@ -1,32 +1,32 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
 
-  static Future<void> initialize(BuildContext context) async {
-    // Initialize local notifications
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+  static Future<void> initialize() async {
+    print("[Notifications] 초기화 시작");
+    try {
+      const initializationSettings = InitializationSettings(
+        android: AndroidInitializationSettings('app_icon'),
+        iOS: DarwinInitializationSettings(),
+      );
+      await _localNotificationsPlugin.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: (NotificationResponse response) async {
+          print("[Notifications] 알림 클릭: ${response.payload}");
+        },
+      );
+      print("[Notifications] 초기화 완료");
+    } catch (e) {
+      print("[Notifications] 초기화 중 오류 발생: $e");
+    }
 
-    const initializationSettings = InitializationSettings(
-      android: AndroidInitializationSettings('app_icon'),
-      iOS: DarwinInitializationSettings(), // iOSInitializationSettings -> DarwinInitializationSettings로 변경됨
-    );
 
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        if (response.payload != null) {
-          print('Notification payload: ${response.payload}');
-          // 알림 클릭 시 동작 처리
-        }
-      },
-    );
-
-    // Configure Firebase Messaging for foreground notifications
+    // Firebase Messaging 설정
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Foreground notification received: ${message.data}');
       if (message.notification != null) {
@@ -37,16 +37,13 @@ class NotificationService {
       }
     });
 
-    // Configure background and terminated state notifications
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('Notification opened from background: ${message.data}');
-      Navigator.pushNamed(context, '/notificationPage'); // 페이지 이동 예시
+      print('Notification opened: ${message.data}');
     });
   }
 
   static Future<void> showNotification(String title, String body) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'default_channel',
       'Default Channel',
       channelDescription: 'This is the default channel',
@@ -55,13 +52,28 @@ class NotificationService {
     );
 
     const NotificationDetails notificationDetails =
-        NotificationDetails(android: androidDetails);
+    NotificationDetails(android: androidDetails);
 
     await _localNotificationsPlugin.show(
-      0, // Notification ID
+      0,
       title,
       body,
       notificationDetails,
     );
+  }
+
+  static Future<String?> getToken() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        print('FCM Token: $fcmToken');
+      } else {
+        print('FCM Token is null');
+      }
+      return fcmToken;
+    } catch (e) {
+      print('Error fetching FCM Token: $e');
+      return null;
+    }
   }
 }
