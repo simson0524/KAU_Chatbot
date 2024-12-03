@@ -26,7 +26,7 @@ connectRedis();
 exports.userLogin = async (req, res) => {
 
     try {
-        const { email, password } = req.body;
+        const { email, password, fcm_token } = req.body;
 
         // 이메일로 사용자 찾기
         const user = await userModel.findUserByEmail(email); // db에 입력한 정보의 사용자가 있는지 검색하기
@@ -44,6 +44,7 @@ exports.userLogin = async (req, res) => {
         const refreshToken = jwt.sign({student_id: user.student_id}, 'refresh-secretKey', {expiresIn: '1d'});
 
         await userModel.saveRefToken(user.student_id, refreshToken); // Refresh Token은 DB에 저장
+        await userModel.saveFcmToken(email, fcm_token); // fcm_token을 users 테이블에 저장
 
         res.status(200).json({accessToken, refreshToken, "message": "로그인이 성공하였습니다."});
 
@@ -293,27 +294,4 @@ exports.getToken = async (req, res) => {
         res.status(500).json('토큰 재발급 중 오류가 발생했습니다.');
     }
     
-}
-
-
-exports.saveFcmToken = async (req, res) => {
-
-    try {
-        const { email, fcm_token } = req.body;
-
-        // 해당 이메일의 사용자가 있는지 확인
-        const user = await userModel.findUserByEmail(email);
-        if (!user) {
-            return res.status(400).json({error: '해당 이메일의 사용자가 존재하지 않습니다.'});
-        }
-
-        // fcm 토큰 저장
-        await userModel.saveFcmToken(email, fcm_token);
-
-        res.status(200).json({'message': 'fcm 토큰 저장이 성공하였습니다.'});
-    }
-    catch (error) {
-        console.error(error);
-        res.status(500).json('사용자 비밀번호 수정 중 오류가 발생했습니다.');
-    }
 }
