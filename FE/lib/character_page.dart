@@ -79,7 +79,7 @@ class CharacterImage extends StatelessWidget {
           left: 0,
           right: 0,
           child: Text(
-            '안녕하세요. \n KAU CHATBOT입니다. \n 대화하고 싶은 상대를 선택해주세요.',
+            '안녕하세요. \n KAU CHATBOT입니다. \n 대화하고 싶은 상대를 선택해주세요. \n Choose the language of the chat.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
@@ -106,11 +106,11 @@ class Mile extends StatelessWidget {
       },
       child: Container(
         width: 85,
-        height: 181,
+        height: 195,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/character_mile.png'),
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
           ),
         ),
       ),
@@ -131,11 +131,11 @@ class Maha extends StatelessWidget {
       },
       child: Container(
         width: 130,
-        height: 189,
+        height: 192,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/character_maha.png'),
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
           ),
         ),
       ),
@@ -160,7 +160,7 @@ class Feet extends StatelessWidget {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/images/character_feet.png'),
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
           ),
         ),
       ),
