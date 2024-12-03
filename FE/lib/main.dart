@@ -7,6 +7,12 @@ import 'package:FE/api/auth_api.dart';
 import 'package:provider/provider.dart'; // auth_api.dart 파일 추가하여 API 호출
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'services/notification_service.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Background notification received: ${message.messageId}');
+}
 
 void main() {
   runApp(
