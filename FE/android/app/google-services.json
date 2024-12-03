@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "892581118321",
+    "project_id": "kauchatbot-7fba0",
+    "storage_bucket": "kauchatbot-7fba0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892581118321:android:7cd1b2cb68501d2b2936d0",
+        "android_client_info": {
+          "package_name": "com.example.fe_view"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8OdxxGOKBV2it6hSrTkEt529H7ZfTR4M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

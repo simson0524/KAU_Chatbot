@@ -6,6 +6,7 @@ import 'package:FE/join_page.dart';
 import 'package:FE/api/auth_api.dart';
 import 'package:provider/provider.dart'; // auth_api.dart 파일 추가하여 API 호출
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() {
   runApp(
