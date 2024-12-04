@@ -28,3 +28,46 @@ exports.deleteInquiry = async (inquiry_id, student_id) => {
   if (!inquiry) return false; // 문의가 없거나 권한이 없는 경우
   return await InquiryModel.deleteInquiryById(inquiry_id, student_id);
 };
+
+exports.addComment = async (inquiry_id, content, student_id) => {
+  // 관리자 인증
+  const isAdmin = await exports.isAdmin(student_id);
+  if (!isAdmin) {
+    throw new Error('권한 없음: 관리자만 댓글을 작성할 수 있습니다.');
+  }
+
+  // 학번에 따른 department_id 매핑
+  const departmentMapping = {
+    '11111111': 1,
+    '22222222': 2,
+    '33333333': 3,
+    '44444444': 4,
+    '55555555': 5,
+    '66666666': 6,
+    '77777777': 7,
+    '88888888': 8,
+  };
+  const department_id = departmentMapping[student_id];
+
+  if (!department_id) {
+    throw new Error('유효하지 않은 학번입니다.');
+  }
+
+  // 댓글 삽입
+  return await InquiryModel.addComment(inquiry_id, department_id, content);
+};
+
+
+// 관리자 인증 함수
+exports.isAdmin = async (student_id) => {
+  // 관리자 학번 목록
+  const adminIds = [
+    '11111111', '22222222', '33333333', 
+    '44444444', '55555555', '66666666', 
+    '77777777', '88888888'
+  ];
+
+  // 학번이 관리자 목록에 포함되어 있는지 확인
+  return adminIds.includes(String(student_id));
+};
+

@@ -1,5 +1,7 @@
 const Inquiry = require('../models/inquiryModel');
 const InquiryService = require('../services/inquiryService');
+const userService = require('../services/userService'); 
+
 
 exports.getAllInquiries = async (req, res) => {
 
@@ -65,4 +67,26 @@ exports.deleteInquiry = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// 댓글 작성 컨트롤러
+exports.addComment = async (req, res) => {
+  const { id: inquiry_id } = req.params; // 문의 ID
+  const { content } = req.body; // 댓글 내용
+  const student_id = req.user.student_id; 
+
+  // student_id 값 확인용 로그
+  console.log('현재 접속 중인 학번:', student_id);
+
+  try {
+    const commentId = await InquiryService.addComment(
+      inquiry_id,
+      content,
+      student_id
+    );
+    res.status(201).json({ success: true, commentId });
+  } catch (err) {
+    res.status(403).json({ success: false, message: err.message });
+  }
+};
+
 

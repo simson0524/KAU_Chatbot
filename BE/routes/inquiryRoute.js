@@ -18,4 +18,8 @@ router.post('/', userService.loginRequired, inquiryController.createInquiry);
 // 문의 삭제 라우터
 router.delete('/:id', userService.loginRequired, inquiryController.deleteInquiry);
 
+// 댓글 작성 API
+router.post('/:id/comment', userService.loginRequired, inquiryController.addComment);
+
+
 module.exports = router;
