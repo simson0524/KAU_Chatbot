@@ -6,18 +6,21 @@ import 'package:FE/join_page.dart';
 import 'package:FE/api/auth_api.dart';
 import 'package:provider/provider.dart'; // auth_api.dart 파일 추가하여 API 호출
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'services/notification_service.dart';
 
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CharacterProvider()),
-      ],
-      child: MyApp(),
-    ),
-  );
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Background notification received: ${message.messageId}');
 }
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await NotificationService.initialize();
+
+  runApp(MyApp());
+}
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -219,36 +222,55 @@ class LoginButtons extends StatelessWidget {
   Future<void> _handleLogin(
       BuildContext context, String email, String password) async {
     try {
-      // AuthApi의 login 함수 호출
-      final result = await AuthApi.login(email, password);
+      print("로그인 시도: 이메일=$email, 비밀번호=******"); // 비밀번호는 보안상 표시하지 않음
 
-      // 로그인 성공 여부 확인 (result에서 직접 확인)
-      if (result.containsKey('accessToken') &&
-          result.containsKey('refreshToken')) {
+      // FCM 토큰 가져오기
+      print("FCM 토큰 가져오는 중...");
+      String? fcmToken;
+
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+
+
+      } catch (e) {
+        print("FCM 토큰 가져오기 또는 서버 전송 중 오류 발생: $e");
+        fcmToken = "default_token"; // 실패 시 기본값 설정
+        print("기본 FCM 토큰 사용: $fcmToken");
+      }
+
+      // AuthApi의 login 함수 호출
+      print("로그인 API 호출 중...");
+      final result = await AuthApi.login(email, password, fcmToken ?? 'default_token');
+
+      if (result.containsKey('accessToken') && result.containsKey('refreshToken')) {
         print('로그인 성공: ${result['message']}');
+        print('AccessToken: ${result['accessToken']}');
+        print('RefreshToken: ${result['refreshToken']}');
 
         // 로그인 성공 시 accessToken과 refreshToken 저장
+        print("토큰 SharedPreferences에 저장 중...");
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', result['accessToken'] ?? '');
         await prefs.setString('refreshToken', result['refreshToken'] ?? '');
+        print("토큰 저장 완료.");
 
         // 로그인 성공 시 페이지 이동
-
+        print("채팅 페이지로 이동 중...");
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const ChattingPage(), // 성공 시 이동할 페이지
+            builder: (context) => const ChattingPage(),
           ),
         );
       } else {
         print('로그인 실패: ${result['message'] ?? '알 수 없는 오류'}');
-        // 로그인 실패 시 알림창 표시
-        showloginfailDialog(context); // 로그인 실패 시 다이얼로그 호출
+        showloginfailDialog(context); // 실패 시 다이얼로그 호출
       }
     } catch (error) {
       print('로그인 중 오류 발생: $error');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

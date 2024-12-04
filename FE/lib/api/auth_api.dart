@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:FE/api/auth_api.dart'; // Import the API functions
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthApi {
   static const String baseUrl = 'http://3.37.153.10:3000';
@@ -80,8 +80,10 @@ class AuthApi {
 
   // 로그인 API 호출 함수
   static Future<Map<String, dynamic>> login(
-      String email, String password) async {
+      String email, String password, String fcmToken) async {
     final url = Uri.parse('http://3.37.153.10:3000/user/login');
+
+
 
     try {
       final response = await http.post(
@@ -90,6 +92,7 @@ class AuthApi {
         body: json.encode({
           'email': email,
           'password': password,
+          'fcm_token': fcmToken, // FCM 토큰 추가
         }),
       );
 
