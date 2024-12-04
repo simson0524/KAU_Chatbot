@@ -47,13 +47,29 @@ class QnaBoardApi {
   // 댓글 작성 (관리자)
   static Future<http.Response> addComment(
       String inquiryId, String content, String accessToken) async {
-    final url = Uri.parse('$baseUrl/board/inquiries/$inquiryId/comments');
-    return await http.post(
-      url,
-      headers: _headers(accessToken),
-      body: json.encode({'content': content}),
-    );
+    final url = Uri.parse('$baseUrl/board/inquiries/$inquiryId/comment');
+
+    try {
+      print("[AddComment] 요청 URL: $url");
+      print("[AddComment] 요청 헤더: ${_headers(accessToken)}");
+      print("[AddComment] 요청 바디: ${json.encode({'content': content})}");
+
+      final response = await http.post(
+        url,
+        headers: _headers(accessToken),
+        body: json.encode({'content': content}),
+      );
+
+      print("[AddComment] 응답 상태 코드: ${response.statusCode}");
+      print("[AddComment] 응답 바디: ${response.body}");
+
+      return response;
+    } catch (error) {
+      print("[AddComment] 요청 중 오류 발생: $error");
+      rethrow; // 오류를 호출한 쪽으로 다시 전달
+    }
   }
+
 
   // 공통 헤더
   static Map<String, String> _headers(String accessToken) {

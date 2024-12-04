@@ -751,7 +751,7 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
             comments = commentsData.map<Map<String, String>>((comment) {
               print('Comment: $comment');
               return {
-                'author_name': comment['author_name'] ?? '익명',
+                'department_name': comment['department_name'] ?? '익명',
                 'content': comment['content'] ?? '내용 없음',
                 'created_at': comment['created_at']?.split('T')[0] ?? '날짜 없음',
               };
@@ -978,7 +978,7 @@ class _PostQnaDetailPageState extends State<PostQnaDetailPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '작성자: ${comment['author_name']}',
+                                  '작성자: ${comment['department_name']}',
                                   style: TextStyle(
                                       fontSize: 14.0,
                                       fontWeight: FontWeight.bold),
