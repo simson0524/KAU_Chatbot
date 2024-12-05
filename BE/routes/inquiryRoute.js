@@ -19,7 +19,7 @@ router.post('/', userService.loginRequired, inquiryController.createInquiry);
 router.delete('/:id', userService.loginRequired, inquiryController.deleteInquiry);
 
 // 댓글 작성 API
-router.post('/:id/comment', userService.loginRequired, inquiryController.addComment);
+router.post('/:id/comments', userService.loginRequired, inquiryController.addComment);
 
 
 module.exports = router;

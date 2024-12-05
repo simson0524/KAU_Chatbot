@@ -1,6 +1,7 @@
 const Inquiry = require('../models/inquiryModel');
 const InquiryService = require('../services/inquiryService');
 const userService = require('../services/userService'); 
+const boardService = require('../services/boardService');
 
 
 exports.getAllInquiries = async (req, res) => {
@@ -83,6 +84,11 @@ exports.addComment = async (req, res) => {
       content,
       student_id
     );
+
+    // 작성자에게 푸시 알림 보내기
+    const inquiry = await InquiryService.getInquiryDetails(inquiry_id, student_id);
+    await boardService.pushMessage(inquiry.student_id, content)
+
     res.status(201).json({ success: true, commentId });
   } catch (err) {
     res.status(403).json({ success: false, message: err.message });
