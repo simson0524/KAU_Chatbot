@@ -2,7 +2,10 @@ const db = require('../config/dbConfig');
 
 exports.getAllUsersWithTags = async () => {
     const query = `
-        SELECT u.student_id, COALESCE(ts.tags, '') AS tags
+        SELECT 
+            u.student_id, 
+            u.major, 
+            COALESCE(ts.tags, '') AS tags
         FROM users u
         LEFT JOIN tag_sequence ts
         ON u.student_id = ts.student_id
@@ -10,6 +13,7 @@ exports.getAllUsersWithTags = async () => {
     const [rows] = await db.execute(query);
     return rows;
 };
+
 
 // 기존 데이터를 삭제하는 함수
 exports.clearInterestNoticeTitles = async () => {

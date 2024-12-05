@@ -6,6 +6,7 @@ exports.fetchAllStudentData = async () => {
     const students = await recsysModel.getAllUsersWithTags();
     const formattedData = students.map(student => ({
         student_id: student.student_id,
+        major: student.major, // major 추가
         tags: student.tags ? student.tags.split(',').slice(0, 50) : []
     }));
 
@@ -22,6 +23,7 @@ exports.fetchAllStudentData = async () => {
 
     return formattedData; // 클라이언트에도 반환
 };
+
 
 exports.processAndSaveStudentData = async (studentData) => {
     // 1. 기존 데이터 삭제
