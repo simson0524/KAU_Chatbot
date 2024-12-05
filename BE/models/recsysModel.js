@@ -54,14 +54,35 @@ exports.saveInterestNoticeTitles = async (students) => {
     }
 };
 
-// 알림을 보낼 사용자 조회
-exports.getUsersWithInterestNotices = async () => {
+// 관심 공지가 있는 사용자 조회
+exports.getUsersWithInterests = async () => {
     const query = `
-      SELECT u.fcm_token
-      FROM users u
-      INNER JOIN tag_sequence ts ON u.student_id = ts.student_id
-      WHERE ts.interest_notice_titles IS NOT NULL
+        SELECT 
+            ts.student_id, 
+            ts.interest_notice_titles
+        FROM 
+            tag_sequence ts
+        WHERE 
+            ts.interest_notice_titles IS NOT NULL AND ts.interest_notice_titles != ''
     `;
-    const [rows] = await pool.query(query);
-    return rows.map((row) => row.fcm_token).filter(Boolean);
-  };
+    const [rows] = await db.execute(query);
+
+    console.log("Database rows:", rows); // 쿼리 결과를 로그로 출력
+
+    return rows.map(row => ({
+        student_id: row.student_id,
+        interests: row.interest_notice_titles
+    }));
+};
+
+// 특정 사용자의 FCM 토큰 조회
+exports.getFcmToken = async (studentId) => {
+    const query = `
+        SELECT fcm_token
+        FROM users
+        WHERE student_id = ?
+    `;
+    const [rows] = await db.execute(query, [studentId]);
+    return rows[0]?.fcm_token || null; // 토큰이 없으면 null 반환
+};
+

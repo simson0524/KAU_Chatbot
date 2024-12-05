@@ -38,39 +38,66 @@ exports.processAndSaveStudentData = async (studentData) => {
     await recsysModel.saveInterestNoticeTitles(students);
 };
 
-// 알림 메시지 전송
-exports.sendNotifications = async (tokens) => {
-    if (tokens.length === 0) {
-      console.log('No tokens to send notifications.');
-      return;
-    }
-  
-    const message = {
-      notification: {
-        title: '관심 공지 알림',
-        body: '회원님이 관심있어 할만한 공지가 업로드 되었습니다! 확인해보세요!',
-      },
-      tokens,
-    };
-  
-    try {
-      const response = await admin.messaging().sendMulticast(message);
-      console.log(`Successfully sent: ${response.successCount} messages.`);
-      console.log(`Failed to send: ${response.failureCount} messages.`);
-    } catch (error) {
-      console.error('Error sending notifications:', error);
-    }
-  };
-
-// 관심 있는 사용자에게 알림 전송
-exports.notifyInterestedUsers = async () => {
-    try {
-      const tokens = await recsysModel.getUsersWithInterestNotices();
-      await exports.sendNotifications(tokens);
-    } catch (error) {
-      console.error('Error in notifyInterestedUsers:', error);
-    }
-  };    
-
   // npm install express mysql2 firebase-admin node-cron
   // serviceAccountKey.json 파일을 Firebase Console에서 다운로드하여 프로젝트에 추가.
+
+
+// FCM 알림 전송 함수
+const sendNotification = async (fcmToken, interests) => {
+    const message = {
+        notification: {
+            title: "KAU CHATBOT",
+            body: "회원님이 관심있어 할만한 공지가 업로드 되었습니다! 확인해보세요!"
+        },
+        data: {
+            interests: JSON.stringify(interests) // 공지 제목을 JSON 문자열로 변환
+        },
+        token: fcmToken
+    };
+
+    try {
+        await admin.messaging().send(message); // FCM 메시지 전송
+        console.log(`Notification sent to token: ${fcmToken}`);
+    } catch (error) {
+        console.error(`Failed to send notification to ${fcmToken}: ${error.message}`);
+        if (error.code === 'messaging/registration-token-not-registered') {
+            console.log(`Removing invalid token: ${fcmToken}`);
+        }
+    }
+};
+
+// 모든 사용자에게 알림 전송
+exports.sendDailyNotifications = async () => {
+    const users = await recsysModel.getUsersWithInterests();
+    const results = []; // 전송 결과 저장
+
+    for (const user of users) {
+        const fcmToken = await recsysModel.getFcmToken(user.student_id);
+        if (fcmToken) {
+            try {
+                await sendNotification(fcmToken, user.interests);
+                results.push({
+                    student_id: user.student_id,
+                    status: "success",
+                    interests: user.interests
+                });
+            } catch (error) {
+                console.error(`Failed to send notification to ${user.student_id}:`, error.message);
+                results.push({
+                    student_id: user.student_id,
+                    status: "failure",
+                    error: error.message
+                });
+            }
+        } else {
+            console.warn(`No FCM token found for student_id=${user.student_id}`);
+            results.push({
+                student_id: user.student_id,
+                status: "no_token"
+            });
+        }
+    }
+
+    return results; // 결과 반환
+};
+
