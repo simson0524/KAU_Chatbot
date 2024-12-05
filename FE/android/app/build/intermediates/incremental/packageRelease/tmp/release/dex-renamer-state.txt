@@ -1,0 +1,4 @@
+#Tue Dec 03 16:22:12 KST 2024
+base.0=/Users/hajunsu/KAU/KAU_Chatbot/FE/android/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+path.0=classes.dex
+renamed.0=classes.dex

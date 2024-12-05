@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">892581118321</string>
+    <string name="google_api_key" translatable="false">AIzaSyD8OdxxGOKBV2it6hSrTkEt529H7ZfTR4M</string>
+    <string name="google_app_id" translatable="false">1:892581118321:android:7cd1b2cb68501d2b2936d0</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyD8OdxxGOKBV2it6hSrTkEt529H7ZfTR4M</string>
+    <string name="google_storage_bucket" translatable="false">kauchatbot-7fba0.firebasestorage.app</string>
+    <string name="project_id" translatable="false">kauchatbot-7fba0</string>
+</resources>
