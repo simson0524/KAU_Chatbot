@@ -33,13 +33,20 @@ exports.updateInterestNoticeTitles = async (req, res) => {
     }
 };
 
-// 관심 있는 사용자에게 알림 트리거
-exports.triggerNotifications = async (req, res) => {
+
+// 즉시 알림 전송 API
+exports.sendNotifications = async (req, res) => {
     try {
-      await recsysService.notifyInterestedUsers();
-      res.status(200).json({ message: 'Notifications triggered successfully.' });
+        const results = await recsysService.sendDailyNotifications();
+        res.status(200).json({
+            message: "Notifications sent successfully!",
+            results
+        });
     } catch (error) {
-      console.error('Error in triggerNotifications:', error);
-      res.status(500).json({ error: 'Failed to trigger notifications.' });
+        console.error("Error sending notifications:", error);
+        res.status(500).json({
+            message: "Failed to send notifications",
+            error: error.message
+        });
     }
-  };
+};

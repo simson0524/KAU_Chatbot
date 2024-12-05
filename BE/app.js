@@ -7,7 +7,8 @@ const inquiryRoutes = require('./routes/inquiryRoute'); // 문의 게시판 라�
 const boardRoutes = require('./routes/boardRoute');
 const dataRoutes = require('./routes/dataRoute'); // csv데이터 관련 라우트 가져오기
 const recsysRoutes = require('./routes/recsysRoute');
-const { notifyInterestedUsers } = require('./services/recsysService');
+const recsysService = require('./services/recsysService');
+const { CronJob } = require('cron');
 // const errorMiddleware = require('./middlewares/errorMiddleware'); // 에러 처리 미들웨어
 
 const app = express(); // Express 애플리케이션 생성
@@ -40,6 +41,21 @@ cron.schedule('0 9 * * *', async () => {
     await notifyInterestedUsers();
   });
 */
+
+
+// 매일 오전 9시에 알림 전송 작업 스케줄링
+const job = new CronJob('0 9 * * *', async () => {
+    console.log("Running scheduled notification job...");
+    try {
+        await recsysService.sendDailyNotifications(); // 알림 작업 실행
+        console.log("Scheduled job completed successfully.");
+    } catch (error) {
+        console.error("Scheduled job failed:", error.message);
+    }
+});
+
+job.start();
+console.log("Cron job has been scheduled.");
 
 
 module.exports = app; // Express 앱을 모듈로 내보냄
