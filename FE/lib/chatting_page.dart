@@ -789,7 +789,6 @@ class LeftDrawerWidget extends StatelessWidget {
               ),
             ),
           ],
-
         ),
       ),
     );
