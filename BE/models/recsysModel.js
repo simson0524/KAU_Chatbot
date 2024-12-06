@@ -86,3 +86,25 @@ exports.getFcmToken = async (studentId) => {
     return rows[0]?.fcm_token || null; // 토큰이 없으면 null 반환
 };
 
+
+// 챗봇 메시지 저장
+exports.insertChatMessage = async (student_id, question, response, chatCharacter) => {
+    const query = `
+        INSERT INTO chat (student_id, question, response, chat_character, created_at)
+        VALUES (?, ?, ?, ?, NOW())
+    `;
+    await db.execute(query, [student_id, question, response, chatCharacter]);
+};
+
+// 특정 사용자의 최신 챗봇 메시지 조회
+exports.getLatestMessageByStudent = async (student_id) => {
+    const query = `
+        SELECT response
+        FROM chat
+        WHERE student_id = ?
+        ORDER BY created_at DESC
+        LIMIT 1
+    `;
+    const [rows] = await db.execute(query, [student_id]);
+    return rows.length > 0 ? rows[0].response : null;
+};

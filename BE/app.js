@@ -44,7 +44,7 @@ cron.schedule('0 9 * * *', async () => {
 
 
 // 매일 오전 9시에 알림 전송 작업 스케줄링
-const job = new CronJob('0 9 * * *', async () => {
+const job = new CronJob('8 23 * * *', async () => {
     console.log("Running scheduled notification job...");
     try {
         await recsysService.sendDailyNotifications(); // 알림 작업 실행
