@@ -28,23 +28,29 @@ class NotificationService {
     // 포그라운드 메시지 처리
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("[Notifications] 포그라운드 알림 수신: ${message.notification}");
+      print("[Notifications] 메시지 데이터: ${message.data}");
+
       if (message.notification != null) {
+        // 기존 알림 처리
         showNotification(
           message.notification!.title ?? '알림',
           message.notification!.body ?? '내용 없음',
         );
+      }
+
+      if (message.data.isNotEmpty) {
+        // 데이터 알림 처리
+        handleDataNotification(message.data);
       }
     });
 
     // 사용자가 알림을 클릭해 앱을 연 경우
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print("[Notifications] 알림 클릭 후 앱 열림: ${message.data}");
-    });
 
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print("[Notifications] 사용자가 알림 클릭 후 앱 열기");
-      print("[Notifications] 메시지 데이터: ${message.data}");
+      if (message.data.isNotEmpty) {
+        handleDataNotification(message.data);
+      }
     });
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -90,13 +96,30 @@ class NotificationService {
       return null;
     }
   }
+
+  // 데이터 알림 처리
+  static void handleDataNotification(Map<String, dynamic> data) {
+    print("[Notifications] 데이터 알림 처리");
+    if (data.containsKey('interests')) {
+      final interests = data['interests'];
+      print("[Notifications] 다음 공지들을 확인해보세요: $interests");
+    } else {
+      print("[Notifications] ");
+    }
+  }
 }
 
 // 백그라운드 메시지 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("[Notifications] 백그라운드 알림 수신: ${message.notification}");
+  print("[Notifications] 백그라운드 데이터: ${message.data}");
+
   if (message.notification != null) {
     print("[Notifications] 제목=${message.notification!.title}");
     print("[Notifications] 내용=${message.notification!.body}");
+  }
+
+  if (message.data.isNotEmpty) {
+    NotificationService.handleDataNotification(message.data);
   }
 }
