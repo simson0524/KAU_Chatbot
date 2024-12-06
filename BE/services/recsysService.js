@@ -43,14 +43,21 @@ exports.processAndSaveStudentData = async (studentData) => {
 
 
 // FCM 알림 전송 함수
-const sendNotification = async (fcmToken, interests) => {
+const sendNotification = async (fcmToken, student_id) => {
+    const latestMessage = await getLatestChatbotMessage(student_id);
+    if (!latestMessage) {
+        console.warn(`No chatbot message found for student_id=${student_id}`);
+        return;
+    }
+
     const message = {
         notification: {
             title: "KAU CHATBOT",
             body: "회원님이 관심있어 할만한 공지가 업로드 되었습니다! 확인해보세요!"
         },
         data: {
-            interests: JSON.stringify(interests) // 공지 제목을 JSON 문자열로 변환
+            page: "chat", // 이동할 페이지
+            chatMessage: latestMessage // 챗봇 메시지 포함
         },
         token: fcmToken
     };
@@ -69,35 +76,30 @@ const sendNotification = async (fcmToken, interests) => {
 // 모든 사용자에게 알림 전송
 exports.sendDailyNotifications = async () => {
     const users = await recsysModel.getUsersWithInterests();
-    const results = []; // 전송 결과 저장
-
     for (const user of users) {
         const fcmToken = await recsysModel.getFcmToken(user.student_id);
         if (fcmToken) {
             try {
-                await sendNotification(fcmToken, user.interests);
-                results.push({
-                    student_id: user.student_id,
-                    status: "success",
-                    interests: user.interests
-                });
+                await saveChatbotMessage(user.student_id, user.interests);
+                await sendNotification(fcmToken, user.student_id);
             } catch (error) {
-                console.error(`Failed to send notification to ${user.student_id}:`, error.message);
-                results.push({
-                    student_id: user.student_id,
-                    status: "failure",
-                    error: error.message
-                });
+                console.error(`Failed to process notifications for ${user.student_id}:`, error.message);
             }
-        } else {
-            console.warn(`No FCM token found for student_id=${user.student_id}`);
-            results.push({
-                student_id: user.student_id,
-                status: "no_token"
-            });
         }
     }
-
-    return results; // 결과 반환
 };
 
+// 챗봇 메시지 저장
+const saveChatbotMessage = async (student_id, interests) => {
+    const botMessage = `
+        사용자님이 관심있어하실 공지의 제목이에요!
+        ${interests.join('\n')}
+        지금 공지 게시판에 검색해보세요!
+    `;
+    await recsysModel.insertChatMessage(student_id, '추천 공지', botMessage, 'maha');
+};
+
+// 챗봇 메시지 조회
+const getLatestChatbotMessage = async (student_id) => {
+    return await recsysModel.getLatestMessageByStudent(student_id);
+};

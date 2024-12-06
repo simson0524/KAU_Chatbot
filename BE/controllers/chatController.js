@@ -95,14 +95,4 @@ exports.getFilteredChatHistory = async (req, res) => {
     }
 };
 
-// recsys 컨트롤러
-exports.getAIResponse = async (req, res) => {
-    try {
-      const studentId = req.user.student_id;
-      const answer = await aiService.getAIResponse(studentId);
-      res.json({ answer });
-    } catch (error) {
-      res.status(500).json({ error: 'Error fetching AI response' });
-    }
-  };
 

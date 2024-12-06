@@ -13,9 +13,4 @@ router.post('/ask', userService.loginRequired, chatController.askQuestion);
 router.get('/history/:student_id', userService.loginRequired, chatController.getFilteredChatHistory);
 
 
-router.post('/get-ai-response', userService.loginRequired, chatController.getAIResponse);
-
-// AI 서버로 메시지 전달 (대화 내용 전달)
-//router.post('/chatbot/ai', userService.loginRequired, chatController.forwardToAI);
-
 module.exports = router;
