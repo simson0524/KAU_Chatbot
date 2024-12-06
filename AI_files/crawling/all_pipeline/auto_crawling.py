@@ -55,3 +55,5 @@ for file_path in file_paths:
         print(f"{file_path} 파일을 찾을 수 없습니다.")
 
 subprocess.run(['python', 'data_send/send_csv.py'], check=True)
+
+subprocess.run(['python', 'langchain/updating_db.py'], check=True)
