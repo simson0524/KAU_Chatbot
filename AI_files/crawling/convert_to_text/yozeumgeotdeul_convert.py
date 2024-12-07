@@ -49,53 +49,15 @@ def extract_content_from_brackets(text):
         return text[start:end]
     return "No valid content found"
 
-
-# 2. 이미지 설명 요약 함수 (이미지 URL과 텍스트 분리 전달)
-def summarize_image(image_url):
-    if pd.isna(image_url) or image_url.strip() == "" or image_url.lower() == "없음":
-        return "No image available"
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "너는 이미지의 내용을 텍스트로 정리해주는 어시스턴트야"},
-                {
-                    "role": "user", 
-                    "content": [
-                        {"type": "text", "text": """아래의 URL에 있는 이미지의 내용을 텍스트로 정리해줘. 한국어로 답변해. 관련있는 태그도 달아줘. 'text:'로 시작하고, 관련 있는 태그는 'tag:'로 시작하는 형식으로 출력해.
-                예시:
-                text:
-                 2024학년도 KAU 교육과정 모니터링단 학생 모집
-                 본교 미래교육혁신원에서는 우리 대학의 전공 및 교양 교육과정 전반에 대한 만족도와 요구를 교육 수요자 시각에서 점검하고, 이를 교육과정 개편에 활용하기 위해 <2024 KAU 교육과정 학생 모니터단>을 모집 합니다. 재학생 여러분들의 많은 관심과 신청 바랍니다.
-                 1. <KAU 교육과정 모니터링>이란?
-                   - 전공 및 교양 교육과정에 대한 학생들의 만족도와 요구사항을 파악하고 장기적 교육과정 개선에 반영을 목적으로 함
-                 - 심층설문지를 활용하여 비대면으로 모니터링 실시
-                 - 2024-1학기 전공 및 교양 교육과정을 대상으로 모니터링 실시
-                 2. 설문 내용 및 방식
-                 ...
-                
-                주의: 시작말과 마무리말을 사용하지 말고 예시처럼 작성해.
-                         """},
-                        {"type": "image_url", "image_url": {"url": image_url}}
-                    ]
-                }
-            ]
-        )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        return f"Error in summarizing image: {str(e)}"
-
-
 # 3. CSV 파일 로드
 file_path = 'crawling/csv_files/요즘것들 공지.csv'  # 원본 CSV 파일 경로를 입력하세요
 df = pd.read_csv(file_path)
 
 # 4. HTML 원문과 이미지 요약 생성
 df['text_convert'] = df['text'].apply(summarize_html)
-df['img_convert'] = df['img'].apply(summarize_image)
 
 # 5. 필요한 열만 선택하여 새로운 데이터프레임 생성
-result_df = df[['idx', 'text_convert', 'img_convert', 'files', 'url', 'title', 'published_date', 'deadline_date']]
+result_df = df[['idx', 'text_convert', 'files', 'url', 'title', 'published_date', 'deadline_date']]
 
 # 6. 결과를 새로운 CSV 파일로 저장
 output_file_path = 'crawling/csv_files/요즘것들 공지 변환.csv'
@@ -122,14 +84,11 @@ def extract_text_and_tag(text):
 # text_convert에서 text와 tag 추출
 df['text_convert_text'] = df['text_convert'].apply(extract_text_and_tag)
 
-# img_convert에서 text와 tag 추출
-df['img_convert_text'] = df['img_convert'].apply(extract_text_and_tag)
-
 # files 열에서 태그로 변환
 df['tag'] = df['files'].apply(lambda x: eval(x) if isinstance(x, str) else [])
 
 # text 합치기
-df['text'] = df['text_convert_text'] + "\n\n" + df['img_convert_text']
+df['text'] = df['text_convert_text']
 
 # files 열 비우기
 df['files'] = ""

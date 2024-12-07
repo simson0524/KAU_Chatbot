@@ -55,7 +55,7 @@ for board_name, board_url in board_urls.items():
 
     # 4달 이내의 날짜 기준
     today = datetime.today()
-    last_week = today - timedelta(days=120)
+    last_week = today - timedelta(days=7)
 
     # 4달 이후 게시물 처리 카운터
     old_post_count = 0
