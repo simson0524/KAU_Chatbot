@@ -95,6 +95,7 @@ class _ChattingPageState extends State<ChattingPage> {
         chatCharacter =
             userInfo['chat_character'] ?? 'maha'; // chat_character 설정
       });
+      print("캐릭터 설정됨: $chatCharacter");
       return true; // 성공적으로 초기화
     } catch (error) {
       print("Error fetching user info: $error");

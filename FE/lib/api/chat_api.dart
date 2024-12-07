@@ -19,6 +19,9 @@ class ChatApi {
           'chat_character': character,
         }),
       );
+      // 응답 로그 출력
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);

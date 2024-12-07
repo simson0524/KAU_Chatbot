@@ -11,7 +11,7 @@ exports.findUserByEmail = async (email) => {
 
 // DB에 입력된 학번의 사용자가 있는지 확인
 exports.findUserByStudentId = async (student_id) => {
-    const [users] = await db.query('SELECT student_id, email, name, major, grade, gender, residence, fcm_token FROM users where student_id = ?', [student_id]);
+    const [users] = await db.query('SELECT student_id, email, name, major, grade, gender, residence, chat_character, fcm_token FROM users where student_id = ?', [student_id]);
     return users[0];
 }
 

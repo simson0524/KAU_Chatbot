@@ -683,45 +683,6 @@ class go_login extends StatelessWidget {
                   '로그인 페이지로',
                   style: TextStyle(fontSize: 10, color: Colors.black),
                 )),
-            //비밀번호 찾기 페이지로 버튼은  추후 삭제 예정
-            TextButton(
-                onPressed: () {
-                  finishJoinDialog(context);
-                  /*
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const FindPasswordPage()),
-                  );*/
-                },
-                style: TextButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                ),
-                child: const Text(
-                  '비밀번호찾기 페이지로',
-                  style: TextStyle(fontSize: 5, color: Colors.black),
-                )),
-            //채팅창 이동  페이지로 버튼은  추후 삭제 예정
-            TextButton(
-                onPressed: () {
-                  /*
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ChattingPage(
-                              ,
-                            )),
-                  );*/
-                },
-                style: TextButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                ),
-                child: const Text(
-                  '채팅창 페이지로',
-                  style: TextStyle(fontSize: 5, color: Colors.black),
-                ))
           ],
         ),
       ),

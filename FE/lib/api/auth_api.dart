@@ -187,7 +187,9 @@ class AuthApi {
           'Authorization': 'Bearer $accessToken', // Access token 헤더에 추가
         },
       );
-
+      // 응답 로그 출력
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
       if (response.statusCode == 200) {
         return json.decode(response.body); // JSON 데이터 반환
       } else {
